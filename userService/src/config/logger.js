@@ -1,5 +1,5 @@
 const winston = require('winston');
-const config = require('../config.config');
+const config = require('../config/config');
 
 // Logger configurations
 const enumerateErrorFormat = winston.format((info) => {

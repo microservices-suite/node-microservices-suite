@@ -1,0 +1,2 @@
+from mongo:latest
+
