@@ -16,9 +16,6 @@ app.get('/',(req,res)=>{
 })
 const server = http.createServer(app)
 
-server.listen(config.port,()=>{
-  logger.info(`http server connected: ${config.port}`)
-})
 
 server.on('error',(err)=>{
   if(err.code === 'EADDRINUSE'){
@@ -29,25 +26,12 @@ server.on('error',(err)=>{
     },1000)
   }  
 })
-// app.get('/',(req,res)=>{
-//   console.log('req triggered --------->')
-//   res.status(200).json({message:`hello from microservice ${process.env.NODE_ENV} -- environment`})
-// })
-// app.listen(config.port,()=>{
-//   console.log(`server listening on port: ${config.port}`)
-// })
-// const server = http.createServer(app);
-// server.listen(config.port, ()=>{
-//     logger.info(`server listening on port: ${config.port}`)
-// })
-// server.on('error', (e) => {
-//     if (e.code === 'EADDRINUSE') {v
-//       console.error('Address in use, retrying...');
-//       setTimeout(() => {
-//         server.close();c
-//         server.listen(config.port, '127.0.0.1');
-//       }, 1000);
-//     }
-//   });
+server.listen(config.port,()=>{
+  logger.info(`http server connected: ${config.port}`)
+})
+app.get('/users',(req,res)=>{
+  res.status(200).json({message:`hello from microservice ${process.env.NODE_ENV} -- environment`})
+})
+
 
 

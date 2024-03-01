@@ -1,0 +1,18 @@
+version: '3'
+services:
+  mongodb:
+    build: 
+      dockerfile: Dockerfile
+      context: ./mongodb
+  server:
+    build:
+      dockerfile: Dockerfile
+      context: ./userService
+    ports:
+      - '6008:6008'
+    depends_on:
+      - mongodb
+    volumes:
+      - /app/node_modules
+      - /Users/nathan3/Desktop/microservice_architecture/microservices_suite/userService:/app
+
