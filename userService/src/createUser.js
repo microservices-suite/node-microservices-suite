@@ -1,9 +1,10 @@
-const Users = require('../models/model')
+const {Users} = require('./model')
+const {catchAsync}=require('./errors/errors.handler')
 
-const createUser = async ({body})=>{
-    const user = await Users.create(body)
-    return {user}
-}
+const createUser = catchAsync(async (req,res)=>{
+    const user = await Users.create(req.body)
+    res.status(201).json({user})
+})
 
 module.exports = {
     createUser
