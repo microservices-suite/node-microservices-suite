@@ -1,0 +1,9 @@
+version: '3'
+
+tasks:
+  dev:
+    cmds:
+      - echo "Starting docker  containers. Make sure docker is running...!"
+      - docker-compose down
+      - docker-compose up
+    silent: true
