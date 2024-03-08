@@ -1,10 +1,9 @@
-const {catchAsync} =  require('../utils/errors.handler')
-const {ObjectId} =  require('mongodb')
-const services = require('../services')
+const {Users} = require('./model')
+const {catchAsync} =  require('./errors/errors.handler')
+
 const getUsers = catchAsync(async(req,res)=>{
-    const id = new ObjectId(req.params.id)
-    const {user} = await services.getUsers({id});
-    res.status(200).json({user})
+    const user = await Users.find({})
+    res.status(200).json({data:user})
 })
 
 module.exports = {
