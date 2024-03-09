@@ -3,7 +3,99 @@ version: '3'
 tasks:
   dev:
     cmds:
-      - echo "Starting docker  containers. Make sure docker is running...!"
+      # Check if Docker is running
+      - |
+        if ! docker info > /dev/null 2>&1; then
+          echo "Docker is not running. Attempting to start Docker..."
+          echo -------------------------------------------------------
+          # Check the platform and execute the appropriate command
+          case "$(uname -s)" in
+            Darwin)
+              # For macOS
+              echo platform : MacOS : starting docker daemon...
+              echo -------------------------------------------------------
+              open /Applications/Docker.app
+              ;;
+            Linux)
+              # For Linux systems with systemd (adjust as needed for your distribution)
+              echo platform : Linux : starting docker daemon...
+              echo -------------------------------------------------------
+              systemctl start docker
+              ;;
+            *)
+              echo "Unsupported operating system. Please start Docker manually."
+              echo -------------------------------------------------------
+              exit 1
+              ;;
+          esac
+
+          # Wait a bit for Docker to initialize (this time might need adjustment)
+          sleep 10
+        fi
+
+      # Check again if Docker is running after the attempt to start it
+      - |
+        if ! docker info > /dev/null 2>&1; then
+          echo "Failed to start Docker. Please check your Docker installation."
+          exit 1
+        else
+          echo "Docker is running."
+          echo -------------------------------------------------------
+        fi
+
+      # Print a newline to separate loading state from subsequent output
+      - echo
+
+      # Commands to start your containers go here
+      - echo "Loading complete. Starting Docker containers..."
+      - echo -------------------------------------------------------
       - docker-compose down
-      - docker-compose up
+      - echo -------------------------------------------------------
+      - docker-compose up --build
+      - echo -------------------------------------------------------
+    silent: true
+  prod:
+    cmds:
+      - |
+        if ! docker info > /dev/null 2>&1; then
+          echo "Docker is not running. Attempting to start Docker..."
+          echo -------------------------------------------------------
+          case "$(uname -s)" in
+            Darwin)
+              echo platform : MacOS : starting docker daemon...
+              echo -------------------------------------------------------
+              open /Applications/Docker.app
+              ;;
+            Linux)
+              echo platform : Linux : starting docker daemon...
+              echo -------------------------------------------------------
+              systemctl start docker
+              ;;
+            *)
+              echo "Unsupported operating system. Please start Docker manually."
+              echo -------------------------------------------------------
+              exit 1
+              ;;
+          esac
+
+          sleep 10
+        fi
+
+      - |
+        if ! docker info > /dev/null 2>&1; then
+          echo "Failed to start Docker. Please check your Docker installation."
+          exit 1
+        else
+          echo "Docker is running."
+          echo -------------------------------------------------------
+        fi
+
+      - echo
+
+      - echo "Loading complete. Starting Docker containers..."
+      - echo -------------------------------------------------------
+      - docker-compose down
+      - echo -------------------------------------------------------
+      - docker-compose  -f docker-compose.yml -f production.yml up --build -d
+      - echo -------------------------------------------------------
     silent: true
