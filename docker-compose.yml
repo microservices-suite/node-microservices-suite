@@ -6,7 +6,7 @@ services:
       context: ./mongodb
   server:
     build:
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
       context: ./userService
     ports:
       - '6008:6008'
@@ -15,4 +15,3 @@ services:
     volumes:
       - /app/node_modules
       - /Users/nathan3/Desktop/microservice_architecture/microservices_suite/userService:/app
-
