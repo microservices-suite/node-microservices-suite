@@ -1,5 +1,5 @@
 const {Users} = require('./model')
-const {catchAsync} =  require('./errors/errors.handler')
+const { catchAsync } = require('./utilities/catchAsync')
 
 const getUsers = catchAsync(async(req,res)=>{
     const user = await Users.find({})
