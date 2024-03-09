@@ -8,6 +8,7 @@ const {getUser} = require('./src/getUser')
 const {errorHandler} = require('./src/errors/errors.handler')
 const validations = require('./src/validations')
 const {validate} = require('./src/utilities/validate')
+const {APIError} =  require('./src/utilities/APIError')
 // const app = require('./src/app')
 const express = require('express')
 
@@ -42,8 +43,9 @@ app.get('/users',getUsers)
 app.post('/users',validate(validations.createUser),createUser)
 app.get('/users/:id',validate(validations.getUser),getUser)
 // global error handler should come after all other middlewares
-app.all('*',(req,res)=>{
-  res.status(404).json({error:'route not found'})
+app.all('*',(req,res,next)=>{
+  const err =  new APIError(404,`requested resource not found on server: ${req.originalUrl}`)
+  next(err)
 })
 app.use(errorHandler)
 
