@@ -9,7 +9,6 @@ const getUser = catchAsync(async (req,res,next)=>{
         next(err)
     } 
     res.status(200).json({user})
-    next()
 })
 
 module.exports = {
