@@ -9,10 +9,11 @@ const {errorHandler} = require('./src/errors/errors.handler')
 const validations = require('./src/validations')
 const {validate} = require('./src/utilities/validate')
 const {APIError} =  require('./src/utilities/APIError')
+const morgan = require('./src/config/morgan')
 // const app = require('./src/app')
 const express = require('express')
 
-mongoose.connect(config.db).then(()=>{
+mongoose.connect(`mongodb://mongodb:27017`).then(()=>{
     logger.info(`successfully connected to mongoDB: ${config.db}`);
 }).catch(err=>{
   logger.error(`failed to connect to mongo. exiting...${err.message}`)
@@ -39,6 +40,8 @@ server.on('error',(err)=>{
 server.listen(config.port,()=>{
   logger.info(`http server connected: ${config.port}`)
 })
+app.use(morgan.errorHandler)
+app.use(morgan.successHandler)
 app.get('/users',getUsers)
 app.post('/users',validate(validations.createUser),createUser)
 app.get('/users/:id',validate(validations.getUser),getUser)
