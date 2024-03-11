@@ -1,6 +1,6 @@
 const {Users} = require('./model')
-const { APIError } = require('./utilities/APIError')
-const { catchAsync } = require('./utilities/catchAsync')
+const { APIError } = require('../../libraries/utilities/APIError')
+const { catchAsync } = require('../../libraries/utilities/catchAsync')
 
 const getUser = catchAsync(async (req,res)=>{
     const user = await Users.findById(req.params.id)
