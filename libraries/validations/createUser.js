@@ -1,5 +1,4 @@
 const Joi = require('joi')
-const { default: mongoose } = require('mongoose')
 
 const createUser = {
     body:Joi.object().keys({

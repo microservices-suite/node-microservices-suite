@@ -1,5 +1,4 @@
-const config = require("../../userService/src/config/config");
-const { logger } = require("../../userService/src/config/logger");
+const config = require("../config/config");
 const { APIError } = require("../utilities/APIError");
 
 const prodErrors = (err, res) => {
