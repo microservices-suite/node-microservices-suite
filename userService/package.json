@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "cross-env NODE_ENV=prod pm2 start index.js --watch",
+    "start": "pm2 start ecosystem.config.js --env production",
     "dev": "cross-env NODE_ENV=dev nodemon index.js",
     "staging": "cross-env NODE_ENV=staging nodemon index.js",
     "test": "jest"
