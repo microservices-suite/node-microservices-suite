@@ -1,0 +1,12 @@
+{
+  "name": "product-service",
+  "version": "1.0.0",
+  "description": "The product service serves as the central repository for managing product information within our microservices ecosystem. It stores detailed product catalogs, including attributes, images, pricing, and inventory levels, providing a single source of truth for product data across channels. With support for multi-lingual and multi-currency catalogs, it enables global reach and localization of product offerings. Through integrations with recommendation engines and analytics platforms, it facilitates personalized product recommendations and insights-driven merchandising strategies. Designed for flexibility and extensibility, it supports custom product types, categories, and attributes, empowering our platform to adapt to evolving business requirements and market trends.",
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Gilbert Andanje",
+  "license": "ISC"
+}
