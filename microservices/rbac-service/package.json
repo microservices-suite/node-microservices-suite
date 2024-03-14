@@ -1,0 +1,12 @@
+{
+  "name": "rbac-service",
+  "version": "1.0.0",
+  "description": "Standing for Role-Based Access Control, this service controls access to resources across the application based on roles assigned to users. It defines roles, permissions, and policies to ensure users can only access the information and functionality necessary for their role, enhancing security and operational efficiency.",
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Gilbert Andanje",
+  "license": "ISC"
+}
