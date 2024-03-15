@@ -41,10 +41,11 @@ To get started with the Microservices Suite, follow these steps:
 Contributions are welcome! If you'd like to contribute to the Microservices Suite project, please follow these guidelines:
 
 1. Fork the repository and clone it to your local machine.
-2. Create a new branch for your feature or bug fix: `git checkout -b feature/my-feature` or `git checkout -b bugfix/my-bug-fix`.
+2. Create a new branch for your feature or bug fix: `git checkout -b feat/<my-feature>` or `git checkout -b fix/<my-bug-fix>`.
 3. Make your changes and ensure that tests pass.
-4. Commit your changes: `git commit -m 'Add new feature'`.
-5. Push to the branch: `git push origin feature/my-feature`.
+4. Commit your changes using the Angular commit message convention:
+Please refer to the [Angular commit message convention](https://github.com/angular/angular/blob/master/CONTRIBUTING.md#commit) for more details.
+5. Push to the branch: `git push origin feat/<my-feature>` or `git push origin fix/<my-bug-fix>`.
 6. Submit a pull request detailing your changes.
 
 Please ensure that your pull request adheres to the project's code style and conventions.
