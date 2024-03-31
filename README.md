@@ -34,7 +34,7 @@ Monorepo strategy benefits for microservices:
 Welcome to our project! To ensure a smooth setup and development experience, ensure you have the following tools installed on your machine:
 
 - **Docker:** For containerization and managing containerized applications.
-- **Task Runner Automation Tool:** For task automation and workflow management.
+- **Task Runner Automation Tool:** For task automation and workflow management [Platform specific installation](https://taskfile.dev/installation/).
 - **Node.js:** As the runtime environment for executing the application code.
 
 ## Running Services
