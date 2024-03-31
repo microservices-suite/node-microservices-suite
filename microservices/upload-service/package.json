@@ -1,5 +1,5 @@
 {
-  "name": "upload-service",
+  "name": "@microservices-suite/upload-service",
   "version": "1.0.0",
   "description": "This service is the backbone for managing file uploads and storage within the application. It supports the uploading of images, documents, and other media types, ensuring they are securely stored and accessible. Features include file validation, transformation (e.g., resizing images), and integration with cloud storage solutions to serve files efficiently to users.",
   "main": "index.js",

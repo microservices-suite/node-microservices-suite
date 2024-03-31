@@ -1,5 +1,5 @@
 {
-  "name": "@microservices_suite/user-service",
+  "name": "@microservices-suite/user-service",
   "version": "1.0.0",
   "description": "This service manages all user-related operations within the application. It handles user registration, authentication, profile management, and data security. By centralizing user management, it ensures consistent access control and a unified user experience across all parts of the application.",
   "main": "index.js",
@@ -19,24 +19,24 @@
     "morgan": "^1.10.0",
     "pm2": "^5.3.1",
     "winston": "^3.12.0",
-    "@microservices_suite/utilities": "1.0.0",
-    "@microservices_suite/errors": "1.0.0",
-    "@microservices_suite/config": "1.0.0",
-    "@microservices_suite/validations": "1.0.0"
+    "@microservices-suite/utilities": "1.0.0",
+    "@microservices-suite/errors": "1.0.0",
+    "@microservices-suite/config": "1.0.0",
+    "@microservices-suite/validations": "1.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.0"
   },
   "workspaces": {
     "nohoist": [
-      "**/@microservices_suite/utilities/",
-      "**/@microservices_suite/utilities/**",
-      "**/@microservices_suite/errors/",
-      "**/@microservices_suite/errors/**",
-      "**/@microservices_suite/config/",
-      "**/@microservices_suite/config/**",
-      "**/@microservices_suite/validations/",
-      "**/@microservices_suite/validations/**"
+      "**/@microservices-suite/utilities/",
+      "**/@microservices-suite/utilities/**",
+      "**/@microservices-suite/errors/",
+      "**/@microservices-suite/errors/**",
+      "**/@microservices-suite/config/",
+      "**/@microservices-suite/config/**",
+      "**/@microservices-suite/validations/",
+      "**/@microservices-suite/validations/**"
     ]
   }
 }
