@@ -1,5 +1,5 @@
 {
-  "name": "email-service",
+  "name": "@microservices-suite/email-service",
   "version": "1.0.0",
   "description": "Dedicated to handling all email communications, this service is responsible for sending, receiving, and organizing email notifications, newsletters, and transactional emails. It integrates with external email delivery platforms and provides templates and customization options to support various email-related functionalities required by other services.",
   "main": "index.js",
