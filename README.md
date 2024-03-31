@@ -2,7 +2,7 @@
 
 ## Overview
 
-Welcome to the Microservices Suite project! This suite is a collection of node microservices built using the mono-repo strategy utilizing the yarn workspaces concept. Every microservice runs in her isolated Docker container and Kubernetes is used for orchestration, providing fluidity to scaling any service or a combo of services efficiently.
+Welcome to the Microservices Suite project! This suite is a collection of node microservices built using the `mono-repo strategy` utilizing the `yarn workspaces` concept. Every `microservice` runs in her `isolated Docker container` and `Kubernetes` is used for `orchestration`, providing fluidity to scaling any service or a combo of services efficiently.
 
 ## Features
 
