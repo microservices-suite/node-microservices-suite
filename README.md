@@ -33,20 +33,22 @@ Monorepo strategy benefits for microservices:
 
 Welcome to our project! To ensure a smooth setup and development experience, ensure you have the following tools installed on your machine:
 
-- **Docker:** For containerization and managing containerized applications.[👉Install docker here](https://docs.docker.com/engine/install/).
-- **Task Runner Automation Tool:** For task automation and workflow management.[👉Install task runner here](https://taskfile.dev/installation/).
-- **Node.js:** As the runtime environment for executing the application code.[👉Download LTS version here](https://nodejs.org/en/download)
+- **Docker:** For containerization and managing containerized applications.  [👉Install docker here](https://docs.docker.com/engine/install/).
+- **Task Runner Automation Tool:** For task automation and workflow management.  [👉Install task runner here](https://taskfile.dev/installation/).
+- **Node.js:** As the runtime environment for executing the application code.  [👉Download LTS version here](https://nodejs.org/en/download)
+- At the project <service_root> create `.env`, `.env.dev` and `.env.staging` files and copy `environment variables` from the `.env.example` file
 
 ## Running Services
 
 This project uses a Task Runner Automation Tool to streamline the process of starting services in both development and production. Follow these steps to get your environment up and running:
-
+- You can derive the `service_name` of a service from the workspace name found in the `package.json "name": ` property e.g `@microservices-suite/<service_name>`
+ 
 ### Production
 
 To run a service in production:
 
 ```bash
-task:start:<service_name>
+task start:<service_name>
 ```
 
 This command utilizes docker-compose to orchestrate containers and set up necessary networks using the docker-bridge default network.
@@ -55,7 +57,7 @@ This command utilizes docker-compose to orchestrate containers and set up necess
 For development purposes, use the following command to start a service, substituting <service_name> with the desired service:
 
 ```bash
-task:dev:<service_name>
+task dev:<service_name>
 ```
 
 The task runner will handle the setup, ensuring your service is ready for development.
@@ -63,14 +65,20 @@ The task runner will handle the setup, ensuring your service is ready for develo
 ### Running Services Without Docker
 If you prefer not to use Docker, you can start services using alternative methods:
 
-- - For Production: Start the service with the PM2 engine by running:
-#### task vanilla:start:<service_name>
-- - For Development: Use the Nodemon node engine for a more development-friendly environment:
+- For Production: Start the service with the PM2 engine by running:
+```bash
+task vanilla:start:<service_name>
+```
+- For Development: Use the Nodemon node engine for a more development-friendly environment:```bash
 
-#### task vanilla:dev:<service_name>
+```bash
+task vanilla:dev:<service_name>
+```
 
 Using Docker-Compose Directly
 Should you need to use docker-compose directly for more control over the container orchestration, you can utilize the standard commands provided by Docker:
+
+
 ```bash
 docker-compose up
 docker-compose down
@@ -98,7 +106,6 @@ This project is licensed under the [MIT License](LICENSE). Feel free to use, mod
 
 We would like to thank the developers and contributors to the following technologies used in this project:
 
-- Nx Monorepo Management Framework
-- npm Workspaces
+- Yarn workspaces
 - Docker
 - Kubernetes
