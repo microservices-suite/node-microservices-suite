@@ -12,7 +12,7 @@ This suite includes the following microservices:
 
 2. **Collaboration**: Learning by reading code authored by others as you work within the same repository its easier to kick bad habits and pick up some good ones from your peers.
 
-3. **Hoist common development chores**: Manage common files like `.gitignore` from a central place <root-directory>. 
+3. **Hoist common development chores**: Manage common files like `.gitignore` from a central place <root-directory> and avoid littering the codebase with unnecessary repetitions. 
 
 4. **Easily integrate developmnent automation**: Manage task runner configurations and docker-compose from <root-directory> to easily automate repetitive workflows.
 
