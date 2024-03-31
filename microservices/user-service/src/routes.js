@@ -1,15 +1,16 @@
 const express = require('express');
-const controllers =  require('./controller');
-const { validate } = require('../../libraries/utilities/validate');
-const router =  express.Router()
+const { validate } = require('@microservices_suite/utilities');
+const { getUserValidation, createUserValidation } = require('@microservices_suite/validations')
+const controllers = require('./controllers');
+
+const router = express.Router()
 
 router
-.all('/users')
-.post(validate(validations.createUser),controllers.createUser)
-.get(controllers.getUsers)
-router.all('/users/:id')
-.get('/users/:id',validate(validations.getUser),controllers.getUser)
+    .route('/users')
+    .post(validate(createUserValidation), controllers.createUser)
+    .get(controllers.getUsers)
+router
+    .route('/users/:id')
+    .get(validate(getUserValidation), controllers.getUser)
 
-module.exports = {
-    router
-}
+module.exports = { router }
