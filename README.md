@@ -36,6 +36,7 @@ Welcome to our project! To ensure a smooth setup and development experience, ens
 - **Docker:** For containerization and managing containerized applications.
 - **Task Runner Automation Tool:** For task automation and workflow management.
 - **Node.js:** As the runtime environment for executing the application code.
+- At the project <service_root> create `.env`, `.env.dev` and `.env.staging` files and copy `environment variables` from the `.env.example` file
 
 ## Running Services
 

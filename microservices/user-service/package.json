@@ -6,7 +6,10 @@
   "private": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "NODE_ENV=dev nodemon index.js"
+    "dev": "NODE_ENV=dev nodemon index.js",
+    "start": "pm2 start ecosystem.config.js --env production",
+    "stop:prod": "pm2 stop ecosystem.config.js",
+    "delete:prod": "pm2 delete ecosystem.config.js"
   },
   "author": "Gilbert Andanje",
   "license": "ISC",
