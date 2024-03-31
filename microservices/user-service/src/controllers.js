@@ -1,5 +1,5 @@
 const services = require('./services')
-const { catchAsync, APIError } = require('@microservices_suite/utilities')
+const { catchAsync, APIError } = require('@microservices-suite/utilities')
 
 const createUser = catchAsync(async (req, res) => {
     const { user } = await services.createUser(req.body)
