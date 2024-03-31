@@ -1,5 +1,5 @@
 {
-  "name": "@microservices_suite/errors",
+  "name": "@microservices-suite/errors",
   "version": "1.0.0",
   "description": "This is the global error handler for handling error messages in development and production environments",
   "main": "index.js",
