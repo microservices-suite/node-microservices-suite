@@ -35,7 +35,7 @@ Welcome to our project! To ensure a smooth setup and development experience, ens
 
 - **Docker:** For containerization and managing containerized applications.[👉Install docker here](https://docs.docker.com/engine/install/).
 - **Task Runner Automation Tool:** For task automation and workflow management.[👉Install task runner here](https://taskfile.dev/installation/).
-- **Node.js:** As the runtime environment for executing the application code.
+- **Node.js:** As the runtime environment for executing the application code.[👉Download LTS version here](https://nodejs.org/en/download)
 
 ## Running Services
 
