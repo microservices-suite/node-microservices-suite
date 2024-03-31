@@ -6,7 +6,7 @@ Welcome to the Microservices Suite project! This suite is a collection of node m
 
 ## Features
 
-This suite includes the following microservices:
+Monorepo strategy benefits for microservices:
 
 1. **Enforce DRY principles**: Collocating code encourages code sharing, reduces code duplication as in multi-repo strategy and saves time to scaffold a microservice by building on existing boilerplate or reusable functionality.
 
@@ -77,6 +77,7 @@ task vanilla:dev:<service_name>
 
 Using Docker-Compose Directly
 Should you need to use docker-compose directly for more control over the container orchestration, you can utilize the standard commands provided by Docker:
+
 
 ```bash
 docker-compose up
