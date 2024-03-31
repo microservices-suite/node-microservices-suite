@@ -1,5 +1,5 @@
 {
-  "name": "middlewares",
+  "name": "@microservices-suite/middlewares",
   "version": "1.0.0",
   "description": "",
   "devDependencies": {},
