@@ -1,7 +1,8 @@
 {
-  "name": "validations",
+  "name": "@microservices_suite/validations",
   "version": "1.0.0",
   "description": "",
+  "private": true,
   "devDependencies": {},
   "author": "Gilbert Andanje",
   "license": "ISC"
