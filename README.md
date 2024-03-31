@@ -41,7 +41,8 @@ Welcome to our project! To ensure a smooth setup and development experience, ens
 ## Running Services
 
 This project uses a Task Runner Automation Tool to streamline the process of starting services in both development and production. Follow these steps to get your environment up and running:
-
+- You can derive the `service_name` of a service from the workspace name found in the `package.json "name": ` property e.g `@microservices-suite/<service_name>`
+ 
 ### Production
 
 To run a service in production:
