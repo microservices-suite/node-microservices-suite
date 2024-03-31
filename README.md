@@ -33,9 +33,9 @@ This suite includes the following microservices:
 
 Welcome to our project! To ensure a smooth setup and development experience, ensure you have the following tools installed on your machine:
 
-- **Docker:** For containerization and managing containerized applications.
-- **Task Runner Automation Tool:** For task automation and workflow management.
-- **Node.js:** As the runtime environment for executing the application code.
+- **Docker:** For containerization and managing containerized applications.[👉Install docker here](https://docs.docker.com/engine/install/).
+- **Task Runner Automation Tool:** For task automation and workflow management.[👉Install task runner here](https://taskfile.dev/installation/).
+- **Node.js:** As the runtime environment for executing the application code.[👉Download LTS version here](https://nodejs.org/en/download)
 - At the project <service_root> create `.env`, `.env.dev` and `.env.staging` files and copy `environment variables` from the `.env.example` file
 
 ## Running Services
