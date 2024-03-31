@@ -2,24 +2,28 @@
 
 ## Overview
 
-Welcome to the Microservices Suite project! This suite is a collection of microservices built on top of the Nx monorepo management framework and npm workspaces. It utilizes Docker containers and Kubernetes for orchestration, providing a scalable and efficient solution for various application needs.
+Welcome to the Microservices Suite project! This suite is a collection of microservices built using the monorepo strategy built on top of yarn workspaces concept. It utilizes Docker containers and Kubernetes for orchestration, providing a scalable and efficient solution for various application needs.
 
 ## Features
 
 This suite includes the following microservices:
 
-1. **Notification Service**: Handles sending notifications to users via various channels such as email, SMS, or push notifications.
+1. **Enforce DRY principles**: Collocating code encourages code sharing, reduce code duplication as in multi-repo strategy and save time to scaffold a microservice by building on existing boiler plate or reusable functionaliy.
 
-2. **Upload Service**: Manages file uploads, ensuring secure and efficient handling of files within the application.
+2. **Collaboration**: Learning by reading code authored by others as you work within the same repository its easier to kick bad habits and pick up some good ones from your peers.
 
-3. **Payment Service**: Facilitates payment processing, integrating with payment gateways and managing transactions securely.
+3. **Hoist common development chores**: Manage common files like `.gitignore` from a central place <root-directory>. 
+
+4. **Easily integrate developmnent automation**: Manage task runner configurations and docker-compose from <root-directory> to easily automate repetitive workflows.
+
+5. **Code sharing anywhere**: Easily publish and import organization-scoped libraries to npm registry with `yarn publish` and `yarn add <@microservices-suite/foo>`.
+
+6. **Easily containerize and scale**: Decouple every microservice to scale individually. `no-hoist yarn workspace` feature ofcouse with our smart scripts to package your `image` enables every microservice to pack all her `austronaut 🚀 suite to land and explore the moon` 😎.
 
 ## Technologies Used
+  
+- **Yarn Workspaces**: Simplifies managing multiple packages within a single repository, encouraging code sharing, reducing code duplication, making it easier to handle dependencies and scripts.
 
-- **Nx Monorepo Management Framework**: Enables efficient code sharing and collaboration among multiple projects within a single repository.
-  
-- **npm Workspaces**: Simplifies managing multiple packages within a single repository, making it easier to handle dependencies and scripts.
-  
 - **Docker Containers**: Provides lightweight, portable, and self-sufficient containers for packaging and deploying microservices.
   
 - **Kubernetes (k8s)**: Offers automated deployment, scaling, and management of containerized applications, ensuring reliability and scalability.

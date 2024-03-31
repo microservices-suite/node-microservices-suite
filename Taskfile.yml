@@ -99,3 +99,27 @@ tasks:
       - docker-compose  -f docker-compose.yml -f production.yml up --build -d
       - echo -------------------------------------------------------
     silent: true
+  start:user-service:
+    cmds:
+      - yarn workspace @microservices-suite/user-service dev
+  start:upload-service:
+    cmds:
+      - yarn workspace @microservices-suite/user-service dev
+  start:email-service:
+    cmds:
+      - yarn workspace @microservices-suite/email-service dev
+  start:rbac-service:
+    cmds:
+      - yarn workspace @microservices-suite/rbac-service dev
+  start:payment-service:
+    cmds:
+      - yarn workspace @microservices-suite/payment-service dev
+  start:notification-service:
+    cmds:
+      - yarn workspace @microservices-suite/notification-service dev
+  start:product-service:
+    cmds:
+      - yarn workspace @microservices-suite/notification-service dev
+  start:cart-service:
+    cmds:
+      - yarn workspace @microservices-suite/notification-service dev
