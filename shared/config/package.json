@@ -1,5 +1,5 @@
 {
-  "name": "@microservices_suite/config",
+  "name": "@microservices-suite/config",
   "version": "1.0.0",
   "description": "This contains common configurations for things like env files,loggers etc for easy setup of environment specific settings",
   "main": "index.js",

@@ -1,7 +1,7 @@
 {
     "configurations": [
       {
-        "name": "Docker Node.js Launch",
+        "name": "@microservices-suite/Docker Node.js Launch",
         "type": "docker",
         "request": "launch",
         "preLaunchTask": "docker-run: debug",

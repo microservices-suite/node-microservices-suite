@@ -1,6 +1,6 @@
 const express = require('express');
-const { validate } = require('@microservices_suite/utilities');
-const { getUserValidation, createUserValidation } = require('@microservices_suite/validations')
+const { validate } = require('@microservices-suite/utilities');
+const { getUserValidation, createUserValidation } = require('@microservices-suite/validations')
 const controllers = require('./controllers');
 
 const router = express.Router()
