@@ -1,10 +1,12 @@
 {
-  "name": "user-service",
+  "name": "@microservices_suite/user-service",
   "version": "1.0.0",
   "description": "This service manages all user-related operations within the application. It handles user registration, authentication, profile management, and data security. By centralizing user management, it ensures consistent access control and a unified user experience across all parts of the application.",
   "main": "index.js",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "NODE_ENV=dev nodemon index.js"
   },
   "author": "Gilbert Andanje",
   "license": "ISC",
@@ -16,9 +18,25 @@
     "mongoose": "^8.2.1",
     "morgan": "^1.10.0",
     "pm2": "^5.3.1",
-    "winston": "^3.12.0"
+    "winston": "^3.12.0",
+    "@microservices_suite/utilities": "1.0.0",
+    "@microservices_suite/errors": "1.0.0",
+    "@microservices_suite/config": "1.0.0",
+    "@microservices_suite/validations": "1.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.0"
+  },
+  "workspaces": {
+    "nohoist": [
+      "**/@microservices_suite/utilities/",
+      "**/@microservices_suite/utilities/**",
+      "**/@microservices_suite/errors/",
+      "**/@microservices_suite/errors/**",
+      "**/@microservices_suite/config/",
+      "**/@microservices_suite/config/**",
+      "**/@microservices_suite/validations/",
+      "**/@microservices_suite/validations/**"
+    ]
   }
 }
