@@ -2,7 +2,7 @@
 
 ## Overview
 
-Welcome to the Microservices Suite project! This suite is a collection of microservices built on top of the Nx monorepo management framework and npm workspaces. It utilizes Docker containers and Kubernetes for orchestration, providing a scalable and efficient solution for various application needs.
+The Microservices Suite project is a comprehensive collection of Node.js microservices, meticulously crafted using the powerful concept of mono-repos with Yarn workspaces. This innovative approach enables streamlined development and management of multiple microservices within a single repository.
 
 ## Features
 
