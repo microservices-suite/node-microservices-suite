@@ -14,7 +14,7 @@ This suite includes the following microservices:
 
 3. **Hoist common development chores**: Manage common files like `.gitignore` from a central place <root-directory> and avoid littering the codebase with unnecessary repetitions. 
 
-4. **Easily integrate developmnent automation**: Manage task runner configurations and docker-compose from <root-directory> to easily automate repetitive workflows.
+4. **Easily integrate development automation**: Manage task runner configurations and docker-compose from `<root-directory>` to easily automate repetitive workflows.
 
 5. **Code sharing anywhere**: Easily publish and import organization-scoped libraries to the npm registry with `yarn publish` and `yarn add <@microservices-suite/foo>`.
 
@@ -28,17 +28,53 @@ This suite includes the following microservices:
   
 - **Kubernetes (k8s)**: Offers automated deployment, scaling, and management of containerized applications, ensuring reliability and scalability.
 
-## Getting Started
 
-To get started with the Microservices Suite, follow these steps:
+# Getting Started
 
-1. Clone the repository to your local machine:
+Welcome to our project! To ensure a smooth setup and development experience, ensure you have the following tools installed on your machine:
 
-2. Navigate to the project directory:
+- **Docker:** For containerization and managing containerized applications.
+- **Task Runner Automation Tool:** For task automation and workflow management.
+- **Node.js:** As the runtime environment for executing the application code.
 
-3. Install dependencies for all microservices:
+## Running Services
 
-4. Follow the individual README files within each microservice directory for specific setup instructions and usage details.
+This project uses a Task Runner Automation Tool to streamline the process of starting services in both development and production. Follow these steps to get your environment up and running:
+
+### Production
+
+To run a service in production:
+
+```bash
+task:start:<service_name>
+```
+
+This command utilizes docker-compose to orchestrate containers and set up necessary networks using the docker-bridge default network.
+
+### Development
+For development purposes, use the following command to start a service, substituting <service_name> with the desired service:
+
+```bash
+task:dev:<service_name>
+```
+
+The task runner will handle the setup, ensuring your service is ready for development.
+
+### Running Services Without Docker
+If you prefer not to use Docker, you can start services using alternative methods:
+
+- - For Production: Start the service with the PM2 engine by running:
+#### task vanilla:start:<service_name>
+- - For Development: Use the Nodemon node engine for a more development-friendly environment:
+
+#### task vanilla:dev:<service_name>
+
+Using Docker-Compose Directly
+Should you need to use docker-compose directly for more control over the container orchestration, you can utilize the standard commands provided by Docker:
+```bash
+docker-compose up
+docker-compose down
+```
 
 ## Contributing
 
