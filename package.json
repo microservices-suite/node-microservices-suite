@@ -5,18 +5,35 @@
   "keywords": [],
   "author": "Gilbert Andanje",
   "license": "ISC",
-  "workspaces": [
-    "microservices/user-service",
-    "microservices/upload-service",
-    "microservices/email-service",
-    "microservices/rbac-service",
-    "microservices/notification-service",
-    "microservices/payment-service",
-    "microservices/product-service",
-    "microservices/cart-service",
-    "shared/middlewares",
-    "shared/utilities",
-    "shared/constants",
-    "shared/validations"
-  ]
+  "private": true,
+  "scripts": {
+    "repo:reset": "find ../microservices_suite -type d -name 'node_modules' -exec rm -rf {} + && find ../microservices_suite -type f -name 'package-lock.json' -delete && find ../microservices_suite -type f -name 'yarn.lock' -delete && find ../microservices_suite -type d -name 'yarn-*' -exec rm -rf {} +",
+    "repo:reset:1": "rm -rf node_modules"
+  },
+  "workspaces": {
+    "packages": [
+      "microservices/user-service",
+      "microservices/upload-service",
+      "microservices/email-service",
+      "microservices/rbac-service",
+      "microservices/notification-service",
+      "microservices/payment-service",
+      "microservices/product-service",
+      "microservices/cart-service",
+      "shared/middlewares",
+      "shared/utilities",
+      "shared/constants",
+      "shared/errors",
+      "shared/config",
+      "shared/validations"      
+    ],
+    "nohoist": [
+      "**/@microservices_suite/utilities",   
+      "**/@microservices_suite/errors",   
+      "**/@microservices_suite/validations",   
+      "**/@microservices_suite/config",   
+      "**/@microservices_suite/constants",   
+      "**/@microservices_suite/middlewares" 
+    ]
+  }
 }

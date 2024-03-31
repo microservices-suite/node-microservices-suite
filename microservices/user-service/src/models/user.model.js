@@ -1,5 +1,5 @@
-const mongoose =  require('mongoose')
-const UsersSchema =  new mongoose.Schema({
+const mongoose = require('mongoose')
+const UsersSchema = new mongoose.Schema({
     name: {
         type: mongoose.Schema.Types.String,
         required: true
@@ -9,14 +9,14 @@ const UsersSchema =  new mongoose.Schema({
         required: true,
         unique: true
     },
-    password:{
+    password: {
         type: mongoose.Schema.Types.String,
         required: true,
     }
 })
 
-UsersSchema.pre('save',function(next) {
+UsersSchema.pre('save', function (next) {
     next()
 })
-const Users = mongoose.model('Users',UsersSchema);
-module.exports = {Users}
+const Users = mongoose.model('Users', UsersSchema);
+module.exports = { Users }
