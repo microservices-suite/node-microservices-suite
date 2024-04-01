@@ -7,7 +7,7 @@
   "license": "ISC",
   "private": true,
   "scripts": {
-    "repo:reset": "find ../microservices-suite -type d -name 'node_modules' -exec rm -rf {} + && find ../microservices-suite -type f -name 'package-lock.json' -delete && find ../microservices-suite -type f -name 'yarn.lock' -delete && find ../microservices-suite -type d -name 'yarn-*' -exec rm -rf {} +",
+    "repo:reset": "find ../node-microservices-suite -type d -name 'node_modules' -exec rm -rf {} + && find ../node-microservices-suite -type f -name 'package-lock.json' -delete && find ../node-microservices-suite -type f -name 'yarn.lock' -delete && find ../node-microservices-suite -type d -name 'yarn-*' -exec rm -rf {} +",
     "repo:reset:1": "rm -rf node_modules"
   },
   "workspaces": {
