@@ -4,5 +4,8 @@
   "description": "",
   "devDependencies": {},
   "author": "Gilbert Andanje",
-  "license": "ISC"
+  "license": "ISC",
+  "publishConfig": {
+    "access": "public"
+  }
 }
