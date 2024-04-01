@@ -99,66 +99,100 @@ tasks:
       - docker-compose  -f docker-compose.yml -f production.yml up --build -d
       - echo -------------------------------------------------------
     silent: true
-    
+
   vanilla:start:user-service:
     cmds:
+      - '[ -f ./microservices/user-service/.env ] || (echo "You need to add .env file with environment variable configurations to proceed" && exit 1)'
+      - yarn repo:reset
+      - yarn install
       - yarn workspace @microservices-suite/user-service start
 
   vanilla:dev:user-service:
     cmds:
+      - '[ -f ./microservices/user-service/.env.dev ] || (echo "You need to add .env.dev file with environment variable configurations to proceed" && exit 1)'
+      - yarn repo:reset
+      - yarn install
       - yarn workspace @microservices-suite/user-service dev
 
   vanilla:start:upload-service:
     cmds:
+      - yarn repo:reset
+      - yarn install
       - yarn workspace @microservices-suite/user-service start
 
   vanilla:dev:upload-service:
     cmds:
+      - yarn repo:reset
+      - yarn install
       - yarn workspace @microservices-suite/user-service dev
 
   vanilla:start:email-service:
     cmds:
+      - yarn repo:reset
+      - yarn install
       - yarn workspace @microservices-suite/email-service start
 
   vanilla:dev:email-service:
     cmds:
+      - yarn repo:reset
+      - yarn install
       - yarn workspace @microservices-suite/email-service dev
 
   vanilla:start:rbac-service:
     cmds:
+      - yarn repo:reset
+      - yarn install
       - yarn workspace @microservices-suite/rbac-service start
 
   vanilla:dev:rbac-service:
     cmds:
+      - yarn repo:reset
+      - yarn install
       - yarn workspace @microservices-suite/rbac-service dev
 
   vanilla:start:payment-service:
     cmds:
+      - yarn repo:reset
+      - yarn install
       - yarn workspace @microservices-suite/payment-service start
 
   vanilla:dev:payment-service:
     cmds:
+      - yarn repo:reset
+      - yarn install
       - yarn workspace @microservices-suite/payment-service dev
 
   vanilla:start:notification-service:
     cmds:
+      - yarn repo:reset
+      - yarn install
       - yarn workspace @microservices-suite/notification-service start
   vanilla:dev:notification-service:
     cmds:
+      - yarn repo:reset
+      - yarn install
       - yarn workspace @microservices-suite/notification-service dev
 
   vanilla:start:product-service:
     cmds:
+      - yarn repo:reset
+      - yarn install
       - yarn workspace @microservices-suite/notification-service start
 
   vanilla:dev:product-service:
     cmds:
+      - yarn repo:reset
+      - yarn install
       - yarn workspace @microservices-suite/notification-service dev
 
   vanilla:start:cart-service:
     cmds:
+      - yarn repo:reset
+      - yarn install
       - yarn workspace @microservices-suite/notification-service start
 
   vanilla:dev:cart-service:
     cmds:
+      - yarn repo:reset
+      - yarn install
       - yarn workspace @microservices-suite/notification-service dev
