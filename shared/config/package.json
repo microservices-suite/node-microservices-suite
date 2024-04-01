@@ -5,5 +5,8 @@
   "main": "index.js",
   "author": "Gilbert Andanje",
   "license": "MIT",
-  "private": true
+  "publishConfig": {
+    "access": "public"
+  },
+  "private": false
 }
