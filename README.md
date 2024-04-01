@@ -4,6 +4,45 @@
 
 Welcome to the Microservices Suite project! This suite is a collection of Node.js microservices built using the mono-repo strategy and leveraging the Yarn workspaces concept. Each microservice runs in its isolated Docker container, and Kubernetes orchestrates the deployment, providing scalability and efficiency.
 
+├─ @microservices-suite/payment-service@1.0.0
+├─ @microservices-suite/product-service@1.0.0
+├─ @microservices-suite/rbac-service@1.0.0
+├─ @microservices-suite/upload-service@1.0.0
+├─ @microservices-suite/user-service@1.0.0
+│  ├─ @hapi/hoek@9.3.0
+│  ├─ @hapi/topo@5.1.0
+│  │  └─ @hapi/hoek@^9.0.0
+│  ├─ @microservices-suite/config@^1.0.1
+│  ├─ @microservices-suite/config@1.0.1
+│  ├─ @microservices-suite/errors@^1.0.1
+│  ├─ @microservices-suite/errors@1.0.1
+│  ├─ @microservices-suite/utilities@^1.0.1
+│  ├─ @microservices-suite/utilities@1.0.1
+│  │  └─ joi@^17.12.2
+│  ├─ @microservices-suite/validations@^1.0.1
+│  ├─ @microservices-suite/validations@1.0.1
+│  ├─ @sideway/address@4.1.5
+│  │  └─ @hapi/hoek@^9.0.0
+│  ├─ @sideway/formula@3.0.1
+│  ├─ @sideway/pinpoint@2.0.0
+│  ├─ dotenv@^16.4.5
+│  ├─ express@^4.18.3
+│  ├─ helmet@^7.1.0
+│  ├─ joi@17.12.2
+│  │  ├─ @hapi/hoek@^9.3.0
+│  │  ├─ @hapi/topo@^5.1.0
+│  │  ├─ @sideway/address@^4.1.5
+│  │  ├─ @sideway/formula@^3.0.1
+│  │  └─ @sideway/pinpoint@^2.0.0
+│  ├─ mongodb@^6.5.0
+│  ├─ mongoose@^8.2.1
+│  ├─ morgan@^1.10.0
+│  ├─ nodemon@^3.1.0
+│  ├─ pm2@^5.3.1
+│  └─ winston@^3.12.0
+├─ @microservices-suite/utilities@1.0.1
+│  └─ joi@^17.12.2
+├─ @microservices-suite/validations@1.0.1
 
 ## Monorepo strategy benefits for microservices:
 
