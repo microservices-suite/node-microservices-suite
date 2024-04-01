@@ -3,15 +3,15 @@ services:
   mongodb:
     build: 
       dockerfile: Dockerfile
-      context: ./mongodb
+      context: ./data-persistence/mongodb
   server:
     build:
       dockerfile: Dockerfile.dev
-      context: ./userService
+      context: ./microservices/user-service
     ports:
       - '6008:6008'
     depends_on:
       - mongodb
     volumes:
       - /app/node_modules
-      - /Users/nathan3/Desktop/microservice_architecture/microservices-suite/userService:/app
+      - /Users/nathan3/Desktop/PracticeEnv/node-microservices-suite/microservices/user-service:/app
