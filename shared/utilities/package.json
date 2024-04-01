@@ -1,6 +1,6 @@
 {
   "name": "@microservices-suite/utilities",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "devDependencies": {},
   "private": false,
@@ -8,6 +8,11 @@
   "license": "ISC",
   "publishConfig": {
     "access": "public"
+  },
+  "scripts": {
+    "release:major": "npm version $(semver $npm_package_version -i major) && npm publish --tag latest",
+    "release:minor": "npm version $(semver $npm_package_version -i minor) && npm publish --tag latest",
+    "release:patch": "npm version $(semver $npm_package_version -i patch) && npm publish --tag latest"
   },
   "dependencies": {
     "joi": "^17.12.2"
