@@ -1,12 +1,50 @@
-# Microservices Suite
+# Microservices Suite 🦧
 
 ## Overview
 
-Welcome to the [📦Microservices](https://drive.google.com/file/d/1Noc_6WVe0CmzynnuURexm7MCv75OUAuQ/view?usp=drive_link) Suite project! This suite is a collection of Node.js microservices built using the [🐘mono-repo]() strategy and leveraging the Yarn workspaces concept. Each microservice runs in its isolated Docker container, and Kubernetes orchestrates the deployment, providing scalability and efficiency.
+Welcome to the 📦 [Microservices](https://drive.google.com/file/d/1Noc_6WVe0CmzynnuURexm7MCv75OUAuQ/view?usp=drive_link) Suite project! This suite is a collection of Node.js microservices built using the 🦧 [mono-repo]() strategy and leveraging the Yarn workspaces concept. Each microservice runs in its isolated Docker container, and Kubernetes orchestrates the deployment, providing scalability and efficiency.
 
 ## Project file structure
-<img width="509" alt="Screenshot 2024-04-01 at 10 45 20 PM" src="https://github.com/microservices-suite/node-microservices-suite/assets/77880940/1bd6d2f7-1fb4-40e9-b7ac-4dd2cb188577">
-
+```sequence
+├─ node-microservices-suite
+│  ├─ data-persistence/
+|  │  ├─ db-1/
+|  │  │  ├─ Dockerfile
+|  │  │  ├─ README.md
+|  │  ├─ sqlite/
+|  │  │  ├─ db/
+|  │  │  ├─ README.md
+|  ├─ microservices/
+|  │  ├─ service-1/
+|  │  │  ├─ src
+|  │  │  ├─ .env
+|  │  │  ├─ .env.dev
+|  │  │  ├─ app.js
+|  │  │  ├─ Dockerfile
+├─ │  │  ├─ Dockerfile.dev
+|  │  │  ├─ ecosystem.config.js
+|  │  │  ├─ index.js
+|  │  │  ├─ package.json
+|  │  │  ├─ task.json
+|  ├─ shared/
+|  │  ├─ library-1/
+|  │  │  ├─ APIError.js
+|  │  │  ├─ catchAsync.js
+|  │  │  ├─ index.js
+|  │  │  ├─ package.json
+|  │  │  ├─ pick.js
+|  │  │  ├─ README.md
+|  │  │  ├─ validate
+|  ├─ .gitignore
+|  ├─ .npmrc
+|  ├─ .yarnrc.yml
+|  ├─ docker-compose.yml
+|  ├─ package.json
+|  ├─ production.yml
+|  ├─ README.md
+|  ├─ Taskfile.yml
+|  ├─ yarn.lock
+```
 ## Monorepo strategy benefits for microservices:
 
 - **Enforce DRY Principles:**
@@ -73,15 +111,15 @@ Welcome to our project! To ensure a smooth setup and development experience, ens
 
 - **Docker:** 
   - For containerization and managing containerized applications.  
-  - [👉Install docker here](https://docs.docker.com/engine/install/).
-  - We love [💚alpine images](https://alpinelinux.org/) <small,simple,secure>. 
+  - 👉 [Install docker here](https://docs.docker.com/engine/install/).
+  - We love 💚 [alpine images](https://alpinelinux.org/) <small,simple,secure>. 
   - You can read about the specific flavor [here](https://github.com/nodejs/docker-node/blob/main/README.md#how-to-use-this-image)
 - **Task Runner Automation Tool:** 
   - For task automation and workflow management.  
-  - [👉Install task runner here](https://taskfile.dev/installation/).
+  - 👉 [Install task runner here](https://taskfile.dev/installation/).
 - **Node.js:** 
   - As the runtime environment for executing the application code.  
-  - [👉Download LTS version here](https://nodejs.org/en/download)
+  - 👉 [Download LTS version here](https://nodejs.org/en/download)
 - At the project <service_root> create `.env`, `.env.dev` and `.env.staging` files and copy `environment variables` from the `.env.example` file
 
 ## Running Services
@@ -156,18 +194,18 @@ We would like to thank the developers and contributors to the following technolo
   - [Yarn workspace](https://classic.yarnpkg.com/lang/en/docs/cli/workspace/). 
   - Also checkout [yarn workspaces](https://classic.yarnpkg.com/en/docs/cli/workspaces)
   - [No-hoist](https://classic.yarnpkg.com/blog/2018/02/15/nohoist/)
-- ⚓️Docker
+- ⚓️ Docker
   - [⚓️vanilla docker (CLI)](https://docs.docker.com/reference/cli/docker/)
   - [docker-compose (manage a multi-container application)](https://docs.docker.com/compose/)
-- 🎡Kubernetes
+- 🎡 Kubernetes
   - [minikube (local kubernetes for development only!)](https://minikube.sigs.k8s.io/docs/start/)
   - [k8s](https://kubernetes.io/docs/home/)
   - [k8s in the cloud,GKE,EKS and more...](https://kubernetes.io/docs/setup/production-environment/turnkey-solutions/)
 - Curated Resouces(by gilbertandanje@gmail.com)
-  - 👉Read [Book by Sam Newman](https://samnewman.io/books/building_microservices/)
-  - 🛳️[containerization, orchestration & CICD](https://drive.google.com/drive/folders/1_GswpJ5jEm27suzglI-wCDomLIuOSvea?usp=drive_link)
-  - 📦[microservices](https://drive.google.com/drive/folders/1ObxIg5qyoIij-l9cUovRmTA3Ds_fSigE?usp=drive_link)
-- 🦍Monorepos
-  - 👉Monorepo is not [code collocation](https://nx.dev/concepts/more-concepts/why-monorepos)
-  - 👉Read [Medium article here](https://medium.com/@avicsebooks/monorepo-2edb5a67517d)
+  - 👉 Read [Book by Sam Newman](https://samnewman.io/books/building_microservices/)
+  - 🛳️ [containerization, orchestration & CICD](https://drive.google.com/drive/folders/1_GswpJ5jEm27suzglI-wCDomLIuOSvea?usp=drive_link)
+  - 📦 [microservices](https://drive.google.com/drive/folders/1ObxIg5qyoIij-l9cUovRmTA3Ds_fSigE?usp=drive_link)
+- 🦧 Monorepos
+  - 👉 Monorepo is not [code collocation](https://nx.dev/concepts/more-concepts/why-monorepos)
+  - 👉 Read [Medium article here](https://medium.com/@avicsebooks/monorepo-2edb5a67517d)
 - For design patterns,best practice and DSA checkout this sheet on the [Resources sheet](https://docs.google.com/spreadsheets/d/1aeci3pqPLG2Uwa42SqSrwgJmqM3A_u7DgkmG7IjZ1Ys/edit#gid=643790244)
