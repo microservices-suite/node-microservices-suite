@@ -166,6 +166,6 @@ We would like to thank the developers and contributors to the following technolo
   - [microservices](https://drive.google.com/drive/folders/1ObxIg5qyoIij-l9cUovRmTA3Ds_fSigE?usp=drive_link)
 olutions/)
 - Monorepos
-  - [👉Monorepo is not code collocation](https://nx.dev/concepts/more-concepts/why-monorepos)
-  - [👉Read [Medium article here](https://medium.com/@avicsebooks/monorepo-2edb5a67517d)
+  - 👉Monorepo is not [code collocation](https://nx.dev/concepts/more-concepts/why-monorepos)
+  - 👉Read [Medium article here](https://medium.com/@avicsebooks/monorepo-2edb5a67517d)
 - For design patterns,best practice and DSA checkout this sheet on the [Resources sheet](https://docs.google.com/spreadsheets/d/1aeci3pqPLG2Uwa42SqSrwgJmqM3A_u7DgkmG7IjZ1Ys/edit#gid=643790244)
