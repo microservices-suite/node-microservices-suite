@@ -164,7 +164,6 @@ We would like to thank the developers and contributors to the following technolo
 - Curated Resouces(by gilbertandanje@gmail.com)
   - [📦containerization, orchestration & CICD](https://drive.google.com/drive/folders/1_GswpJ5jEm27suzglI-wCDomLIuOSvea?usp=drive_link)
   - [microservices](https://drive.google.com/drive/folders/1ObxIg5qyoIij-l9cUovRmTA3Ds_fSigE?usp=drive_link)
-olutions/)
 - Monorepos
   - 👉Monorepo is not [code collocation](https://nx.dev/concepts/more-concepts/why-monorepos)
   - 👉Read [Medium article here](https://medium.com/@avicsebooks/monorepo-2edb5a67517d)
