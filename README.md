@@ -4,9 +4,8 @@
 
 Welcome to the Microservices Suite project! This suite is a collection of Node.js microservices built using the mono-repo strategy and leveraging the Yarn workspaces concept. Each microservice runs in its isolated Docker container, and Kubernetes orchestrates the deployment, providing scalability and efficiency.
 
-## Features
 
-This suite offers the following features:
+## Monorepo strategy benefits for microservices:
 
 1. **Enforce DRY Principles**: Collocating code encourages code sharing, reduces duplication, and saves time by building on existing boilerplate or reusable functionality.
 
@@ -50,15 +49,18 @@ Kubernetes offers automated deployment, scaling, and management of containerized
 
 Welcome to our project! To ensure a smooth setup and development experience, ensure you have the following tools installed on your machine:
 
-- **Docker:** For containerization and managing containerized applications. We love [💚alpine images <small,simple,secure>](https://alpinelinux.org/) for the simplic. You can read about the specific flavor [here](https://github.com/nodejs/docker-node/blob/main/README.md#how-to-use-this-image)
-- **Task Runner Automation Tool:** For task automation and workflow management.
-- **Node.js:** As the runtime environment for executing the application code.
+
+- **Docker:** For containerization and managing containerized applications.  [👉Install docker here](https://docs.docker.com/engine/install/).
+- We love [💚alpine images](https://alpinelinux.org/) <small,simple,secure>. You can read about the specific flavor [here](https://github.com/nodejs/docker-node/blob/main/README.md#how-to-use-this-image)
+- **Task Runner Automation Tool:** For task automation and workflow management.  [👉Install task runner here](https://taskfile.dev/installation/).
+- **Node.js:** As the runtime environment for executing the application code.  [👉Download LTS version here](https://nodejs.org/en/download)
 - At the project <service_root> create `.env`, `.env.dev` and `.env.staging` files and copy `environment variables` from the `.env.example` file
 
 ## Running Services
 
 This project uses a Task Runner Automation Tool to streamline the process of starting services in both development and production. Follow these steps to get your environment up and running:
-
+- You can derive the `service_name` of a service from the workspace name found in the `package.json "name": ` property e.g `@microservices-suite/<service_name>`
+ 
 ### Production
 
 To run a service in production:
@@ -93,6 +95,7 @@ task vanilla:dev:<service_name>
 
 Using Docker-Compose Directly
 Should you need to use docker-compose directly for more control over the container orchestration, you can utilize the standard commands provided by Docker:
+
 
 ```bash
 docker-compose up
