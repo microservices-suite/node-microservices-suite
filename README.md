@@ -2,11 +2,49 @@
 
 ## Overview
 
-Welcome to the Microservices Suite project! This suite is a collection of Node.js microservices built using the mono-repo strategy and leveraging the Yarn workspaces concept. Each microservice runs in its isolated Docker container, and Kubernetes orchestrates the deployment, providing scalability and efficiency.
+Welcome to the 📦[Microservices](https://drive.google.com/file/d/1Noc_6WVe0CmzynnuURexm7MCv75OUAuQ/view?usp=drive_link) Suite project! This suite is a collection of Node.js microservices built using the 🦍[mono-repo]() strategy and leveraging the Yarn workspaces concept. Each microservice runs in its isolated Docker container, and Kubernetes orchestrates the deployment, providing scalability and efficiency.
 
 ## Project file structure
-<img width="509" alt="Screenshot 2024-04-01 at 10 45 20 PM" src="https://github.com/microservices-suite/node-microservices-suite/assets/77880940/1bd6d2f7-1fb4-40e9-b7ac-4dd2cb188577">
-
+```sequence
+├─ node-microservices-suite
+│  ├─ data-persistence/
+|  │  ├─ db-1/
+|  │  │  ├─ Dockerfile
+|  │  │  ├─ README.md
+|  │  ├─ sqlite/
+|  │  │  ├─ db/
+|  │  │  ├─ README.md
+|  ├─ microservices/
+|  │  ├─ service-1/
+|  │  │  ├─ src
+|  │  │  ├─ .env
+|  │  │  ├─ .env.dev
+|  │  │  ├─ app.js
+|  │  │  ├─ Dockerfile
+├─ │  │  ├─ Dockerfile.dev
+|  │  │  ├─ ecosystem.config.js
+|  │  │  ├─ index.js
+|  │  │  ├─ package.json
+|  │  │  ├─ task.json
+|  ├─ shared/
+|  │  ├─ library-1/
+|  │  │  ├─ APIError.js
+|  │  │  ├─ catchAsync.js
+|  │  │  ├─ index.js
+|  │  │  ├─ package.json
+|  │  │  ├─ pick.js
+|  │  │  ├─ README.md
+|  │  │  ├─ validate
+|  ├─ .gitignore
+|  ├─ .npmrc
+|  ├─ .yarnrc.yml
+|  ├─ docker-compose.yml
+|  ├─ package.json
+|  ├─ production.yml
+|  ├─ README.md
+|  ├─ Taskfile.yml
+|  ├─ yarn.lock
+```
 ## Monorepo strategy benefits for microservices:
 
 - **Enforce DRY Principles:**
@@ -164,9 +202,10 @@ We would like to thank the developers and contributors to the following technolo
   - [k8s](https://kubernetes.io/docs/home/)
   - [k8s in the cloud,GKE,EKS and more...](https://kubernetes.io/docs/setup/production-environment/turnkey-solutions/)
 - Curated Resouces(by gilbertandanje@gmail.com)
-  - [📦containerization, orchestration & CICD](https://drive.google.com/drive/folders/1_GswpJ5jEm27suzglI-wCDomLIuOSvea?usp=drive_link)
-  - [microservices](https://drive.google.com/drive/folders/1ObxIg5qyoIij-l9cUovRmTA3Ds_fSigE?usp=drive_link)
-- Monorepos
+  - 👉Read [Book by Sam Newman](https://samnewman.io/books/building_microservices/)
+  - 🛳️[containerization, orchestration & CICD](https://drive.google.com/drive/folders/1_GswpJ5jEm27suzglI-wCDomLIuOSvea?usp=drive_link)
+  - 📦[microservices](https://drive.google.com/drive/folders/1ObxIg5qyoIij-l9cUovRmTA3Ds_fSigE?usp=drive_link)
+- 🦍Monorepos
   - 👉Monorepo is not [code collocation](https://nx.dev/concepts/more-concepts/why-monorepos)
   - 👉Read [Medium article here](https://medium.com/@avicsebooks/monorepo-2edb5a67517d)
 - For design patterns,best practice and DSA checkout this sheet on the [Resources sheet](https://docs.google.com/spreadsheets/d/1aeci3pqPLG2Uwa42SqSrwgJmqM3A_u7DgkmG7IjZ1Ys/edit#gid=643790244)
