@@ -1,5 +1,5 @@
 const config = require("../config/config");
-const { APIError } = require("../utilities/APIError");
+const { APIError } = require("../utilities");
 
 const prodErrors = (err, res) => {
     if (err.isOperational) {
