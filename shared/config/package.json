@@ -1,6 +1,6 @@
 {
   "name": "@microservices-suite/config",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "This contains common configurations for things like env files,loggers etc for easy setup of environment specific settings",
   "main": "index.js",
   "author": "Gilbert Andanje",
