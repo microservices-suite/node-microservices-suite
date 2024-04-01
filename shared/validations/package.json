@@ -2,8 +2,11 @@
   "name": "@microservices-suite/validations",
   "version": "1.0.0",
   "description": "",
-  "private": true,
+  "private": false,
   "devDependencies": {},
   "author": "Gilbert Andanje",
-  "license": "ISC"
+  "license": "ISC",
+  "publishConfig": {
+    "access": "public"
+  }
 }
