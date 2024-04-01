@@ -1,7 +1,18 @@
 version: "3"
-
+env:
+  mode: "vanilla"
+  env: "dev"
+  service: "user_service"
 tasks:
-  dev:user-service:
+  # Dynamically run services using default containerization with docker-compose
+  run:*:*:
+    vars:
+      mode: "{{index .MATCH 0}}"
+      service: "{{index .MATCH 1}}"
+      # Set env_file based on whether mode is not 'prod'
+      env_file: '{{ if ne .mode "prod" }}.env.{{.mode}}{{ else }}.env{{ end }}'
+      docker-compose-up: '{{ if ne .mode "prod" }}docker-compose up --build{{ else }}docker-compose  -f docker-compose.yml -f production.yml up --build -d{{ end }}'
+
     cmds:
       # Check if Docker is running
       - |
@@ -23,7 +34,7 @@ tasks:
               systemctl start docker
               ;;
             *)
-              echo "Unsupported operating system. Please start Docker manually."
+              echo "Unsupported operating system. Please start Docker manually. and try task run:{{.mode}}:{{.service}} again..."
               echo -------------------------------------------------------
               exit 1
               ;;
@@ -51,148 +62,24 @@ tasks:
       - echo -------------------------------------------------------
       - docker-compose down
       - echo -------------------------------------------------------
-      - docker-compose up --build
-      - echo -------------------------------------------------------
-    silent: true
-  prod:user-service:
-    cmds:
-      - |
-        if ! docker info > /dev/null 2>&1; then
-          echo "Docker is not running. Attempting to start Docker..."
-          echo -------------------------------------------------------
-          case "$(uname -s)" in
-            Darwin)
-              echo platform : MacOS : starting docker daemon...
-              echo -------------------------------------------------------
-              open /Applications/Docker.app
-              ;;
-            Linux)
-              echo platform : Linux : starting docker daemon...
-              echo -------------------------------------------------------
-              systemctl start docker
-              ;;
-            *)
-              echo "Unsupported operating system. Please start Docker manually."
-              echo -------------------------------------------------------
-              exit 1
-              ;;
-          esac
-
-          sleep 10
-        fi
-
-      - |
-        if ! docker info > /dev/null 2>&1; then
-          echo "Failed to start Docker. Please check your Docker installation."
-          exit 1
-        else
-          echo "Docker is running."
-          echo -------------------------------------------------------
-        fi
-
-      - echo
-
-      - echo "Loading complete. Starting Docker containers..."
-      - echo -------------------------------------------------------
-      - docker-compose down
-      - echo -------------------------------------------------------
-      - docker-compose  -f docker-compose.yml -f production.yml up --build -d
+      - "{{.docker-compose-up}}"
       - echo -------------------------------------------------------
     silent: true
 
-  vanilla:start:user-service:
+  # Dynamically run services using node server engines PM2 in prod and nodemon in dev mode
+  vanilla:*:*:
+    vars:
+      mode: "{{index .MATCH 0}}"
+      service: "{{index .MATCH 1}}"
+      # Set env_file based on whether mode is not 'prod'
+      env_file: '{{ if ne .mode "prod" }}.env.{{.mode}}{{ else }}.env{{ end }}'
     cmds:
-      - '[ -f ./microservices/user-service/.env ] || (echo "You need to add .env file with environment variable configurations to proceed" && exit 1)'
+      - >
+        [ -f ./microservices/{{.service}}/{{.env_file}} ] || 
+        (echo "You need to add the {{.env_file}} file with environment variable configurations to proceed" && exit 1)
       - yarn repo:reset
       - yarn install
-      - yarn workspace @microservices-suite/user-service start
+      - >
+        yarn workspace @microservices-suite/{{.service}} '{{ if ne .mode "prod" }}{{.mode}}{{ else }}start{{ end }}'
 
-  vanilla:dev:user-service:
-    cmds:
-      - '[ -f ./microservices/user-service/.env.dev ] || (echo "You need to add .env.dev file with environment variable configurations to proceed" && exit 1)'
-      - yarn repo:reset
-      - yarn install
-      - yarn workspace @microservices-suite/user-service dev
-
-  vanilla:start:upload-service:
-    cmds:
-      - yarn repo:reset
-      - yarn install
-      - yarn workspace @microservices-suite/user-service start
-
-  vanilla:dev:upload-service:
-    cmds:
-      - yarn repo:reset
-      - yarn install
-      - yarn workspace @microservices-suite/user-service dev
-
-  vanilla:start:email-service:
-    cmds:
-      - yarn repo:reset
-      - yarn install
-      - yarn workspace @microservices-suite/email-service start
-
-  vanilla:dev:email-service:
-    cmds:
-      - yarn repo:reset
-      - yarn install
-      - yarn workspace @microservices-suite/email-service dev
-
-  vanilla:start:rbac-service:
-    cmds:
-      - yarn repo:reset
-      - yarn install
-      - yarn workspace @microservices-suite/rbac-service start
-
-  vanilla:dev:rbac-service:
-    cmds:
-      - yarn repo:reset
-      - yarn install
-      - yarn workspace @microservices-suite/rbac-service dev
-
-  vanilla:start:payment-service:
-    cmds:
-      - yarn repo:reset
-      - yarn install
-      - yarn workspace @microservices-suite/payment-service start
-
-  vanilla:dev:payment-service:
-    cmds:
-      - yarn repo:reset
-      - yarn install
-      - yarn workspace @microservices-suite/payment-service dev
-
-  vanilla:start:notification-service:
-    cmds:
-      - yarn repo:reset
-      - yarn install
-      - yarn workspace @microservices-suite/notification-service start
-  vanilla:dev:notification-service:
-    cmds:
-      - yarn repo:reset
-      - yarn install
-      - yarn workspace @microservices-suite/notification-service dev
-
-  vanilla:start:product-service:
-    cmds:
-      - yarn repo:reset
-      - yarn install
-      - yarn workspace @microservices-suite/notification-service start
-
-  vanilla:dev:product-service:
-    cmds:
-      - yarn repo:reset
-      - yarn install
-      - yarn workspace @microservices-suite/notification-service dev
-
-  vanilla:start:cart-service:
-    cmds:
-      - yarn repo:reset
-      - yarn install
-      - yarn workspace @microservices-suite/notification-service start
-
-  vanilla:dev:cart-service:
-    cmds:
-      - yarn repo:reset
-      - yarn install
-      - yarn workspace @microservices-suite/notification-service dev
+  # TODO: Orchestrate services with kubernetes inside minikube clusters and kubectl
