@@ -150,6 +150,18 @@ This project is licensed under the [MIT License](LICENSE). Feel free to use, mod
 
 We would like to thank the developers and contributors to the following technologies used in this project:
 
-- Yarn workspaces
-- Docker
-- Kubernetes
+- Yarn
+  - [Yarn workspace](https://classic.yarnpkg.com/lang/en/docs/cli/workspace/). 
+  - Also checkout [yarn workspaces](https://classic.yarnpkg.com/en/docs/cli/workspaces)
+  - [No-hoist](https://classic.yarnpkg.com/blog/2018/02/15/nohoist/)
+- ⚓️Docker
+  - [⚓️vanilla docker (CLI)](https://docs.docker.com/reference/cli/docker/)
+  - [docker-compose (manage a multi-container application)](https://docs.docker.com/compose/)
+- 🎡Kubernetes
+  - [minikube (local kubernetes for development only!)](https://minikube.sigs.k8s.io/docs/start/)
+  - [k8s](https://kubernetes.io/docs/home/)
+  - [k8s in the cloud,GKE,EKS and more...](https://kubernetes.io/docs/setup/production-environment/turnkey-solutions/)
+- Curated Resouces(by gilbertandanje@gmail.com)
+  - [📦containerization, orchestration & CICD](https://drive.google.com/drive/folders/1_GswpJ5jEm27suzglI-wCDomLIuOSvea?usp=drive_link)
+  - [microservices](https://drive.google.com/drive/folders/1ObxIg5qyoIij-l9cUovRmTA3Ds_fSigE?usp=drive_link)
+- For design patterns,best practice and DSA checkout this sheet on the [Resources sheet](https://docs.google.com/spreadsheets/d/1aeci3pqPLG2Uwa42SqSrwgJmqM3A_u7DgkmG7IjZ1Ys/edit#gid=643790244)
