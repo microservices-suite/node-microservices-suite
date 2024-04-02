@@ -2,7 +2,7 @@
 
 ## Overview
 
-Welcome to the 📦 [Microservices](https://drive.google.com/file/d/1Noc_6WVe0CmzynnuURexm7MCv75OUAuQ/view?usp=drive_link) Suite project! This suite is a collection of Node.js microservices built using the 🦧 [mono-repo]() strategy and leveraging the Yarn workspaces concept. Each microservice runs in its isolated Docker container, and Kubernetes orchestrates the deployment, providing scalability and efficiency.
+Welcome to the 📦 [Microservices](https://drive.google.com/file/d/1Noc_6WVe0CmzynnuURexm7MCv75OUAuQ/view?usp=drive_link) Suite project! This suite is a collection of Node.js microservices built using the 🦧 [mono-repo]() strategy and leveraging the [yarn workspaces](https://classic.yarnpkg.com/lang/en/docs/workspaces/) concept. Each microservice runs in its isolated Docker `container`, and `Kubernetes` orchestrates the deployment, providing scalability and efficiency.
 
 ## Project file structure
 ```sequence
@@ -11,8 +11,14 @@ Welcome to the 📦 [Microservices](https://drive.google.com/file/d/1Noc_6WVe0Cm
 |  │  ├─ db-1/
 |  │  │  ├─ Dockerfile
 |  │  │  ├─ README.md
-|  │  ├─ sqlite/****
+|  │  ├─ sqlite/ #for in memory or disk db for miniature devices, IoT, smart watches, implants and assistive devices
 |  │  │  ├─ db/
+|  │  │  ├─ README.md
+│  ├─ k8s/
+|  │  ├─ service-1/
+|  │  │  ├─ cluster-ip-service.yml
+|  │  │  ├─ cluster-deployment.yml
+|  │  │  ├─ ingress-service.yml
 |  │  │  ├─ README.md
 |  ├─ microservices/
 |  │  ├─ service-1/
@@ -35,6 +41,13 @@ Welcome to the 📦 [Microservices](https://drive.google.com/file/d/1Noc_6WVe0Cm
 |  │  │  ├─ pick.js
 |  │  │  ├─ README.md
 |  │  │  ├─ validate
+│  ├─ tests/
+|  │  ├─ service-1/
+|  │  │  ├─ e2e/
+|  │  │  ├─ integration/
+|  │  │  ├─ snapshot/ #if it's a micro-frontend service
+|  │  │  ├─ unit/
+|  │  │  ├─ README.md
 |  ├─ .gitignore
 |  ├─ .npmrc
 |  ├─ .yarnrc.yml
@@ -47,9 +60,10 @@ Welcome to the 📦 [Microservices](https://drive.google.com/file/d/1Noc_6WVe0Cm
 ```
 ## Monorepo strategy benefits for microservices:
 
-- **Enforce DRY Principles:**
+- **Enforce [DRY](https://japhethobala.com/posts/technical/single-responsibility/) Principles:**
+  - [@Japheth Obala](https://github.com/jobala) the Prophet 😎 has done a sleek job demystifying [👉SOLID & best practice here](https://japhethobala.com/).
   - Collocating code encourages code sharing.
-  - Reduce duplication
+  - Reduce duplication 👉[read about SOLID here](https://japhethobala.com/)
   - Save time by building on existing boilerplate or reusable functionality.
 
 - **Collaboration:** 
@@ -74,7 +88,7 @@ Welcome to the 📦 [Microservices](https://drive.google.com/file/d/1Noc_6WVe0Cm
 
 - **Easily Containerize and Scale:** 
   - Decouple every microservice to scale individually. 
-  - Leverage the `no-hoist Yarn workspace` feature and custom scripts to enable efficient packaging of microservices into isolated containers.
+  - Leverage the [no-hoist yarn workspace](https://classic.yarnpkg.com/blog/2018/02/15/nohoist/) feature and custom scripts to enable efficient packaging of microservices into isolated containers.
 
 ## Technologies Used
 
