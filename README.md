@@ -11,8 +11,14 @@ Welcome to the 📦 [Microservices](https://drive.google.com/file/d/1Noc_6WVe0Cm
 |  │  ├─ db-1/
 |  │  │  ├─ Dockerfile
 |  │  │  ├─ README.md
-|  │  ├─ sqlite/****
+|  │  ├─ sqlite/**** #for in memory or disk db for miniature devices, `IoT`, `smart watches`, `implants` and `assistive devices`
 |  │  │  ├─ db/
+|  │  │  ├─ README.md
+│  ├─ k8s/
+|  │  ├─ service-1/
+|  │  │  ├─ cluster-ip-service.yml
+|  │  │  ├─ cluster-deployment.yml
+|  │  │  ├─ ingress-service.yml
 |  │  │  ├─ README.md
 |  ├─ microservices/
 |  │  ├─ service-1/
@@ -35,6 +41,13 @@ Welcome to the 📦 [Microservices](https://drive.google.com/file/d/1Noc_6WVe0Cm
 |  │  │  ├─ pick.js
 |  │  │  ├─ README.md
 |  │  │  ├─ validate
+│  ├─ tests/
+|  │  ├─ service-1/
+|  │  │  ├─ e2e/
+|  │  │  ├─ integration/
+|  │  │  ├─ snapshot/ #if it's a micro-frontend service
+|  │  │  ├─ unit/
+|  │  │  ├─ README.md
 |  ├─ .gitignore
 |  ├─ .npmrc
 |  ├─ .yarnrc.yml
