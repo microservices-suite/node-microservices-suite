@@ -11,7 +11,7 @@ Welcome to the 📦 [Microservices](https://drive.google.com/file/d/1Noc_6WVe0Cm
 |  │  ├─ db-1/
 |  │  │  ├─ Dockerfile
 |  │  │  ├─ README.md
-|  │  ├─ sqlite/
+|  │  ├─ sqlite/****
 |  │  │  ├─ db/
 |  │  │  ├─ README.md
 |  ├─ microservices/
@@ -65,7 +65,12 @@ Welcome to the 📦 [Microservices](https://drive.google.com/file/d/1Noc_6WVe0Cm
   - simplify the automation of repetitive workflows.
 
 - **Code Sharing Anywhere:** 
-  - Publish and import organization-scoped libraries to the npm registry with `yarn publish` and `yarn add <@microservices-suite/foo>`.
+  - Publish and import organization-scoped libraries to the npm registry with 
+```bash
+    yarn publish 
+    yarn add <@microservices-suite/foo> or
+    yarn @microservices-suite/<workspace-name> add <@microservices-suite/foo>
+```
 
 - **Easily Containerize and Scale:** 
   - Decouple every microservice to scale individually. 
@@ -81,9 +86,10 @@ Welcome to the 📦 [Microservices](https://drive.google.com/file/d/1Noc_6WVe0Cm
 - **Docker Containers:** 
   - Provides lightweight, portable, and self-sufficient containers for packaging and deploying microservices.
 
-### Alpine Images
+### **Alpine** Images
 
-Alpine images are very minimalistic Linux minidistros that cost you only `~5MB` of real estate. That is why they are used inside your favourite `smart watch ⌚️`. One objective of this project is to `optimize image builds for Continuous Integration (CI)` and `production` environments through the utilization of the slimmest possible images so that you dont bloat ⚠️ your machine in dev and we have a lean server in prod.
+- Alpine images are very minimalistic Linux minidistros that cost you only `~5MB` of real estate. That is why they are used inside your favourite `smart watch ⌚️`. 
+- One objective of this project is to `optimize image builds for Continuous Integration (CI)` and `production` environments through the utilization of the slimmest possible images so that you dont bloat ⚠️ your machine in dev and we have a lean server in prod.
 
 #### Key Strategies:
 
@@ -98,11 +104,11 @@ Alpine images are very minimalistic Linux minidistros that cost you only `~5MB` 
 
 ### Docker & Node Best Practices
 
-For an in-depth guide and best practices on using Docker with Node.js, visit the [Docker & Node Best Practices](https://github.com/nodejs/docker-node/blob/main/docs/BestPractices.md) repository.
+- For an in-depth guide and best practices on using Docker with Node.js, visit the [Docker & Node Best Practices](https://github.com/nodejs/docker-node/blob/main/docs/BestPractices.md) repository.
 
 ### Kubernetes (k8s)
 
-Kubernetes offers automated deployment, scaling, and management of containerized applications, ensuring reliability and scalability.
+- Kubernetes offers automated deployment, scaling, and management of containerized applications, ensuring reliability and scalability.
 
 # Getting Started
 
@@ -124,45 +130,26 @@ Welcome to our project! To ensure a smooth setup and development experience, ens
 
 ## Running Services
 
-This project uses a Task Runner Automation Tool to streamline the process of starting services in both development and production. Follow these steps to get your environment up and running:
-- You can derive the `service_name` of a service from the workspace name found in the `package.json "name": ` property e.g `@microservices-suite/<service_name>`
- 
-### Production
-
-To run a service in production:
-
-```bash
-task start:<service_name>
+- This project uses [Task Runner](https://taskfile.dev/usage/) Automation Tool to streamline the process of starting services in both development and production. Follow these steps to get your environment up and running:
+- You can derive the `service_name` of a service from the workspace name found in the `package.json "name": ` property e.g 
+```json
+"name": "@microservices-suite/<service_name>"
 ```
-
-This command utilizes docker-compose to orchestrate containers and set up necessary networks using the docker-bridge default network.
-
-### Development
-For development purposes, use the following command to start a service, substituting <service_name> with the desired service:
-
+- To run a service in either modes [dev,staging,prod]:
 ```bash
-task dev:<service_name>
+task <mode>:<service_name>
 ```
-
-The task runner will handle the setup, ensuring your service is ready for development.
+- This command uses docker-compose to start your service(s)
+- The task runner will handle the setup, ensuring your service is ready.
 
 ### Running Services Without Docker
-If you prefer not to use Docker, you can start services using node `PM2` engine in production or `nodemon` in dev mode:
-
-- For Production: Start the service with the PM2 engine by running:
+- If you prefer not to use Docker, you can use the `vanilla` task command to start services using node `PM2` engine in production or `nodemon` in any other mode:
 ```bash
-task vanilla:start:<service_name>
-```
-- For Development: Use the Nodemon node engine for a more development-friendly environment:```bash
-
-```bash
-task vanilla:dev:<service_name>
+task vanilla:<mode>:<service_name>
 ```
 
-Using Docker-Compose Directly
-Should you need to use docker-compose directly for more control over the container orchestration, you can utilize the standard commands provided by Docker:
-
-
+### Using Docker-Compose Directly
+- Should you need to use docker-compose directly for more control over the container orchestration, you can utilize the standard commands provided by Docker:
 ```bash
 docker-compose up
 docker-compose down
@@ -173,18 +160,26 @@ docker-compose down
 Contributions are welcome! If you'd like to contribute to the Microservices Suite project, please follow these guidelines:
 
 1. Fork the repository and clone it to your local machine.
-2. Create a new branch for your feature or bug fix: `git checkout -b feat/<my-feature>` or `git checkout -b fix/<my-bug-fix>`.
+```bash
+git clone https://github.com/microservices-suite/node-microservices-suite.git
+```
+2. Create a new branch for your feature or bug fix: 
+```bash
+git checkout -b feat/<my-feature>
+```
 3. Make your changes and make sure that tests pass.
 4. Commit your changes using the Angular commit message convention:
-For more details, please refer to the [Angular commit message convention](https://github.com/angular/angular/blob/master/CONTRIBUTING.md#commit).
-5. Push to the branch: `git push origin feat/<my-feature>` or `git push origin fix/<my-bug-fix>`.
+   - For more details, please refer to the [Angular commit message convention](https://github.com/angular/angular/blob/master/CONTRIBUTING.md#commit).
+5. Push to the branch: 
+```bash
+git push origin feat/<my-feature>
+```
 6. Submit a pull request detailing your changes.
-
-Please ensure that your pull request adheres to the project's code style and conventions.
+7. Please ensure that your pull request adheres to the project's code style and conventions.
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE). Feel free to use, modify, and distribute this code for any purpose.
+- This project is licensed under the [MIT License](LICENSE). Feel free to use, modify, and distribute this code for any purpose.
 
 ## Acknowledgements
 
