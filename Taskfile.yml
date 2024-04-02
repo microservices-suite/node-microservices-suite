@@ -83,3 +83,29 @@ tasks:
         yarn workspace @microservices-suite/{{.service}} '{{ if ne .mode "prod" }}{{.mode}}{{ else }}start{{ end }}'
 
   # TODO: Orchestrate services with kubernetes inside minikube clusters and kubectl
+  k8s:*:*:
+    vars:
+      mode: "{{index .MATCH 0}}"
+      service: "{{index .MATCH 1}}"
+      #TODO: build dynamic file matching paths to k8 configurations here
+
+      #TODO: build dynamic k8 commands here
+    cmds:
+      - "#TODO: enerate dynamic orchestration workflows based on [mode] & [service]"
+
+  # TODO: Run your tests using jest or any test suite of choice
+  test:*:*:
+    vars:
+      type: "{{index .MATCH 0}}" #type to match [unit,e2e,snapshot,all]
+      service: "{{index .MATCH 1}}" #service to match [<service_name>,<glob-patterns>,all]
+      #TODO: build dynamic file matching paths to test pyramid here
+
+      #TODO: build dynamic test commands here
+    cmds:
+      - "#TODO: generate dynamic testing workflows based on [type] & [service]"
+
+  # TODO: create a utilities glossary to switch {{.CLIARGS}} eg utilities: case --reset do; case --stop do; case etc ...
+  reset:
+    cmds:
+      - "yarn repo:reset" #deep remove all node modules and artefacts generated during yarn install
+
