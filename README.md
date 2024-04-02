@@ -11,7 +11,7 @@ Welcome to the 📦 [Microservices](https://drive.google.com/file/d/1Noc_6WVe0Cm
 |  │  ├─ db-1/
 |  │  │  ├─ Dockerfile
 |  │  │  ├─ README.md
-|  │  ├─ sqlite/**** #for in memory or disk db for miniature devices, `IoT`, `smart watches`, `implants` and `assistive devices`
+|  │  ├─ sqlite/ #for in memory or disk db for miniature devices, IoT, smart watches, implants and assistive devices
 |  │  │  ├─ db/
 |  │  │  ├─ README.md
 │  ├─ k8s/
