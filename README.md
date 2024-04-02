@@ -48,7 +48,7 @@ Welcome to the 📦 [Microservices](https://drive.google.com/file/d/1Noc_6WVe0Cm
 ## Monorepo strategy benefits for microservices:
 
 - **Enforce [DRY](https://japhethobala.com/posts/technical/single-responsibility/) Principles:**
-  - @jobala has done a sleek job demystifying [👉SOLID & best practice here](https://japhethobala.com/).
+  - [@Japheth Obala](https://github.com/jobala) the Prophet 😎 has done a sleek job demystifying [👉SOLID & best practice here](https://japhethobala.com/).
   - Collocating code encourages code sharing.
   - Reduce duplication 👉[read about SOLID here](https://japhethobala.com/)
   - Save time by building on existing boilerplate or reusable functionality.
