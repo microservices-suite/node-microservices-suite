@@ -13,58 +13,58 @@ tasks:
       env_file: '{{ if ne .mode "prod" }}.env.{{.mode}}{{ else }}.env{{ end }}'
       docker-compose-up: '{{ if ne .mode "prod" }}docker-compose up --build{{ else }}docker-compose  -f docker-compose.yml -f production.yml up --build -d{{ end }}'
 
-    cmds:
-      # Check if Docker is running
-      - |
-        if ! docker info > /dev/null 2>&1; then
-          echo "Docker is not running. Attempting to start Docker..."
-          echo -------------------------------------------------------
-          # Check the platform and execute the appropriate command
-          case "$(uname -s)" in
-            Darwin)
-              # For macOS
-              echo platform : MacOS : starting docker daemon...
-              echo -------------------------------------------------------
-              open /Applications/Docker.app
-              ;;
-            Linux)
-              # For Linux systems with systemd (adjust as needed for your distribution)
-              echo platform : Linux : starting docker daemon...
-              echo -------------------------------------------------------
-              systemctl start docker
-              ;;
-            *)
-              echo "Unsupported operating system. Please start Docker manually. and try task run:{{.mode}}:{{.service}} again..."
-              echo -------------------------------------------------------
-              exit 1
-              ;;
-          esac
+    # cmds:
+    #   # Check if Docker is running
+    #   - |
+    #     if ! docker info > /dev/null 2>&1; then
+    #       echo "Docker is not running. Attempting to start Docker..."
+    #       echo -------------------------------------------------------
+    #       # Check the platform and execute the appropriate command
+    #       case "$(uname -s)" in
+    #         Darwin)
+    #           # For macOS
+    #           echo platform : MacOS : starting docker daemon...
+    #           echo -------------------------------------------------------
+    #           open /Applications/Docker.app
+    #           ;;
+    #         Linux)
+    #           # For Linux systems with systemd (adjust as needed for your distribution)
+    #           echo platform : Linux : starting docker daemon...
+    #           echo -------------------------------------------------------
+    #           systemctl start docker
+    #           ;;
+    #         *)
+    #           echo "Unsupported operating system. Please start Docker manually. and try task run:{{.mode}}:{{.service}} again..."
+    #           echo -------------------------------------------------------
+    #           exit 1
+    #           ;;
+    #       esac
 
-          # Wait a bit for Docker to initialize (this time might need adjustment)
-          sleep 10
-        fi
+    #       # Wait a bit for Docker to initialize (this time might need adjustment)
+    #       sleep 10
+    #     fi
 
-      # Check again if Docker is running after the attempt to start it
-      - |
-        if ! docker info > /dev/null 2>&1; then
-          echo "Failed to start Docker. Please check your Docker installation."
-          exit 1
-        else
-          echo "Docker is running."
-          echo -------------------------------------------------------
-        fi
+    #   # Check again if Docker is running after the attempt to start it
+    #   - |
+    #     if ! docker info > /dev/null 2>&1; then
+    #       echo "Failed to start Docker. Please check your Docker installation."
+    #       exit 1
+    #     else
+    #       echo "Docker is running."
+    #       echo -------------------------------------------------------
+    #     fi
 
-      # Print a newline to separate loading state from subsequent output
-      - echo
+    #   # Print a newline to separate loading state from subsequent output
+    #   - echo
 
-      # Commands to start your containers go here
-      - echo "Loading complete. Starting Docker containers..."
-      - echo -------------------------------------------------------
-      - docker-compose down
-      - echo -------------------------------------------------------
-      - "{{.docker-compose-up}}"
-      - echo -------------------------------------------------------
-    silent: true
+    #   # Commands to start your containers go here
+    #   - echo "Loading complete. Starting Docker containers..."
+    #   - echo -------------------------------------------------------
+    #   - docker-compose down
+    #   - echo -------------------------------------------------------
+    #   - "{{.docker-compose-up}}"
+    #   - echo -------------------------------------------------------
+    # silent: true
 
   # Dynamically run services using node server engines PM2 in prod and nodemon in dev mode
   vanilla:*:*:
