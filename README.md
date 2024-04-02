@@ -74,7 +74,7 @@ Welcome to the 📦 [Microservices](https://drive.google.com/file/d/1Noc_6WVe0Cm
 
 - **Easily Containerize and Scale:** 
   - Decouple every microservice to scale individually. 
-  - Leverage the `no-hoist Yarn workspace` feature and custom scripts to enable efficient packaging of microservices into isolated containers.
+  - Leverage the [no-hoist yarn workspace](https://classic.yarnpkg.com/blog/2018/02/15/nohoist/) feature and custom scripts to enable efficient packaging of microservices into isolated containers.
 
 ## Technologies Used
 
