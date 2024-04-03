@@ -13,21 +13,17 @@ tasks:
       docker_compose_up: '{{ if ne .mode "prod" }}docker-compose {{.action}} {{.CLI_ARGS}}{{ else }}docker-compose  -f docker-compose.yml -f production.yml {{.action}} {{.CLI_ARGS}} {{ end }}'
 
     cmds:
-      # Check if Docker is running
       - |
         if ! docker info > /dev/null 2>&1; then
           echo "Docker is not running. Attempting to start Docker..."
           echo -------------------------------------------------------
-          # Check the platform and execute the appropriate command
           case "$(uname -s)" in
             Darwin)
-              # For macOS
               echo platform : MacOS : starting docker daemon...
               echo -------------------------------------------------------
               open /Applications/Docker.app
               ;;
             Linux)
-              # For Linux systems with systemd (adjust as needed for your distribution)
               echo platform : Linux : starting docker daemon...
               echo -------------------------------------------------------
               systemctl start docker
@@ -38,13 +34,8 @@ tasks:
               exit 1
               ;;
           esac
-
-          # Wait a bit for Docker to initialize (this time might need adjustment)
           sleep 10
         fi
-
-      # Check again if Docker is running after the attempt to start it
-      - |
         if ! docker info > /dev/null 2>&1; then
           echo "Failed to start Docker. Please check your Docker installation."
           exit 1
@@ -52,6 +43,32 @@ tasks:
           echo "Docker is running."
           echo -------------------------------------------------------
         fi
+
+      # Search for the service directory from anywhere using BFS algorithm and upgrade package.json
+      - |
+        bfs_search() {
+          start_dir="$1"
+          target_file="$2"
+          queue=("$start_dir")
+          while [ ${#queue[@]} -gt 0 ]; do
+            current_dir="${queue[0]}"
+            queue=("${queue[@]:1}")
+            for entry in "$current_dir"/*; do
+              if [ -d "$entry" ]; then
+                queue+=("$entry")
+              elif [ "${entry##*/}" = "$target_file" ]; then
+                echo "Found directory with $target_file: $current_dir"
+                cd "$current_dir"
+                yarn install
+                yarn upgrade
+                exit 0
+              fi
+            done
+          done
+          echo "Service directory for '$service' not found."
+          exit 1
+        }
+        bfs_search "$(pwd)" "package.json"
 
       # Print a newline to separate loading state from subsequent output
       - echo -------------------------------------------------------
