@@ -12,6 +12,16 @@ const UsersSchema = new mongoose.Schema({
     password: {
         type: mongoose.Schema.Types.String,
         required: true,
+    },
+    bananas: {
+        type: mongoose.Schema.Types.String,
+        required: false,
+    }
+}, {
+    writeConcern: {
+        w: 'majority',
+        j: true,
+        wtimeout: 1000
     }
 })
 
