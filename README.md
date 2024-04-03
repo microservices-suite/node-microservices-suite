@@ -151,7 +151,7 @@ Welcome to our project! To ensure a smooth setup and development experience, ens
 ```
 - To run a service in either modes [dev,staging,prod]:
 ```bash
-task <mode>:<service_name>
+task run:<mode>:<service_name>
 ```
 - This command uses docker-compose to start your service(s)
 - The task runner will handle the setup, ensuring your service is ready.
