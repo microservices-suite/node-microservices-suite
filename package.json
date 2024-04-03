@@ -26,15 +26,15 @@
       "shared/constants",
       "shared/errors",
       "shared/config",
-      "shared/validations"      
+      "shared/validations"
     ],
     "nohoist": [
-      "**/@microservices-suite/utilities",   
-      "**/@microservices-suite/errors",   
-      "**/@microservices-suite/validations",   
-      "**/@microservices-suite/config",   
-      "**/@microservices-suite/constants",   
-      "**/@microservices-suite/middlewares" 
+      "**/@microservices-suite/utilities",
+      "**/@microservices-suite/errors",
+      "**/@microservices-suite/validations",
+      "**/@microservices-suite/config",
+      "**/@microservices-suite/constants",
+      "**/@microservices-suite/middlewares"
     ]
   }
 }
