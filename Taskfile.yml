@@ -45,6 +45,7 @@ tasks:
         fi
 
       # Search for the service directory from anywhere using BFS algorithm and upgrade package.json
+      # TODO: improve on its accuracy
       - |
         bfs_search() {
           start_dir="$1"
@@ -57,10 +58,25 @@ tasks:
               if [ -d "$entry" ]; then
                 queue+=("$entry")
               elif [ "${entry##*/}" = "$target_file" ]; then
+                echo -------------------------------------------------------
+                echo -------------------------------------------------------
                 echo "Found directory with $target_file: $current_dir"
+                echo -------------------------------------------------------
+                echo cd...ing into $current_dir
                 cd "$current_dir"
+                echo -------------------------------------------------------
+                echo installing packages ....................................
+
                 yarn install
+
+                echo -------------------------------------------------------
+
+                echo uprading packages .....................................
                 yarn upgrade
+                echo -------------------------------------------------------
+                echo done setting up----------------------------------------
+                echo -------------------------------------------------------
+
                 exit 0
               fi
             done
@@ -81,11 +97,21 @@ tasks:
       - yarn repo:reset
       - echo -------------------------------------------------------
       - echo "cleanup done. Starting to build docker image....."
-      - echo -------------------------------------------------------
+      - echo stopping any running containers------------------------
       - docker-compose down
-      - echo -------------------------------------------------------
+      - echo firing up new containers get ready---------------------
+      - sleep 5
+      - echo 💥💥----------------------------------------------------
+      - sleep 5
+      - echo 🔥🔥🔥🔥🔥🔥---------------------------------------------
+      - sleep 5
+      - echo oh shit!! 🤯😲------------------------------------------ 
+      - sleep 5
+      - echo -------------------------------------------------------  
+      - echo -------------------------------------------------------  
+
       - "{{.docker_compose_up}}"
-      - echo -------------------------------------------------------
+      - echo -------------------------------------------------------  
     # silent: true
 
   # Dynamically run services using node server engines PM2 in prod and nodemon in dev mode
