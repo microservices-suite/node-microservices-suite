@@ -7,12 +7,20 @@ Welcome to the 📦 [Microservices](https://drive.google.com/file/d/1Noc_6WVe0Cm
 ## Project file structure
 ```sequence
 ├─ node-microservices-suite
+│  ├─ API-gateways/
+|  │  ├─ app-1/
+|  │  │  ├─ nginx
+|  │  │  ├─ apache
+|  │  │  ├─ README.md
+│  ├─ GraphQL/
+|  │  ├─ app-1/
+|  │  │  ├─ apollo-server # placeholder file atm
+|  │  │  ├─ README.md
 │  ├─ data-persistence/
 |  │  ├─ db-1/
 |  │  │  ├─ Dockerfile
 |  │  │  ├─ README.md
-|  │  ├─ sqlite/ #for in memory or disk db for miniature devices, IoT, smart watches, implants and assistive devices
-|  │  │  ├─ db/
+|  │  ├─ sqlite/ #for in memory or disk db for miniature devices or prototyping
 |  │  │  ├─ README.md
 │  ├─ k8s/
 |  │  ├─ service-1/
