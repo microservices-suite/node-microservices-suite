@@ -18,38 +18,28 @@ tasks:
         (echo "You need to add the {{.env_file}} file with environment variable configurations to proceed" && exit 1)
       - >
         if [ "{{.action}}" == "down" ]; then
-          docker-compose down
+          {{.docker_compose}}
           exit 0
         fi
-      # - |
-      #   if [ "{{.action}}" -eq "down" ]; then
-      #       echo "not skipping -----{{.docker_compose}}-------------------"
-      #       "{{.docker_compose}}"
-      #       exit 0
-      #   else
-      #       echo "skipping -----{{.docker_compose}}-------------------"
-      #   fi
-      - if [ {{.action}} -eq down ]; then docker compose down; else exit 0; fi && exit 0 
       - |
         if ! docker info > /dev/null 2>&1; then
           echo "Docker is not running. Attempting to start Docker..."
-          echo '--------------------------------------->'
           case "$(uname -s)" in
             Darwin)
-              echo '--------------------------------------->'
+              echo '---------------------------------------'
               echo platform : MacOS : starting docker daemon...
-              echo '--------------------------------------->'
+              echo '---------------------------------------'
               open /Applications/Docker.app
               ;;
             Linux)
-              echo '--------------------------------------->'
+              echo '---------------------------------------'
               echo platform : Linux : starting docker daemon...
-              echo '--------------------------------------->'
+              echo '---------------------------------------'
               systemctl start docker
               ;;
             *)
               echo "Unsupported operating system. Please start Docker manually. and try task run:{{.mode}}:{{.service}} again..."
-              echo !! '------------------------------------------------------->'
+              echo '!! -----------------------------------------------------'
               exit 1
               ;;
           esac
@@ -59,7 +49,7 @@ tasks:
           echo "💔 Failed to start Docker. Please check your Docker installation."
           exit 1
         else
-          echo "✅ ==>Docker is running..."
+          if [ "{{.action}}" != "down" ]; then echo "✅ ==>Docker is running..."; else exit 0; fi
         fi
 
       # Search for the service directory from anywhere and upgrade package.json
@@ -72,22 +62,19 @@ tasks:
                 if [[ " ${split_cwd[@]} " =~ " node-microservices-suite " ]]; then
                     service_root=$(echo "${split_cwd[*]:0:${#split_cwd[@]}-2}" | tr ' ' '/')/microservices/$service
                     cd "/$service_root" || { echo "Error: Unable to change directory to $service_root"; exit 1; }
-                    echo '----------------------------------------------------->'
+                    echo '-----------------------------------------------------'
                     if [ -f yarn.lock ]; then
                         rm yarn.lock
                     fi
                     echo "Found directory with $target_file: $service_root"
-                    echo '----------------------------------------------------->'
+                    echo '-----------------------------------------------------'
                     echo cd...ing into $service_root
-                    echo '----------------------------------------------------->'
-                    echo installing packages ....................................
+                    echo '-----------------------------------------------------'
+                    echo '==> installing packages'
                     yarn install
-                    echo '----------------------------------------------------->'
-                    echo upgrading packages .....................................
+                    echo '==> upgrading packages'
                     yarn upgrade
-                    echo '----------------------------------------------------->'
-                    echo '-------------------done setting up------------------->'
-                    echo '----------------------------------------------------->'
+                    echo '-------------------done setting up-------------------'
                 else
                     echo "run this command from within your application"
                     exit 1
@@ -101,28 +88,23 @@ tasks:
       - >
         if [ "{{.action}}" == "up" ]; then
           echo "Loading complete. Starting Docker containers..."
-          echo '--------------------------------------->'
+          echo '---------------------------------------'
           echo "cleaning up the the repo to prepare for building the image..."
-          echo '--------------------------------------->'
           yarn repo:reset
-          echo '--------------------------------------->'
+          echo '---------------------------------------'
           echo "cleanup done. Starting to build docker image....."
-          echo '--------------------------------------->'
-          echo stopping any running containers'-------->'
-          echo '--------------------------------------->'
+          echo '---------------------------------------'
+          echo stopping any running containers'--------'
+          echo '---------------------------------------'
           docker-compose down
-          echo firing up new containers get ready'------->'
-          sleep 1
+          echo '==> firing up new containers. Get ready...'
           echo 💥💥'------->'
-          sleep 1
           echo 🔥🔥🔥🔥🔥🔥'------->'
           sleep 1
           echo oh shit!! 🤯😲'------>'
-          sleep 1
-          echo '----------------------------------------->'
+          echo '-----------------------------------------'
           pwd
           {{.docker_compose}}
-          echo '----------------------------------------->'
         fi
 
     silent: true
@@ -168,7 +150,7 @@ tasks:
       - "#TODO: generate dynamic testing workflows based on [type] & [service]"
     silent: true
 
-  # TODO: create a utilities glossary to switch {{.CLI_ARGS}} eg utilities: case --reset do; case --stop do; case etc ...
+  # TODO: create a utilities glossary to switch {{.CLI_ARGS}} eg utilities: case --reset do; case --stop do; case etc
   reset:
     cmds:
       - "yarn repo:reset" #deep remove all node modules and artefacts generated during yarn install
