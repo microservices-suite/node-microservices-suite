@@ -21,7 +21,7 @@ Welcome to the 📦 [Microservices](https://drive.google.com/file/d/1Noc_6WVe0Cm
 |  │  │  ├─ Dockerfile
 |  │  │  ├─ README.md
 |  │  ├─ sqlite/ #for in memory or disk db for miniature devices or prototyping
-|  │  ├─ sqlite/ #for in memory or disk db for miniature devices or prototyping
+|  │  ├─ ├─ db/
 |  │  │  ├─ README.md
 │  ├─ k8s/
 |  │  ├─ service-1/
@@ -159,8 +159,9 @@ Welcome to our project! To ensure a smooth setup and development experience, ens
 "name": "@microservices-suite/<service_name>"
 ```
 - To run a service in either modes [dev,staging,prod]:
+- Action is similar to [up,down] docker compose syntax where `up` & `down` `start` and `stop` the `service` respectively with `docker-compose <action>`
 ```bash
-task run:<mode>:<service_name>
+task do:<service_name>:<mode>:<action>
 ```
 - This command uses docker-compose to start your service(s)
 - The task runner will handle the setup, ensuring your service is ready.
@@ -168,7 +169,7 @@ task run:<mode>:<service_name>
 ### Running Services Without Docker
 - If you prefer not to use Docker, you can use the `vanilla` task command to start services using node `PM2` engine in production or `nodemon` in any other mode:
 ```bash
-task vanilla:<mode>:<service_name>
+task vanilla:<service_name>:<mode>
 ```
 
 ### Using Docker-Compose Directly
