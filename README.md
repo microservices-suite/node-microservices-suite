@@ -21,7 +21,7 @@ Welcome to the 📦 [Microservices](https://drive.google.com/file/d/1Noc_6WVe0Cm
 |  │  │  ├─ Dockerfile
 |  │  │  ├─ README.md
 |  │  ├─ sqlite/ #for in memory or disk db for miniature devices or prototyping
-|  │  ├─ sqlite/ #for in memory or disk db for miniature devices or prototyping
+|  │  ├─ db/
 |  │  │  ├─ README.md
 │  ├─ k8s/
 |  │  ├─ service-1/
