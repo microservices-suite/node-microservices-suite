@@ -10,115 +10,122 @@ tasks:
       action: "{{index .MATCH 2}}"
       # Set env_file based on whether mode is not 'prod'
       env_file: '{{ if ne .mode "prod" }}.env.{{.mode}}{{ else }}.env{{ end }}'
-      docker_compose_up: '{{ if ne .mode "prod" }}docker-compose {{.action}} {{.CLI_ARGS}}{{ else }}docker-compose  -f docker-compose.yml -f production.yml {{.action}} {{.CLI_ARGS}} {{ end }}'
+      docker_compose: '{{ if ne .mode "prod" }}docker-compose {{.action}} {{.CLI_ARGS}}{{ else }}docker-compose  -f docker-compose.yml -f production.yml {{.action}} {{.CLI_ARGS}} {{ end }}'
 
     cmds:
+      - >
+        [ -f ./microservices/{{.service}}/{{.env_file}} ] || 
+        (echo "You need to add the {{.env_file}} file with environment variable configurations to proceed" && exit 1)
+      # - |
+      #   if [ "{{.action}}" -eq "down" ]; then
+      #       echo "not skipping -----{{.docker_compose}}-------------------"
+      #       "{{.docker_compose}}"
+      #       exit 0
+      #   else
+      #       echo "skipping -----{{.docker_compose}}-------------------"
+      #   fi
+      - if [ {{.action}} -eq down ]; then docker compose down; else exit 0; fi && exit 0 
       - |
         if ! docker info > /dev/null 2>&1; then
           echo "Docker is not running. Attempting to start Docker..."
-          echo -------------------------------------------------------
+          echo '--------------------------------------->'
           case "$(uname -s)" in
             Darwin)
+              echo '--------------------------------------->'
               echo platform : MacOS : starting docker daemon...
-              echo -------------------------------------------------------
+              echo '--------------------------------------->'
               open /Applications/Docker.app
               ;;
             Linux)
+              echo '--------------------------------------->'
               echo platform : Linux : starting docker daemon...
-              echo -------------------------------------------------------
+              echo '--------------------------------------->'
               systemctl start docker
               ;;
             *)
               echo "Unsupported operating system. Please start Docker manually. and try task run:{{.mode}}:{{.service}} again..."
-              echo -------------------------------------------------------
+              echo !! '------------------------------------------------------->'
               exit 1
               ;;
           esac
           sleep 10
         fi
         if ! docker info > /dev/null 2>&1; then
-          echo "Failed to start Docker. Please check your Docker installation."
+          echo "💔 Failed to start Docker. Please check your Docker installation."
           exit 1
         else
-          echo "Docker is running."
-          echo -------------------------------------------------------
+          echo "✅ ==>Docker is running..."
         fi
 
       # Search for the service directory from anywhere using BFS algorithm and upgrade package.json
       # TODO: improve on its accuracy
       - |
-        bfs_search() {
-          start_dir="$1"
-          target_file="$2"
-          queue=("$start_dir")
-          while [ ${#queue[@]} -gt 0 ]; do
-            current_dir="${queue[0]}"
-            queue=("${queue[@]:1}")
-            for entry in "$current_dir"/*; do
-              if [ -d "$entry" ]; then
-                queue+=("$entry")
-              elif [ "${entry##*/}" = "$target_file" ]; then
-                echo -------------------------------------------------------
-                echo -------------------------------------------------------
-                echo "Found directory with $target_file: $current_dir"
-                echo -------------------------------------------------------
-                echo cd...ing into $current_dir
-                cd "$current_dir"
-                echo -------------------------------------------------------
+        search_service_root_from_cwd() {
+            cwd="$1"
+            service="$2"
+            split_cwd=(${cwd//\// })
+            if [[ " ${split_cwd[@]} " =~ " node-microservices-suite " ]]; then
+                service_root=$(echo "${split_cwd[*]:0:${#split_cwd[@]}-2}" | tr ' ' '/')/microservices/{{.service}}
+                cd "/$service_root" || { echo "Error: Unable to change directory to $service_root"; exit 1; }
+                # direcotry found
+                echo '----------------------------------------------------->'
+                if [ -f yarn.lock ]; then
+                    rm yarn.lock
+                else
+                fi
+                echo "Found directory with $target_file: $service_root"
+                echo '----------------------------------------------------->'
+                echo cd...ing into $service_root
+                echo '----------------------------------------------------->'
                 echo installing packages ....................................
-
                 yarn install
-
-                echo -------------------------------------------------------
-
+                echo '----------------------------------------------------->'
                 echo uprading packages .....................................
                 yarn upgrade
-                echo -------------------------------------------------------
-                echo done setting up----------------------------------------
-                echo -------------------------------------------------------
-
-                exit 0
-              fi
-            done
-          done
-          echo "Service directory for '$service' not found."
-          exit 1
+                echo '----------------------------------------------------->'
+                echo '-------------------done setting up------------------->'
+                echo '----------------------------------------------------->'
+            else
+                echo "run this command from within your application"
+                exit 1
+            fi
         }
-        bfs_search "$(pwd)" "package.json"
+
+        # Example usage:
+        search_service_root_from_cwd "$(pwd)" "your_service_name"
+
 
       # Print a newline to separate loading state from subsequent output
-      - echo -------------------------------------------------------
-
       # Commands to start your containers go here
       - echo "Loading complete. Starting Docker containers..."
-      - echo -------------------------------------------------------
+      - echo '--------------------------------------->'
       - echo "cleaning up the the repo to prepare for building the image..."
-      - echo -------------------------------------------------------
+      - echo '--------------------------------------->'
       - yarn repo:reset
-      - echo -------------------------------------------------------
+      - echo '--------------------------------------->'
       - echo "cleanup done. Starting to build docker image....."
-      - echo stopping any running containers------------------------
+      - echo '--------------------------------------->'
+      - echo stopping any running containers'-------->'
+      - echo '--------------------------------------->'
       - docker-compose down
-      - echo firing up new containers get ready---------------------
-      - sleep 5
-      - echo 💥💥----------------------------------------------------
-      - sleep 5
-      - echo 🔥🔥🔥🔥🔥🔥---------------------------------------------
-      - sleep 5
-      - echo oh shit!! 🤯😲------------------------------------------ 
-      - sleep 5
-      - echo -------------------------------------------------------  
-      - echo -------------------------------------------------------  
-
-      - "{{.docker_compose_up}}"
-      - echo -------------------------------------------------------  
-    # silent: true
+      - echo firing up new containers get ready'------->'
+      - sleep 1
+      - echo 💥💥'------->'
+      - sleep 1
+      - echo 🔥🔥🔥🔥🔥🔥'------->'
+      - sleep 1
+      - echo oh shit!! 🤯😲'------>'
+      - sleep 1
+      - echo '----------------------------------------->'
+      - "{{.docker_compose}}"
+      - echo '----------------------------------------->'
+    silent: true
 
   # Dynamically run services using node server engines PM2 in prod and nodemon in dev mode
   vanilla:*:*:
     vars:
-      mode: "{{index .MATCH 0}}"
-      service: "{{index .MATCH 1}}"
+      service: "{{index .MATCH 0}}"
+      mode: "{{index .MATCH 1}}"
       # Set env_file based on whether mode is not 'prod'
       env_file: '{{ if ne .mode "prod" }}.env.{{.mode}}{{ else }}.env{{ end }}'
     cmds:
@@ -129,6 +136,7 @@ tasks:
       - yarn install
       - >
         yarn workspace @microservices-suite/{{.service}} '{{ if ne .mode "prod" }}{{.mode}}{{ else }}start{{ end }}'
+    silent: true
 
   # TODO: Orchestrate services with kubernetes inside minikube clusters and kubectl
   k8s:*:*:
@@ -140,6 +148,7 @@ tasks:
       #TODO: build dynamic k8 commands here
     cmds:
       - "#TODO: enerate dynamic orchestration workflows based on [mode] & [service]"
+    silent: true
 
   # TODO: Run your tests using jest or any test suite of choice
   test:*:*:
@@ -151,9 +160,11 @@ tasks:
       #TODO: build dynamic test commands here
     cmds:
       - "#TODO: generate dynamic testing workflows based on [type] & [service]"
+    silent: true
 
   # TODO: create a utilities glossary to switch {{.CLI_ARGS}} eg utilities: case --reset do; case --stop do; case etc ...
   reset:
     cmds:
       - "yarn repo:reset" #deep remove all node modules and artefacts generated during yarn install
+    silent: true
 
