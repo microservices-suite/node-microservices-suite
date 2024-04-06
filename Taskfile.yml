@@ -2,7 +2,7 @@ version: "3"
 
 tasks:
   # Dynamically run services using default containerization with docker-compose
-  # task do <service_name>:<environment>:<action>
+  # task do:<service_name>:<environment>:<action> -- [args]
   do:*:*:*:
     vars:
       service: "{{index .MATCH 0}}"
@@ -110,6 +110,7 @@ tasks:
     silent: true
 
   # Dynamically run services using node server engines PM2 in prod and nodemon in dev mode
+  # task vanilla:<service_name>:<environment> -- [args]
   vanilla:*:*:
     vars:
       service: "{{index .MATCH 0}}"
