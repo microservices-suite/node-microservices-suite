@@ -27,7 +27,7 @@ tasks:
           case "$(uname -s)" in
             Darwin)
               echo '---------------------------------------'
-              echo platform : MacOS : starting docker daemon...
+              echo  platform : MacOS : starting docker daemon...
               echo '---------------------------------------'
               open /Applications/Docker.app
               ;;
@@ -66,13 +66,13 @@ tasks:
                     if [ -f yarn.lock ]; then
                         rm yarn.lock
                     fi
-                    echo "Found directory with $target_file: $service_root"
+                    echo "✓Found directory with $target_file: $service_root"
                     echo '-----------------------------------------------------'
                     echo cd...ing into $service_root
                     echo '-----------------------------------------------------'
-                    echo '==> installing packages'
+                    echo '⇣==> installing packages'
                     yarn install
-                    echo '==> upgrading packages'
+                    echo '💹==> upgrading packages'
                     yarn upgrade
                     echo '-------------------done setting up-------------------'
                 else
@@ -87,21 +87,17 @@ tasks:
       # Commands to start your containers go here
       - >
         if [ "{{.action}}" == "up" ]; then
-          echo "Loading complete. Starting Docker containers..."
+          echo "🏁Starting Docker containers..."
           echo '---------------------------------------'
-          echo "cleaning up the the repo to prepare for building the image..."
+          echo "🧴Cleaning up the the repo to prepare for building the image..."
           yarn repo:reset
           echo '---------------------------------------'
-          echo "cleanup done. Starting to build docker image....."
-          echo '---------------------------------------'
-          echo stopping any running containers'--------'
-          echo '---------------------------------------'
+          echo "✨ Cleanup done."
+          echo "🛑 ==> Stopping any running containers..."
           docker-compose down
-          echo '==> firing up new containers. Get ready...'
-          echo 💥💥'------->'
-          echo 🔥🔥🔥🔥🔥🔥'------->'
+          echo '🚀 ==> Firing up new containers...'
           sleep 1
-          echo oh shit!! 🤯😲'------>'
+          echo oh shit!! 🤯😲
           echo '-----------------------------------------'
           pwd
           {{.docker_compose}}
