@@ -14,4 +14,4 @@ services:
       - mongodb
     volumes:
       - /app/node_modules
-      - /Users/nathan3/Desktop/PracticeEnv/node-microservices-suite/microservices/user-service:/app
+      - ./microservices/user-service:/app
