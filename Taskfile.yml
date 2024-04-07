@@ -43,13 +43,13 @@ tasks:
               exit 1
               ;;
           esac
-          sleep 10
+          sleep 15
         fi
         if ! docker info > /dev/null 2>&1; then
           echo "💔 Failed to start Docker. Please check your Docker installation."
           exit 1
         else
-          if [ "{{.action}}" != "down" ]; then echo "✅ ==>Docker is running..."; else exit 0; fi
+          if [ "{{.action}}" != "down" ]; then echo "✅ ==> Docker is running..."; else exit 0; fi
         fi
 
       # Search for the service directory from anywhere and upgrade package.json
@@ -66,13 +66,13 @@ tasks:
                     if [ -f yarn.lock ]; then
                         rm yarn.lock
                     fi
-                    echo "✓Found directory with $target_file: $service_root"
+                    echo "✓ Found directory with $target_file: $service_root"
                     echo '-----------------------------------------------------'
                     echo cd...ing into $service_root
                     echo '-----------------------------------------------------'
-                    echo '⇣==> installing packages'
+                    echo '⇣ ==> installing packages'
                     yarn install
-                    echo '💹==> upgrading packages'
+                    echo '💹 ==> upgrading packages'
                     yarn upgrade
                     echo '-------------------done setting up-------------------'
                 else
@@ -83,13 +83,12 @@ tasks:
             search_service_root_from_cwd "$(pwd)" "{{.service}}"
         fi
 
-      # Print a newline to separate loading state from subsequent output
       # Commands to start your containers go here
       - >
         if [ "{{.action}}" == "up" ]; then
-          echo "🏁Starting Docker containers..."
+          echo "🏁 ==> Starting Docker containers..."
           echo '---------------------------------------'
-          echo "🧴Cleaning up the the repo to prepare for building the image..."
+          echo "🧴 ==> Cleaning up the the repo to prepare for building the image..."
           yarn repo:reset
           echo '---------------------------------------'
           echo "✨ Cleanup done."
