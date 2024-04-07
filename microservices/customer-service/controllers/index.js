@@ -1,0 +1,1 @@
+module.exports.cusomterController = require('./customer.controller')
