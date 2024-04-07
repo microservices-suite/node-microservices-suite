@@ -7,14 +7,14 @@ const productSchema = new mongoose.Schema(
             type: String,
             required : true
         },
-        product_name : {
+        name : {
             type : String,
             required : true
         },
-        product_cost_price : {
+        cost_price : {
             type : Number,
         },
-        product_sell_price : {
+        sell_price : {
             type : Number,
         },
         discount_id: {
@@ -33,6 +33,5 @@ const productSchema = new mongoose.Schema(
     }
 )
 
-productSchema.index({ product_id, product_name}, { unique : true})
-
+productSchema.index({ product_id, name}, { unique : true})
 module.export = mongoose.model('product', productSchema)
