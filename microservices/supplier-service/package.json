@@ -1,20 +1,19 @@
 {
-    "name": "@microservices-suite/customer-service",
+    "name": "@microservices-suite/supplier-service",
     "version": "1.0.0",
-    "description": "The customer service serves as the customer central repository to deal with the customer CRUD operations",
+    "description": "The supplier service serves as the central repo for the supplier CRUD operation",
     "main": "index.js",
     "dependencies": {
-        "express" : "*",
+        "express": "*",
         "mongoose": "^8.3.0",
         "mongodb": "^6.5.0",
         "nodemon": "^3.1.0"
     },
-    "devDependencies": {},
     "scripts": {
         "start": "node index.js",
         "dev": "nodemon index.js"
     },
+    "devDependencies": {},
     "author": "Dhairya Doshi",
     "license": "ISC"
-
 }
