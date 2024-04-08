@@ -20,7 +20,7 @@ const customerSchema = new mongoose.Schema(
             type: String,
             require: true
         },
-        orders: {
+        order_list: {
             type: Array
         },
         is_deleted: {
@@ -35,4 +35,4 @@ const customerSchema = new mongoose.Schema(
 )
 
 customerSchema.index({ customer_id, name},{unique : true})
-module.export = mongoose.model('customer', customerSchema)
+module.exports = mongoose.model('customer', customerSchema)

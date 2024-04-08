@@ -1,1 +1,1 @@
-module.exports.Customer = require('./customer.model')
+module.exports.customerModel = require('./customer.model')

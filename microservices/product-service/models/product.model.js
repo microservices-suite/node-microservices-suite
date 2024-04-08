@@ -34,4 +34,4 @@ const productSchema = new mongoose.Schema(
 )
 
 productSchema.index({ product_id, name}, { unique : true})
-module.export = mongoose.model('product', productSchema)
+module.exports = mongoose.model('product', productSchema)
