@@ -1,9 +1,17 @@
 const getAllSupplier = async(req, res) => {
-    res.status(200).send({data : []})
+    try {        
+        res.status(200).send({data : ["This is getAllSupplier"]})
+    } catch (error) {
+        console.log(error)
+    }
 }
 
 const createSupplier = async(req, res) => {
-    res.status(201).send({data : []})
+    try {        
+        res.status(201).send({data : ["This is createSupplier"]})
+    } catch (error) {
+        console.log(error)
+    }
 }
 
 module.exports = {
