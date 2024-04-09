@@ -3,7 +3,7 @@ const router = express.Router()
 const supplierRouter = require('./supplier.route')
 
 const defaultRoutes = [
-    { path: '/supplier' , route : supplierRouter}
+    { path: '' , route : supplierRouter}
 ]
 
 defaultRoutes.forEach( route => {

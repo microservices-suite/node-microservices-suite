@@ -4,7 +4,7 @@ const produtRouter = require('./product.route')
 const router = express.Router()
 
 const defaultRoutes = [
-    { path : '/product', route: produtRouter}
+    { path : '', route: produtRouter}
 ]
 
 defaultRoutes.forEach((route) => {
