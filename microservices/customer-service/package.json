@@ -5,11 +5,12 @@
     "main": "index.js",
     "dependencies": {
         "express" : "*",
-        "mongoose": "^8.3.0",
-        "mongodb": "^6.5.0",
-        "nodemon": "^3.1.0"
+        "mongoose": "*",
+        "mongodb": "^6.5.0"
     },
-    "devDependencies": {},
+    "devDependencies": {
+        "nodemon": "3.1.0"
+    },
     "scripts": {
         "start": "node index.js",
         "dev": "nodemon index.js"
