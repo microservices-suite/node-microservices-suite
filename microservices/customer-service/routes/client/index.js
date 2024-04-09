@@ -4,7 +4,7 @@ const customerRouter = require('./customer.route');
 const customerReportRouter = require('./customerReport.route')
 
 const defaultRoutes = [
-    { path : '/customer', route : customerRouter},
+    { path : '', route : customerRouter},
     { path : '/customer-report', route : customerReportRouter}
 ];
 
