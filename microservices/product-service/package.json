@@ -7,7 +7,8 @@
       "nodemon": "3.1.0",
       "express" : "*",
       "mongoose": "*",
-      "mongodb": "^6.5.0"
+      "mongodb": "^6.5.0",
+      "amqplib": "0.10.3"
   },
   "devDependencies": {
   },
