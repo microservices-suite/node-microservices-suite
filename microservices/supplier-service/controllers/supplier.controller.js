@@ -1,5 +1,11 @@
+const { publishMessage , subscribeMessage} = require('../utlis/index')
+const {PRODUCT_BINDING_KEY, CUSTOMER_BINDING_KEY, SUPPLIER_BINDING_KEY} = require('../config/index')
+const { json } = require('express')
+
 const getAllSupplier = async(req, res) => {
-    try {        
+    try {    
+        // const channel = req.rabbitMQChannel; 
+        publishMessage(req.rabbitMQChannel, CUSTOMER_BINDING_KEY, JSON.stringify({ "name" : "Supplie"}))   
         res.status(200).send({data : ["This is getAllSupplier"]})
     } catch (error) {
         console.log(error)
