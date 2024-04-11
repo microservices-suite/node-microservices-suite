@@ -1,5 +1,6 @@
 module.exports = {
-    RMQ_URL: "amqp://localhost",
+    // RMQ_URL: "amqp://localhost",
+    RMQ_URL: "amqp://rabbitmq:5672",
     RMQ_EXCHANGE_NAME: "MS_SHOPPING",
     RMQ_QUEUE_NAME: "MS_CUSTOMER_QUEUE",
     CUSTOMER_BINDING_KEY: "CUSTOMER_SERVICE",
