@@ -1,0 +1,22 @@
+{
+    "name": "@microservices-suite/customer-service",
+    "version": "1.0.0",
+    "description": "The customer service serves as the customer central repository to deal with the customer CRUD operations",
+    "main": "index.js",
+    "dependencies": {
+        "express" : "*",
+        "mongoose": "*",
+        "mongodb": "^6.5.0",
+        "nodemon": "3.1.0",
+        "amqplib": "0.10.3"
+    },
+    "devDependencies": {
+    },
+    "scripts": {
+        "start": "node index.js",
+        "dev": "nodemon index.js"
+    },
+    "author": "Dhairya Doshi",
+    "license": "ISC"
+
+}

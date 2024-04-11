@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 services:
   mongodb:
     build: 
@@ -15,3 +15,37 @@ services:
     volumes:
       - /app/node_modules
       - ./microservices/user-service:/app
+  nginx:
+    restart: always
+    build:
+      context: ./microservices/api-proxy-server
+      dockerfile: DockerFile.dev
+    ports:
+      - '4000:80'
+  customer:
+    container_name: customer
+    restart: always
+    build:
+      context: ./microservices/customer-service
+      dockerfile: DockerFile.dev
+    volumes:
+      - /app/node_modules
+      - ./microservices/customer-service:/app
+  supplier:
+    container_name: supplier
+    restart: always
+    build:
+      context: ./microservices/supplier-service
+      dockerfile: DockerFile.dev
+    volumes:
+      - /app/node_modules
+      - ./microservices/supplier-service:/app  
+  product:
+    container_name: product
+    restart: always
+    build:
+      context: ./microservices/product-service
+      dockerfile: DockerFile.dev
+    volumes:
+      - /app/node_modules
+      - ./microservices/product-service:/app
