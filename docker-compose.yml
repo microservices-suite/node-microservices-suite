@@ -1,21 +1,36 @@
 version: '3.8'
 services:
-  mongodb:
-    build: 
-      dockerfile: Dockerfile
-      context: ./data-persistence/mongodb
-  server:
-    build:
-      dockerfile: Dockerfile.dev
-      context: ./microservices/user-service
+  # mongodb:
+  #   build: 
+  #     dockerfile: Dockerfile
+  #     context: ./data-persistence/mongodb
+  # server:
+  #   build:
+  #     dockerfile: Dockerfile.dev
+  #     context: ./microservices/user-service
+  #   ports:
+  #     - '6008:6008'
+  #   depends_on:
+  #     - mongodb
+  #   volumes:
+  #     - /app/node_modules
+  #     - ./microservices/user-service:/app
+  rabbitmq:
+    image: rabbitmq:3.8
+    container_name: rabbitmq
     ports:
-      - '6008:6008'
-    depends_on:
-      - mongodb
-    volumes:
-      - /app/node_modules
-      - ./microservices/user-service:/app
+      - '5672:5672'
+      - '15672:15672'
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      retries: 5
+    restart: unless-stopped
   nginx:
+    depends_on:
+      - customer
+      - product
+      - supplier
     restart: always
     build:
       context: ./microservices/api-proxy-server
@@ -23,6 +38,9 @@ services:
     ports:
       - '4000:80'
   customer:
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
     container_name: customer
     restart: always
     build:
@@ -32,6 +50,9 @@ services:
       - /app/node_modules
       - ./microservices/customer-service:/app
   supplier:
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
     container_name: supplier
     restart: always
     build:
@@ -41,6 +62,8 @@ services:
       - /app/node_modules
       - ./microservices/supplier-service:/app  
   product:
+    depends_on:
+      - rabbitmq
     container_name: product
     restart: always
     build:
