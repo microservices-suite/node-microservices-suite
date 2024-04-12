@@ -1,0 +1,29 @@
+{
+    "realm": "microservice",
+    "clients": [
+      {
+        "clientId": "supplier-service",
+        "enabled": true,
+        "redirectUris": ["*"],
+        "publicClient": true
+      }
+    ],
+    "users": [
+      {
+        "username": "user1",
+        "enabled": true,
+        "credentials": [
+          {
+            "type": "password",
+            "value": "password1"
+          }
+        ],
+        "attributes": {
+          "email": "user1@example.com",
+          "firstName": "John",
+          "lastName": "Doe"
+        }
+      }
+    ]
+  }
+  
