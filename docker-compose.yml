@@ -15,60 +15,72 @@ services:
     volumes:
       - /app/node_modules
       - ./microservices/user-service:/app
-  # rabbitmq:
-  #   image: rabbitmq:3.8
-  #   container_name: rabbitmq
-  #   ports:
-  #     - '5672:5672'
-  #     - '15672:15672'
-  #   healthcheck:
-  #     test: ["CMD", "rabbitmq-diagnostics", "ping"]
-  #     interval: 30s
-  #     retries: 5
-  #   restart: unless-stopped
-  # nginx:
-  #   depends_on:
-  #     - customer
-  #     - product
-  #     - supplier
-  #   restart: always
-  #   build:
-  #     context: ./gateway/apps/ecommerce-app/nginx
-  #     dockerfile: Dockerfile.dev
-  #   ports:
-  #     - '4000:80'
-  # customer: 
-  #   depends_on:
-  #     rabbitmq:
-  #       condition: service_healthy
-  #   container_name: customer
-  #   restart: always
-  #   build:
-  #     context: ./microservices/customer-service
-  #     dockerfile: Dockerfile.dev
-  #   volumes:
-  #     - /app/node_modules
-  #     - ./microservices/customer-service:/app
-  # supplier:
-  #   depends_on:
-  #     rabbitmq:
-  #       condition: service_healthy
-  #   container_name: supplier
-  #   restart: always
-  #   build:
-  #     context: ./microservices/supplier-service
-  #     dockerfile: Dockerfile.dev
-  #   volumes:
-  #     - /app/node_modules
-  #     - ./microservices/supplier-service:/app  
-  # product:
-  #   depends_on:
-  #     - rabbitmq
-  #   container_name: product
-  #   restart: always
-  #   build:
-  #     context: ./microservices/product-service
-  #     dockerfile: Dockerfile.dev
-  #   volumes:
-  #     - /app/node_modules
-  #     - ./microservices/product-service:/app
+  rabbitmq:
+    image: rabbitmq:3.8
+    container_name: rabbitmq
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      retries: 5
+    restart: unless-stopped
+  nginx:
+    depends_on:
+      - customer
+      - product
+      - supplier
+    restart: always
+    build:
+      context: ./microservices/api-proxy-server
+      dockerfile: DockerFile.dev
+    ports:
+      - '4000:80'
+  customer:
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    container_name: customer
+    restart: always
+    build:
+      context: ./microservices/customer-service
+      dockerfile: DockerFile.dev
+    volumes:
+      - /app/node_modules
+      - ./microservices/customer-service:/app
+  supplier:
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    container_name: supplier
+    restart: always
+    build:
+      context: ./microservices/supplier-service
+      dockerfile: DockerFile.dev
+    volumes:
+      - /app/node_modules
+      - ./microservices/supplier-service:/app  
+  product:
+    depends_on:
+      - rabbitmq
+    container_name: product
+    restart: always
+    build:
+      context: ./microservices/product-service
+      dockerfile: DockerFile.dev
+    volumes:
+      - /app/node_modules
+      - ./microservices/product-service:/app
+  keycloak:
+    container_name: keycloak
+    depends_on:
+        - nginx
+    build:
+      context: ./microservices/rbac-service
+      dockerfile: DockerFile.dev
+    ports:
+      - "8080:8080"
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
