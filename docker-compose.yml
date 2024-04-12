@@ -2,11 +2,11 @@ version: '3.8'
 services:
   mongodb:
     build: 
-      dockerfile: Dockerfile
+      dockerfile: DockerFile
       context: ./data-persistence/mongodb
   server:
     build:
-      dockerfile: Dockerfile.dev
+      dockerfile: DockerFile.dev
       context: ./microservices/user-service
     ports:
       - '6008:6008'
