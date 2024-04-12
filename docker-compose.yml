@@ -1,20 +1,20 @@
 version: '3.8'
 services:
-  # mongodb:
-  #   build: 
-  #     dockerfile: Dockerfile
-  #     context: ./data-persistence/mongodb
-  # server:
-  #   build:
-  #     dockerfile: Dockerfile.dev
-  #     context: ./microservices/user-service
-  #   ports:
-  #     - '6008:6008'
-  #   depends_on:
-  #     - mongodb
-  #   volumes:
-  #     - /app/node_modules
-  #     - ./microservices/user-service:/app
+  mongodb:
+    build: 
+      dockerfile: Dockerfile
+      context: ./data-persistence/mongodb
+  server:
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./microservices/user-service
+    ports:
+      - '6008:6008'
+    depends_on:
+      - mongodb
+    volumes:
+      - /app/node_modules
+      - ./microservices/user-service:/app
   rabbitmq:
     image: rabbitmq:3.8
     container_name: rabbitmq
