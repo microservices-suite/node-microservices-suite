@@ -4,7 +4,7 @@ services:
     build: 
       dockerfile: DockerFile
       context: ./data-persistence/mongodb
-  server:
+  user-service:
     build:
       dockerfile: DockerFile.dev
       context: ./microservices/user-service
@@ -28,16 +28,16 @@ services:
     restart: unless-stopped
   nginx:
     depends_on:
-      - customer
-      - product
-      - supplier
+      - customer-service
+      - product-service
+      - supplier-service
     restart: always
     build:
-      context: ./microservices/api-proxy-server
+      context: ./gateway/apps/ecommerce-app/nginx
       dockerfile: DockerFile.dev
     ports:
       - '4000:80'
-  customer:
+  customer-service:
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -49,7 +49,7 @@ services:
     volumes:
       - /app/node_modules
       - ./microservices/customer-service:/app
-  supplier:
+  supplier-service:
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -61,7 +61,7 @@ services:
     volumes:
       - /app/node_modules
       - ./microservices/supplier-service:/app  
-  product:
+  product-service:
     depends_on:
       - rabbitmq
     container_name: product
