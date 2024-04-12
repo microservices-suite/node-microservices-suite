@@ -1,0 +1,3 @@
+FROM keycloak/keycloak:24.0.2
+COPY ./realm-export.json /opt/jboss/keycloak/standalone/configuration/realm-export.json
+CMD ["-Dkeycloak.migration.action=import", "-Dkeycloak.migration.provider=singleFile", "-Dkeycloak.migration.file=/opt/jboss/keycloak/standalone/configuration/realm-export.json", "start-dev"]

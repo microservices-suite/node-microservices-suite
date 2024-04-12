@@ -72,3 +72,15 @@ services:
     volumes:
       - /app/node_modules
       - ./microservices/product-service:/app
+  keycloak:
+    container_name: keycloak
+    depends_on:
+        - nginx
+    build:
+      context: ./microservices/rbac-service
+      dockerfile: DockerFile.dev
+    ports:
+      - "8080:8080"
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
