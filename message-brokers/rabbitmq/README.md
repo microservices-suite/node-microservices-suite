@@ -14,3 +14,7 @@ On Mac:
 - Now you should be able to run the CLI tool check the 👉 [docs](https://www.rabbitmq.com/docs/cli)
 On Windows:
 - Refer to environment specific instructions on how to add the CLI tool to path incase its not yet globally availlable.
+
+Best practice:
+- Strive to separate concerns but reduce `chattiness` at the same time as this is a symptom of poor  `domain model mapping` . 
+- A `Bound Context should` be autonomous and only communicate when very necessary.
