@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: upload-service-pod
+  labels:
+    component: upload
+spec:
+  containers:
+    - name: upload-service
+      image: gandie/upload:new
+      resources:
+        limits:
+          memory: "128Mi"
+          cpu: "500m"
+      ports:
+        - containerPort: 9004
