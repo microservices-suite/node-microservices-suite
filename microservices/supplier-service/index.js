@@ -6,6 +6,7 @@ const {rabbitMQMiddleware} = require('./middlewares/rabbitmq')
 const { config, morgan, logger } = require('@microservices-suite/config');
 
 
+
 app.use(express.json())
 
 
