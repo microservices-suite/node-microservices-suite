@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: keycloak-service-pod
+  labels:
+    component: keycloak
+spec:
+  containers:
+    - name: keycloak-service
+      image: gandie/keycloak
+      ports:
+        - containerPort: 9005
