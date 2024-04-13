@@ -15,6 +15,26 @@ services:
     volumes:
       - /app/node_modules
       - ./microservices/user-service:/app
+  upload-service:
+    build:
+      dockerfile: DockerFile.dev
+      context: ./microservices/upload-service
+    ports:
+      - '9005:9005'
+    depends_on:
+      - mongodb
+    volumes:
+      - /app/node_modules
+      - ./microservices/upload-service:/app
+  my-app:
+    build:
+      dockerfile: DockerFile.dev
+      context: ./microservices/my-app
+    ports:
+      - '3000:3000'
+    volumes:
+      - /app/node_modules
+      - ./microservices/my-app:/app
   rabbitmq:
     image: rabbitmq:3.8
     container_name: rabbitmq
