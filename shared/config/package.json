@@ -1,6 +1,6 @@
 {
   "name": "@microservices-suite/config",
-  "version": "1.0.3",
+  "version": "1.0.7",
   "description": "This contains common configurations for things like env files,loggers etc for easy setup of environment specific settings",
   "main": "index.js",
   "author": "Gilbert Andanje",
@@ -8,5 +8,11 @@
   "publishConfig": {
     "access": "public"
   },
-  "private": false
+  "private": false,
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "joi": "^17.12.3",
+    "morgan": "^1.10.0",
+    "winston": "^3.13.0"
+  }
 }
