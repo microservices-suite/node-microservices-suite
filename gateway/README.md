@@ -1,6 +1,6 @@
 # Microservices Suite
 
-## API-GATEWAY Package
+## API-GATEWAY Package. Remember to provide redundancy to eliminate the `single point of failure`
 
 The API-GATEWAY serves as the front-facing layer of our Microservices Suite, designed to efficiently route client requests to the appropriate internal service. By abstracting the internal services network from the client, it exposes a singular endpoint that consolidates and manages access to your suite of APIs.
 
