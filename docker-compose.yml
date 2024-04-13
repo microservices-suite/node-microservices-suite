@@ -26,6 +26,12 @@ services:
       interval: 30s
       retries: 5
     restart: unless-stopped
+  # shared:
+  #   build: 
+  #     context: ./shared
+  #     dockerfile: DockerFile.dev
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "sleep 1"]
   nginx:
     depends_on:
       - customer
@@ -41,6 +47,8 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+      # shared:
+      #   condition: service_healthy
     container_name: customer
     restart: always
     build:
@@ -53,6 +61,8 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+      # shared:
+      #   condition: service_healthy
     container_name: supplier
     restart: always
     build:
