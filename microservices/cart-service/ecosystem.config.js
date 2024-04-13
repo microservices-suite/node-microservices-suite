@@ -1,20 +1,20 @@
 module.exports = {
     apps : [{
-      name   : "user_service",
-      // autorestart: true,
+      name   : "upload_service",
+      autorestart: true,
       watch: true,
       time: true,
       script : "./index.js",
       instances:4,
       env_production: {
         NODE_ENV: "prod",
-        DATABASE_URL:"mongodb://mongodb:27017/user_service_db_dev",
-        PORT:"9003"
+        DATABASE_URL:"host.docker.internal:27017/customer_service_db_dev",
+        PORT:"9009"
      },
      env_development: {
-      NODE_ENV: "devb",
-      DATABASE_URL:"mongodb://mongodb:27017/user_service_db_dev",
-      PORT:"9003"
+      NODE_ENV: "dev",
+      DATABASE_URL:"host.docker.internal:27017/customer_service_db_dev",
+      PORT:"9009"
    }
     }]
   }

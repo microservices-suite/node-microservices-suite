@@ -1,20 +1,40 @@
 version: '3.8'
 services:
-  # mongodb:
-  #   build: 
-  #     dockerfile: Dockerfile
-  #     context: ./data-persistence/mongodb
-  # server:
-  #   build:
-  #     dockerfile: Dockerfile.dev
-  #     context: ./microservices/user-service
-  #   ports:
-  #     - '6008:6008'
-  #   depends_on:
-  #     - mongodb
-  #   volumes:
-  #     - /app/node_modules
-  #     - ./microservices/user-service:/app
+  mongodb:
+    build: 
+      dockerfile: DockerFile
+      context: ./data-persistence/mongodb
+  user-service:
+    build:
+      dockerfile: DockerFile.dev
+      context: ./microservices/user-service
+    ports:
+      - '6008:6008'
+    depends_on:
+      - mongodb
+    volumes:
+      - /app/node_modules
+      - ./microservices/user-service:/app
+  upload-service:
+    build:
+      dockerfile: DockerFile.dev
+      context: ./microservices/upload-service
+    ports:
+      - '9005:9005'
+    depends_on:
+      - mongodb
+    volumes:
+      - /app/node_modules
+      - ./microservices/upload-service:/app
+  my-app:
+    build:
+      dockerfile: DockerFile.dev
+      context: ./microservices/my-app
+    ports:
+      - '3000:3000'
+    volumes:
+      - /app/node_modules
+      - ./microservices/my-app:/app
   rabbitmq:
     image: rabbitmq:3.8
     container_name: rabbitmq
@@ -34,16 +54,16 @@ services:
   #     test: ["CMD-SHELL", "sleep 1"]
   nginx:
     depends_on:
-      - customer
-      - product
-      - supplier
+      - customer-service
+      - product-service
+      - supplier-service
     restart: always
     build:
-      context: ./microservices/api-proxy-server
+      context: ./gateway/apps/ecommerce-app/nginx
       dockerfile: DockerFile.dev
     ports:
       - '4000:80'
-  customer:
+  customer-service:
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -57,7 +77,7 @@ services:
     volumes:
       - /app/node_modules
       - ./microservices/customer-service:/app
-  supplier:
+  supplier-service:
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -71,7 +91,7 @@ services:
     volumes:
       - /app/node_modules
       - ./microservices/supplier-service:/app  
-  product:
+  product-service:
     depends_on:
       - rabbitmq
     container_name: product
