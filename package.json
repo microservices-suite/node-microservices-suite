@@ -21,6 +21,8 @@
       "microservices/payment-service",
       "microservices/product-service",
       "microservices/cart-service",
+      "microservices/supplier-service",
+      "microservices/customer-service",
       "shared/middlewares",
       "shared/utilities",
       "shared/constants",
