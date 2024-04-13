@@ -26,10 +26,12 @@ services:
       interval: 30s
       retries: 5
     restart: unless-stopped
+    # entrypoint: >
+    #   bash -c "rabbitmq-plugins enable rabbitmq_management && rabbitmq-plugins enable rabbitmq_prometheus && rabbitmq-server"
   # shared:
   #   build: 
   #     context: ./shared
-  #     dockerfile: DockerFile.dev
+  #     dockerfile: dockerFile.dev
   #   healthcheck:
   #     test: ["CMD-SHELL", "sleep 1"]
   nginx:
@@ -40,7 +42,7 @@ services:
     restart: always
     build:
       context: ./microservices/api-proxy-server
-      dockerfile: DockerFile.dev
+      dockerfile: dockerFile.dev
     ports:
       - '4000:80'
   customer:
@@ -53,7 +55,7 @@ services:
     restart: always
     build:
       context: ./microservices/customer-service
-      dockerfile: DockerFile.dev
+      dockerfile: dockerFile.dev
     volumes:
       - /app/node_modules
       - ./microservices/customer-service:/app
@@ -67,7 +69,7 @@ services:
     restart: always
     build:
       context: ./microservices/supplier-service
-      dockerfile: DockerFile.dev
+      dockerfile: dockerFile.dev
     volumes:
       - /app/node_modules
       - ./microservices/supplier-service:/app  
@@ -78,17 +80,18 @@ services:
     restart: always
     build:
       context: ./microservices/product-service
-      dockerfile: DockerFile.dev
+      dockerfile: dockerFile.dev
     volumes:
       - /app/node_modules
       - ./microservices/product-service:/app
   keycloak:
     container_name: keycloak
     depends_on:
-        - nginx
+      rabbitmq:
+        condition: service_healthy
     build:
       context: ./microservices/rbac-service
-      dockerfile: DockerFile.dev
+      dockerfile: dockerFile.dev
     ports:
       - "8080:8080"
     environment:
