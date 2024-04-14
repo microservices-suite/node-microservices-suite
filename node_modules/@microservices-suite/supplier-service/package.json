@@ -1,0 +1,24 @@
+{
+    "name": "@microservices-suite/supplier-service",
+    "version": "1.0.0",
+    "description": "The supplier service serves as the central repo for the supplier CRUD operation",
+    "main": "index.js",
+    "dependencies": {
+        "@microservices-suite/config": "1.0.7",
+        "@microservices-suite/errors": "^1.1.6",
+        "@microservices-suite/utilities": "^1.0.6",
+        "@microservices-suite/validations": "^1.0.9",
+        "amqplib": "0.10.3",
+        "express": "*",
+        "mongodb": "^6.5.0",
+        "mongoose": "*",
+        "nodemon": "3.1.0"
+    },
+    "scripts": {
+        "start": "node index.js",
+        "dev": "NODE_ENV=dev nodemon index.js"
+    },
+    "devDependencies": {},
+    "author": "Dhairya Doshi",
+    "license": "ISC"
+}

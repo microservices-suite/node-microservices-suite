@@ -2,12 +2,12 @@ version: '3.8'
 services:
   mongodb:
     build: 
-      dockerfile: DockerFile
       context: ./data-persistence/mongodb
+      dockerfile: dockerFile
   user-service:
     build:
-      dockerfile: DockerFile.dev
       context: ./microservices/user-service
+      dockerfile: dockerFile.dev
     ports:
       - '6008:6008'
     depends_on:
@@ -17,8 +17,8 @@ services:
       - ./microservices/user-service:/app
   upload-service:
     build:
-      dockerfile: DockerFile.dev
       context: ./microservices/upload-service
+      dockerfile: dockerFile.dev
     ports:
       - '9005:9005'
     depends_on:
@@ -27,14 +27,18 @@ services:
       - /app/node_modules
       - ./microservices/upload-service:/app
   my-app:
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
     build:
-      dockerfile: DockerFile.dev
       context: ./microservices/my-app
+      dockerfile: dockerFile.dev
     ports:
       - '3000:3000'
     volumes:
       - /app/node_modules
       - ./microservices/my-app:/app
+  
   rabbitmq:
     image: rabbitmq:3.8
     container_name: rabbitmq
@@ -49,7 +53,7 @@ services:
   # shared:
   #   build: 
   #     context: ./shared
-  #     dockerfile: DockerFile.dev
+  #     dockerfile: dockerFile.dev
   #   healthcheck:
   #     test: ["CMD-SHELL", "sleep 1"]
   nginx:
@@ -60,7 +64,7 @@ services:
     restart: always
     build:
       context: ./gateway/apps/ecommerce-app/nginx
-      dockerfile: DockerFile.dev
+      dockerfile: dockerFile.dev
     ports:
       - '4000:80'
   customer-service:
@@ -73,7 +77,7 @@ services:
     restart: always
     build:
       context: ./microservices/customer-service
-      dockerfile: DockerFile.dev
+      dockerfile: dockerFile.dev
     volumes:
       - /app/node_modules
       - ./microservices/customer-service:/app
@@ -87,7 +91,7 @@ services:
     restart: always
     build:
       context: ./microservices/supplier-service
-      dockerfile: DockerFile.dev
+      dockerfile: dockerFile.dev
     volumes:
       - /app/node_modules
       - ./microservices/supplier-service:/app  
@@ -98,17 +102,18 @@ services:
     restart: always
     build:
       context: ./microservices/product-service
-      dockerfile: DockerFile.dev
+      dockerfile: dockerFile.dev
     volumes:
       - /app/node_modules
       - ./microservices/product-service:/app
   keycloak:
     container_name: keycloak
     depends_on:
-        - nginx
+      rabbitmq:
+        condition: service_healthy
     build:
       context: ./microservices/rbac-service
-      dockerfile: DockerFile.dev
+      dockerfile: dockerFile.dev
     ports:
       - "8080:8080"
     environment:
