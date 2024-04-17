@@ -8,6 +8,9 @@
   "publishConfig": {
     "access": "public"
   },
+  "scripts": {
+    "release": "npx bumpp-version@latest && yarn publish"
+  },
   "private": false,
   "dependencies": {
     "dotenv": "^16.4.5",
