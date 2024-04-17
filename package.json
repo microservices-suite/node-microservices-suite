@@ -9,6 +9,13 @@
   "scripts": {
     "repo:reset": "find ../node-microservices-suite -type d -name 'node_modules' -exec rm -rf {} + && find ../node-microservices-suite -type f -name 'package-lock.json' -delete && find ../node-microservices-suite -type f -name 'yarn.lock' -delete && find ../node-microservices-suite -type d -name 'yarn-*' -exec rm -rf {} +",
     "repo:reset:1": "rm -rf node_modules",
+    "generate:release": "npx changelogen@latest --release",
+    "release:shared:config": "yarn workspace @microservices-suite/config run release",
+    "release:shared:constants": "yarn workspace @microservices-suite/constants run release",
+    "release:shared:errors": "yarn workspace @microservices-suite/errors run release",
+    "release:shared:middlewares": "yarn workspace @microservices-suite/middlewares run release",
+    "release:shared:utilities": "yarn workspace @microservices-suite/utilities run release",
+    "release:shared:validations": "yarn workspace @microservices-suite/validations run release",
     "test": "jest"
   },
   "workspaces": {
