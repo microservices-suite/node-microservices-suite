@@ -8,7 +8,7 @@
     "access": "public"
   },
   "scripts": {
-    "release": "npx bumpp-version@latest && npm publish"
+    "release": "npx bumpp-version@latest && yarn publish"
   },
   "license": "ISC"
 }
