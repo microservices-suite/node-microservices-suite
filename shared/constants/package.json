@@ -1,6 +1,6 @@
 {
   "name": "@microservices-suite/constants",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "",
   "devDependencies": {},
   "author": "Gilbert Andanje",
@@ -8,7 +8,7 @@
     "access": "public"
   },
   "scripts": {
-    "release": "npx bumpp-version@latest && yarn publish"
+    "release": "npx bumpp-version@latest && npm publish"
   },
   "license": "ISC"
 }
