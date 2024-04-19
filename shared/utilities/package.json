@@ -12,7 +12,8 @@
   "scripts": {
     "release:major": "npm version $(semver $npm_package_version -i major) && npm publish --tag latest",
     "release:minor": "npm version $(semver $npm_package_version -i minor) && npm publish --tag latest",
-    "release:patch": "npm version $(semver $npm_package_version -i patch) && npm publish --tag latest"
+    "release:patch": "npm version $(semver $npm_package_version -i patch) && npm publish --tag latest",
+    "release": "npx bumpp-version@latest && yarn publish"
   },
   "dependencies": {
     "joi": "^17.12.2"
