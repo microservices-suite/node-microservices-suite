@@ -8,5 +8,8 @@
   "license": "ISC",
   "publishConfig": {
     "access": "public"
+  },
+  "scripts": {
+    "release": "npx bumpp-version@latest && yarn publish"
   }
 }
