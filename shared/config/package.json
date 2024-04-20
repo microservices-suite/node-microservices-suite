@@ -1,6 +1,6 @@
 {
   "name": "@microservices-suite/config",
-  "version": "1.0.7",
+  "version": "1.0.9",
   "description": "This contains common configurations for things like env files,loggers etc for easy setup of environment specific settings",
   "main": "index.js",
   "author": "Gilbert Andanje",
@@ -10,7 +10,7 @@
     "registry": "https://registry.npmjs.org"
   },
   "scripts": {
-    "release": "npx bumpp-version@latest && yarn publish"
+    "release": "npx bumpp-version@latest && npm publish"
   },
   "private": false,
   "dependencies": {
