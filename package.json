@@ -20,22 +20,8 @@
   },
   "workspaces": {
     "packages": [
-      "microservices/user-service",
-      "microservices/upload-service",
-      "microservices/email-service",
-      "microservices/rbac-service",
-      "microservices/notification-service",
-      "microservices/payment-service",
-      "microservices/product-service",
-      "microservices/cart-service",
-      "microservices/supplier-service",
-      "microservices/customer-service",
-      "shared/middlewares",
-      "shared/utilities",
-      "shared/constants",
-      "shared/errors",
-      "shared/config",
-      "shared/validations"
+      "microservices/*",
+      "shared/*"
     ],
     "nohoist": [
       "**/@microservices-suite/utilities",
