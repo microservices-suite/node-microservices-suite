@@ -1,12 +1,12 @@
 {
   "name": "@microservices-suite/constants",
-  "version": "1.5.12",
+  "version": "1.5.11",
   "description": "",
   "devDependencies": {},
   "author": "Gilbert Andanje",
   "publishConfig": {
     "access": "public",
-    "registry": "//registry.npmjs.org"
+    "registry": "https://registry.npmjs.org"
   },
   "scripts": {
     "release": "npx bumpp-version@latest && npm publish"
