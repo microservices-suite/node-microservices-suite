@@ -5,8 +5,7 @@
   "devDependencies": {},
   "author": "Gilbert Andanje",
   "publishConfig": {
-    "access": "public",
-    "registry": "https://registry.npmjs.org"
+    "access": "public"
   },
   "scripts": {
     "release": "npx bumpp-version@latest && npm publish"
