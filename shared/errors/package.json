@@ -9,7 +9,7 @@
     "registry": "https://registry.npmjs.org"
   },
   "scripts": {
-    "release": "npx bumpp-version@latest && yarn publish"
+    "release": "npx bumpp-version@latest && npm publish"
   },
   "license": "MIT"
 }
