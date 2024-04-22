@@ -1,5 +1,5 @@
 
-const { addDepsAtWorkspace, logSuccess, logError } = require('./scripts.module')
+const { addDepsAtWorkspace, logSuccess, logError, logInfo } = require('./scripts.module')
 const { program } = require('commander');
 
 
@@ -18,7 +18,8 @@ program
       });
       logSuccess({ message })
     } catch (error) {
-      logError({ error })
+      const CODE = error.split(':')[1]
+      if(![' EEXIST',' ENOENT',' EINVAL',' ENOTDIR'].includes(CODE))logError({ error })
     }
   });
 program.parse(process.argv);
