@@ -54,6 +54,16 @@
   resolved "https://registry.yarnpkg.com/@microservices-suite/config/-/config-1.0.3.tgz#41fd678d89b4de9ac41683e1d6628ed2816d6a6b"
   integrity sha512-Rxd+iRLVubDOXjre5SRrCPEhGeoF3aG+MWzQbeC62kK51NoQy0pK3yGZRJa+mF9MNiaEvmyAm2GGlTsUcS1QqQ==
 
+"@microservices-suite/config@1.0.7":
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/@microservices-suite/config/-/config-1.0.7.tgz#0e8d83b738eea101b67ef1bb9149b68dadea3d04"
+  integrity sha512-9xg5V3pJkB2CtQ8nOqJ5aHuUKITO21lyqezrgcVcCymhUh4Xxq9MpocoQ3FqkqXR5Aia/dScbh0N6R2Hl8A+JA==
+  dependencies:
+    dotenv "^16.4.5"
+    joi "^17.12.3"
+    morgan "^1.10.0"
+    winston "^3.13.0"
+
 "@mongodb-js/saslprep@^1.1.5":
   version "1.1.5"
   resolved "https://registry.yarnpkg.com/@mongodb-js/saslprep/-/saslprep-1.1.5.tgz#0c48a96c8d799e81fae311b7251aa5c1dc7c6e95"

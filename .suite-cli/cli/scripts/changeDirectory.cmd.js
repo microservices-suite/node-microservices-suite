@@ -1,11 +1,9 @@
-#!/usr/bin/env node
 
-const { program } = require('commander');
-const { changeDirectory, logInfo, logError, logSuccess } = require('./scripts.module')
 const { exit } = require('node:process')
-const figlet = require('figlet')
+const { changeDirectory, logError, logSuccess } = require('./scripts.module')
+const { program } = require('commander');
 
-console.log(figlet.textSync('Microservices-Suite'))
+
 program
     .description('The function cds into given directory_path')
     .argument('<directory_path>', 'The path to the file')

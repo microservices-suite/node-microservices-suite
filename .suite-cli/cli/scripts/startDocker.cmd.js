@@ -1,12 +1,9 @@
-#!/usr/bin/env node
 
-const { program } = require('commander')
 const { startDocker, logError, logInfo, logSuccess } = require('./scripts.module')
+const { program } = require('commander')
 
-require('./scripts.module')
-const figlet = require('figlet')
 
-console.log(figlet.textSync('Microservices-Suite'))
+
 program
     .description('Checks if docker is running')
     .action(async () => {
