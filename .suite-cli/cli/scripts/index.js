@@ -1,11 +1,12 @@
 module.exports.generateDirectoryPath=require('./generateDirectoryPath.cmd'),
 module.exports.changeDirectory=require('./changeDirectory.cmd'),
-module.exports.envFileExists=require('./envFileExists.cmd'),
+module.exports.pathExists=require('./pathExists.cmd'),
 module.exports.logInfoMessage=require('./logInfoMessage.cmd'),
 module.exports.logErrorMessage=require('./logErrorMessage.cmd'),
 module.exports.logSuccessMessage=require('./logSuccessMessage.cmd'),
 module.exports.isMatch=require('./isMatch.cmd'),
 module.exports.getPlatform=require('./getPlatform.cmd'),
-module.exports.checkDockerCmd=require('./checkDocker.cmd'),
-module.exports.installDepsAtWorkspaceCmd=require('./installDepsAtWorkspace.cmd'),
-module.exports.addDepsAtWorkspacecmd=require('./addDepsAtWorkspace.cmd')
+module.exports.checkDocker=require('./checkDocker.cmd'),
+module.exports.startDocker=require('./startDocker.cmd'),
+module.exports.installDepsAtWorkspace=require('./installDepsAtWorkspace.cmd'),
+module.exports.addDepsAtWorkspace=require('./addDepsAtWorkspace.cmd')

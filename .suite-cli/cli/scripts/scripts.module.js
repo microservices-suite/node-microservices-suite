@@ -31,7 +31,7 @@ const changeDirectory = ({ directory_path }) => {
  * @param {string} file_path  The path to the file to check.
  * @returns {boolean} True if the file exists, false otherwise.
  */
-const envFileExists = ({ file_path }) => {
+const pathExists = ({ file_path }) => {
     return existsSync(file_path)
 }
 /**
@@ -151,12 +151,38 @@ const startDocker = () => {
  * @default options.workspace_directory='microservices' 
  * @returns {void} Does not return a value. Installs dependencies at given workspace
  */
-const installDepsAtWorkspace = ({ workspace_name, workspace_directory = 'microservices' }) => {
-    const directory_path = generateDirectoryPath({ workspace_name, workspace_directory })
-    changeDirectory({ directory_path })
-    exec('yarn install',)
-}
+const installDepsAtWorkspace = ({ workspace_name, workspace_directory = 'microservices', packages }) => {
+    return new Promise((resolve, reject) => {
+        try {
+            const directory_path = generateDirectoryPath({ workspace_name, workspace_directory });
 
+            // Platform aware cd
+            const command = process.platform === 'win32' ?
+                `cd /d "${directory_path}" && yarn --silent install` :
+                `cd "${directory_path}" && yarn --silent install`;
+
+            const options = {
+                shell: platform === 'win32' ? 'C:\\Program Files\\Git\\bin\\bash.exe' : '/bin/bash'
+            };
+
+            exec(command, options, (err, stdout, stderr) => {
+                const split_stack = err.stack.split('\n')[1].split(sep)
+                if (err) {
+                    if (split_stack[split_stack.length - 1].split([':']).includes('undefined')) { reject('Workspace name not provided!') }
+                    else {
+                        reject(err.stack.split('\n')[1]); // Extracting the first line of the stack trace
+                    }
+                } else {
+                    resolve(`Successfully installed packages: @microservices-suite/${workspace_name}`);
+                }
+            });
+        } catch (error) {
+            return reject(`Directory does not exist: ${directory_path}`);
+        }
+    });
+
+
+};
 /**
  * Adds dependencies at given workspace and update package.json
  * @param {Object} options Options object containing workspace_name and workspace_directory
@@ -169,45 +195,48 @@ const installDepsAtWorkspace = ({ workspace_name, workspace_directory = 'microse
  */
 const addDepsAtWorkspace = ({ workspace_name, workspace_directory = 'microservices', packages }) => {
     return new Promise((resolve, reject) => {
-        const directory_path = generateDirectoryPath({ workspace_name, workspace_directory });
+        try {
+            const directory_path = generateDirectoryPath({ workspace_name, workspace_directory });
 
-        if (!existsSync(directory_path)) {
+            // Platform aware cd
+            const command = process.platform === 'win32' ?
+                `cd /d "${directory_path}" && yarn --silent add ${packages}` :
+                `cd "${directory_path}" && yarn --silent add ${packages}`;
+
+            const options = {
+                shell: platform === 'win32' ? 'C:\\Program Files\\Git\\bin\\bash.exe' : '/bin/bash'
+            };
+
+            exec(command, options, (err, stdout, stderr) => {
+                const split_stack = err.stack.split('\n')[1].split(sep)
+                if (err) {
+                    if (split_stack[split_stack.length - 1].split([':']).includes('undefined')) { reject('Workspace name not provided!') }
+                    const errorMessage = stderr || err.message;
+                    const packageNameRegex = /\/([^/:]+):/;
+                    const match = packageNameRegex.exec(errorMessage);
+                    console.log(split_stack[split_stack.length - 1].split([':']).includes('undefined'))
+                    if (match && match[1]) {
+                        reject(`Package not found in registry: ${match[1]}`);
+
+                    } else {
+                        reject(err.stack.split('\n')[1]); // Extracting the first line of the stack trace
+                    }
+                } else {
+                    resolve(`Successfully installed packages: ${packages} @microservices-suite/${workspace_name}`);
+                }
+            });
+        } catch (error) {
             return reject(`Directory does not exist: ${directory_path}`);
         }
-
-        // Platform aware cd
-        const command = process.platform === 'win32' ?
-            `cd /d "${directory_path}" && yarn --silent add ${packages}` :
-            `cd "${directory_path}" && yarn --silent add ${packages}`;
-
-        const options = {
-            shell: platform === 'win32' ? 'C:\\Program Files\\Git\\bin\\bash.exe' : '/bin/bash'
-        };
-
-        exec(command, options, (err, stdout, stderr) => {
-            if (err) {
-                const errorMessage = stderr || err.message;
-                const packageNameRegex = /\/([^/:]+):/;
-                const match = packageNameRegex.exec(errorMessage);
-
-                if (match && match[1]) {
-                    reject(`Package not found in registry: ${match[1]}`);
-
-                } else {
-                    reject(err.stack.split('\n')[1]); // Extracting the first line of the stack trace
-                }
-            } else {
-                resolve(`Successfully installed packages: ${packages} @microservices-suite/${workspace_name}`);
-            }
-        });
     });
+
 
 };
 
 module.exports = {
     generateDirectoryPath,
     changeDirectory,
-    envFileExists,
+    pathExists,
     logInfo,
     logError,
     logSuccess,

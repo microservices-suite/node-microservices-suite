@@ -1,10 +1,8 @@
-#!/usr/bin/env node
 
-const { program } = require('commander');
 const { generateDirectoryPath, logInfo } = require('./scripts.module')
-const figlet = require('figlet')
+const { program } = require('commander');
 
-console.log(figlet.textSync('Microservices-Suite'))
+
 program
     .command('generate-path')
     .description('Dynamically generate directory path given workspace_name')
