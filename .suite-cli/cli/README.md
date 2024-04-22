@@ -7,7 +7,7 @@
 To install `suite-cli` and save it in your `devDependencies`, run the following command:
 
 ```bash
-npm install -D @microservices-suite/suite-cli
+yarn add -D @microservices-suite/suite-cli
 ```
 
 ### Usage
