@@ -1,6 +1,6 @@
 const { join, sep } = require('node:path')
 const { cwd, chdir } = require('node:process')
-const { existsSync, statSync } = require('node:fs');
+const { existsSync, statSync, readdirSync } = require('node:fs');
 const { platform } = require('node:process');
 const { exec } = require('node:child_process');
 const chalk = require('chalk')
@@ -134,7 +134,7 @@ const startDocker = () => {
                 reject(`⇣ Install Docker to run this command: ${chalk.blue('https://docs.docker.com/engine/install/')}`);
             }
             if (await checkDocker()) {
-                resolve('✓ Docker is already running ...')
+                resolve('Docker is already running ...')
             }
             else {
                 resolve('⏳ Docker daemon is starting... Please check Docker status to ensure it is running.');
@@ -228,9 +228,73 @@ const addDepsAtWorkspace = ({ workspace_name, workspace_directory = 'microservic
             return reject(`Directory does not exist: ${directory_path}`);
         }
     });
-
-
 };
+
+// In actionHandlers.js
+async function start(components, options) {
+    console.log(`Starting ${components.length} components...`);
+    const useDockerCompose = options.app || (!options.app && !options.kubectl);
+
+    for (const component of components) {
+        const [name] = component.split(':');
+        const type = options.app ? 'app' : 'service';
+        console.log(`Starting ${type}: ${name}...`);
+        if (options.vanilla) {
+            console.log(`Running ${type} ${name} in development mode with Nodemon`);
+            // Logic to start the component with Nodemon
+        } else if (useDockerCompose) {
+            console.log(`Running ${type} ${name} with Docker Compose`);
+            // Logic to start the component with Docker Compose
+        } else {
+            console.log(`Running ${type} ${name} with kubectl`);
+            // Logic to start the component with kubectl
+        }
+    }
+}
+
+async function startAll({options}) {
+    console.log("Starting all services in development mode...");
+    const currentDir = cwd();
+
+    // Check if 'microservices' directory exists
+    const isMicroservicesDir = currentDir.split(sep).includes('microservices');
+    
+    // Construct microservices directory path
+    const microservicesDir = isMicroservicesDir ?
+      currentDir.split(sep).slice(0, currentDir.split(sep).indexOf('microservices') + 1).join(sep) :
+      `${currentDir}${sep}microservices`;  
+    // Check if the microservices directory exists
+    if (!existsSync(microservicesDir) || !statSync(microservicesDir).isDirectory()) {
+      console.error(`Microservices directory not found: ${microservicesDir}`);
+      return;
+    }
+  
+    // Get a list of directories in the microservices directory
+    const serviceDirectories = readdirSync(microservicesDir)
+      .filter(item => statSync(join(microservicesDir, item)).isDirectory());
+  
+    // Start each service
+    for (const dir of serviceDirectories) {
+      console.log(`Starting service in directory: ${dir}`);
+      try {
+        const { stdout, stderr } = await exec(`yarn workspace @microservices-suite/${dir} dev`, { cwd: join(microservicesDir, dir) });
+        console.log(`Service in directory ${dir} started successfully`);
+        if (stderr) {
+          console.error(`Error output from service in directory ${dir}: ${formatError(stderr)}`);
+        }
+      } catch (error) {
+        console.error(`Failed to start service in directory ${dir}: ${error.message}`);
+      }
+    }
+  }
+  
+  function formatError(error) {
+    if (typeof error === 'object') {
+      return JSON.stringify(error, null, 2); // Stringify with indentation for better readability
+    } else {
+      return String(error);
+    }
+  }
 
 module.exports = {
     generateDirectoryPath,
@@ -244,5 +308,7 @@ module.exports = {
     checkDocker,
     startDocker,
     installDepsAtWorkspace,
-    addDepsAtWorkspace
+    addDepsAtWorkspace,
+    startAll,
+    start,
 }

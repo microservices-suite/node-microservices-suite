@@ -10,3 +10,4 @@ module.exports.isMatch = require('./isMatch.cmd');
 module.exports.getPlatform = require('./getPlatform.cmd');
 module.exports.checkDocker = require('./checkDocker.cmd');
 module.exports.startDocker = require('./startDocker.cmd');
+module.exports.startAll = require('./startAll.cmd');
