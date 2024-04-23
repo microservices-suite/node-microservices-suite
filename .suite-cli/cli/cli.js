@@ -79,5 +79,22 @@ program
     .argument('<workspace-name>', 'Name of the workspace to cd into')
     .option('-d, --workspace-directory <directory>', 'Directory where to look for the workspace. Defaults to "microservices"', 'microservices')
     .action((workspace_name, options) => actionHandlers.generateDirectoryPath({ workspace_name, options }));
+program
+    .command('start [components...]')
+    .description('Starts specified components (services or apps), or all services in dev mode if none are specified')
+    .option('-a, --app', 'Indicates that the components specified are apps. Defaults to Docker Compose.')
+    .option('-k, --kubectl', 'Run the components using kubectl instead of Docker Compose. This flag is ignored if -a is not provided.')
+    .option('-v, --vanilla', 'Run the components directly without Docker. In development mode with Nodemon, otherwise with PM2')
+    .action(async (components, options) => {
+        if (components.length === 0) {
+            // No components specified, default to starting all services in development mode
+            console.log("No specific components specified. Starting all services in development mode...");
+            await actionHandlers.startAll({ vanilla: options.vanilla });
+            return;
+        }
+
+        await actionHandlers.start(components, options);
+    });
+
 program.parse(process.argv);
 module.exports = program
