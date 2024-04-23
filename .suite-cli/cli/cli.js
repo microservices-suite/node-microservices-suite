@@ -2,7 +2,10 @@
 
 const actionHandlers = require('./scripts')
 const { Command } = require('commander');
+const figlet = require('figlet')
+
 const program = new Command()
+actionHandlers.logInfoMessage({ message: (figlet.textSync('Microservices-suite')) })
 
 program
     .command('err')
