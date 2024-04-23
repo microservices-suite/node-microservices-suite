@@ -1,13 +1,14 @@
 
-const { checkDocker, getPlatform, logInfo } = require('./scripts.module')
-const { program } = require('commander')
+const { checkDocker, getPlatform, logInfo } = require('./scripts.module');
 
+module.exports = async () => {
+    const isDockerRunning = await checkDocker();
+    const platform = getPlatform();
+    const platformEmoji = platform === 'MacOS' ? '🍏' : platform === 'Linux' ? '🐧' : '🪟';
+    const dockerStatusMessage = isDockerRunning ? 'running...' : 'not running. Attempting to start docker...';
+    const dockerStatusIcon = isDockerRunning ? '✓' : '⚠️';
 
-program
-    .description('Checks if docker is running')
-    .action(async () => {
-        const _ = await checkDocker()
-        logInfo({ message: `Platform : ${`${getPlatform() === 'MacOS' ? '🍏' : 'Linux' ? '🐧' : '🪟'} ${getPlatform()}`} :  ${_ ? '✓' : '⚠️'} docker is ${_ ? 'running...' : 'not running. Attempting to start docker...'}` })
-    })
-program.parse(process.argv);
-module.exports = program
+    logInfo({
+        message: `Platform: ${platformEmoji} ${platform} : ${dockerStatusIcon} Docker is ${dockerStatusMessage}`
+    });
+};

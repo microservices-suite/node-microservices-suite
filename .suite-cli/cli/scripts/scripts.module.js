@@ -166,8 +166,8 @@ const installDepsAtWorkspace = ({ workspace_name, workspace_directory = 'microse
             };
 
             exec(command, options, (err, stdout, stderr) => {
-                const split_stack = err.stack.split('\n')[1].split(sep)
                 if (err) {
+                    const split_stack = err.stack.split('\n')[1].split(sep)
                     if (split_stack[split_stack.length - 1].split([':']).includes('undefined')) { reject('Workspace name not provided!') }
                     else {
                         reject(err.stack.split('\n')[1]); // Extracting the first line of the stack trace
@@ -208,13 +208,12 @@ const addDepsAtWorkspace = ({ workspace_name, workspace_directory = 'microservic
             };
 
             exec(command, options, (err, stdout, stderr) => {
-                const split_stack = err.stack.split('\n')[1].split(sep)
                 if (err) {
+                    const split_stack = err.stack.split('\n')[1].split(sep)
                     if (split_stack[split_stack.length - 1].split([':']).includes('undefined')) { reject('Workspace name not provided!') }
                     const errorMessage = stderr || err.message;
                     const packageNameRegex = /\/([^/:]+):/;
                     const match = packageNameRegex.exec(errorMessage);
-                    console.log(split_stack[split_stack.length - 1].split([':']).includes('undefined'))
                     if (match && match[1]) {
                         reject(`Package not found in registry: ${match[1]}`);
 
