@@ -1,9 +1,9 @@
 # Changelog
 
 
-## v1.3.0
+## v1.6.0
 
-[compare changes](https://github.com/microservices-suite/node-microservices-suite/compare/v1.1.0...v1.3.0)
+[compare changes](https://github.com/microservices-suite/node-microservices-suite/compare/v1.1.0...v1.6.0)
 
 ### 🚀 Enhancements
 
@@ -25,14 +25,16 @@
 - Update dependenices and cli entrypoint ([5cb79e8](https://github.com/microservices-suite/node-microservices-suite/commit/5cb79e8))
 - Add sample cli unit test cases ([897687f](https://github.com/microservices-suite/node-microservices-suite/commit/897687f))
 - **release:** V1.2.0 ([9700d94](https://github.com/microservices-suite/node-microservices-suite/commit/9700d94))
+- **release:** V1.3.0 ([83e1b46](https://github.com/microservices-suite/node-microservices-suite/commit/83e1b46))
+- **release:** V1.4.0 ([95713ba](https://github.com/microservices-suite/node-microservices-suite/commit/95713ba))
 
 ### ❤️ Contributors
 
 - Gilbert Andanje ([@GAndanje](http://github.com/GAndanje))
 
-## v1.2.0
+## v1.4.0
 
-[compare changes](https://github.com/microservices-suite/node-microservices-suite/compare/v1.1.0...v1.2.0)
+[compare changes](https://github.com/microservices-suite/node-microservices-suite/compare/v1.1.0...v1.4.0)
 
 ### 🚀 Enhancements
 
@@ -53,27 +55,8 @@
 
 - Update dependenices and cli entrypoint ([5cb79e8](https://github.com/microservices-suite/node-microservices-suite/commit/5cb79e8))
 - Add sample cli unit test cases ([897687f](https://github.com/microservices-suite/node-microservices-suite/commit/897687f))
-
-### ❤️ Contributors
-
-- Gilbert Andanje ([@GAndanje](http://github.com/GAndanje))
-
-## v1.1.0
-
-[compare changes](https://github.com/microservices-suite/node-microservices-suite/compare/v1.4.2...v1.1.0)
-
-### 🚀 Enhancements
-
-- Add suite-cli ([37e5481](https://github.com/microservices-suite/node-microservices-suite/commit/37e5481))
-
-### 💅 Refactors
-
-- Rm my-app ([ed56801](https://github.com/microservices-suite/node-microservices-suite/commit/ed56801))
-
-### 🏡 Chore
-
-- Release v1.4.2 ([3937f18](https://github.com/microservices-suite/node-microservices-suite/commit/3937f18))
-- Update deps ([821a0d7](https://github.com/microservices-suite/node-microservices-suite/commit/821a0d7))
+- **release:** V1.2.0 ([9700d94](https://github.com/microservices-suite/node-microservices-suite/commit/9700d94))
+- **release:** V1.3.0 ([83e1b46](https://github.com/microservices-suite/node-microservices-suite/commit/83e1b46))
 
 ### ❤️ Contributors
 
