@@ -7,14 +7,23 @@
 To install `suite-cli` and save it in your `devDependencies`, run the following command:
 
 ```bash
-yarn add -D @microservices-suite/suite-cli
+yarn add -D @microservices-suite/cli
 ```
 
 ### Usage
+- Install dependencies
 ```bash
-suite add <deps>
+suite install
 ```
-
+- Install dependencies at workspace
 ```bash
-suite add express axios
+suite add <workspace> express axios
+```
+- Check if docker is running
+```bash
+suite do, docker:check 
+```
+- Start docker daemon
+```bash
+suite docker:start
 ```
