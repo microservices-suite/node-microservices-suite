@@ -1,4 +1,10 @@
 
-const { isMatch, logSuccess, startAll } = require('./scripts.module')
+const { startAll, logError } = require('./scripts.module')
 
-module.exports = async ({ options }) => await startAll({ options });
+module.exports = async ({ options }) => {
+    try {
+        await startAll({ options });
+    } catch (errors) {
+        logError({ errors })
+    }
+};
