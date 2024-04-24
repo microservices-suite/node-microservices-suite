@@ -1,8 +1,8 @@
 const { join, sep } = require('node:path')
-const { cwd, chdir } = require('node:process')
+const { cwd, chdir, exit } = require('node:process')
 const { existsSync, statSync, readdirSync } = require('node:fs');
 const { platform } = require('node:process');
-const { exec } = require('node:child_process');
+let { exec } = require('node:child_process');
 const chalk = require('chalk')
 
 /**
@@ -43,7 +43,7 @@ const logSuccess = ({ message }) => console.log(chalk.blue(`✓ ${message}`))
 
 /**
  * Prints error message to screen
- * @param {string} message Error message to display to console 
+ * @param {string} error Error message to display to console 
  * @returns {void}
  */
 const logError = ({ error }) => console.log(chalk.red(`⚠️ ${error}`))
@@ -55,6 +55,20 @@ const logError = ({ error }) => console.log(chalk.red(`⚠️ ${error}`))
  */
 const logInfo = ({ message }) => console.log(chalk.gray(`✓ ${message}`))
 
+
+/**
+ * Prints warning message to screen
+ * @param {string} message Warning message to display to console 
+ * @returns {void}
+ */
+const logWarning = ({ message }) => console.log(chalk.yellow(`✓ ${message}`))
+
+/**
+ * Prints warning message to screen
+ * @param {string} message Warning message to display to console 
+ * @returns {void}
+ */
+const logAdvise = ({ message }) => console.log(chalk.stderr(`✓ ${message}`))
 
 /**
  * Compares if 2 values match
@@ -232,69 +246,81 @@ const addDepsAtWorkspace = ({ workspace_name, workspace_directory = 'microservic
 
 // In actionHandlers.js
 async function start(components, options) {
-    console.log(`Starting ${components.length} components...`);
+    logInfo({ message: `Starting ${components.length} components...` });
     const useDockerCompose = options.app || (!options.app && !options.kubectl);
 
     for (const component of components) {
         const [name] = component.split(':');
         const type = options.app ? 'app' : 'service';
-        console.log(`Starting ${type}: ${name}...`);
+        logInfo({ message: `Starting ${type}: ${name}...` });
         if (options.vanilla) {
-            console.log(`Running ${type} ${name} in development mode with Nodemon`);
+            logInfo({ message: `Running ${type} ${name} in development mode with Nodemon` });
             // Logic to start the component with Nodemon
         } else if (useDockerCompose) {
-            console.log(`Running ${type} ${name} with Docker Compose`);
+            logInfo({ message: `Running ${type} ${name} with Docker Compose` });
             // Logic to start the component with Docker Compose
         } else {
-            console.log(`Running ${type} ${name} with kubectl`);
+            logInfo({ message: `Running ${type} ${name} with kubectl` });
             // Logic to start the component with kubectl
         }
     }
 }
 
-async function startAll({options}) {
-    console.log("Starting all services in development mode...");
-    const currentDir = cwd();
+const startAll = ({ options }) => {
+    return new Promise(async (resolve, reject) => {
+        logInfo({ message: "Starting all services in development mode..." });
+        const currentDir = cwd();
 
-    // Check if 'microservices' directory exists
-    const isMicroservicesDir = currentDir.split(sep).includes('microservices');
-    
-    // Construct microservices directory path
-    const microservicesDir = isMicroservicesDir ?
-      currentDir.split(sep).slice(0, currentDir.split(sep).indexOf('microservices') + 1).join(sep) :
-      `${currentDir}${sep}microservices`;  
-    // Check if the microservices directory exists
-    if (!existsSync(microservicesDir) || !statSync(microservicesDir).isDirectory()) {
-      console.error(`Microservices directory not found: ${microservicesDir}`);
-      return;
-    }
-  
-    // Get a list of directories in the microservices directory
-    const serviceDirectories = readdirSync(microservicesDir)
-      .filter(item => statSync(join(microservicesDir, item)).isDirectory());
-  
-    // Start each service
-    for (const dir of serviceDirectories) {
-      console.log(`Starting service in directory: ${dir}`);
-      try {
-        const { stdout, stderr } = await exec(`yarn workspace @microservices-suite/${dir} dev`, { cwd: join(microservicesDir, dir) });
-        console.log(`Service in directory ${dir} started successfully`);
-        if (stderr) {
-          console.error(`Error output from service in directory ${dir}: ${formatError(stderr)}`);
+        // Check if 'microservices' directory exists
+        const isMicroservicesDir = currentDir.split(sep).includes('microservices');
+
+        // Construct microservices directory path
+        const microservicesDir = isMicroservicesDir ?
+            currentDir.split(sep).slice(0, currentDir.split(sep).indexOf('microservices') + 1).join(sep) :
+            `${currentDir}${sep}microservices`;
+        logInfo({ message: `cwd: ${microservicesDir}` });
+
+        // Check if the microservices directory exists
+        if (!existsSync(microservicesDir) || !statSync(microservicesDir).isDirectory()) {
+            reject(`Microservices directory not found: ${microservicesDir}`);
+            return;
         }
-      } catch (error) {
-        console.error(`Failed to start service in directory ${dir}: ${error.message}`);
-      }
-    }
-  }
-  
-  function formatError(error) {
-    if (typeof error === 'object') {
-      return JSON.stringify(error, null, 2); // Stringify with indentation for better readability
-    } else {
-      return String(error);
-    }
-  }
+
+        // Get a list of directories in the microservices directory
+        const serviceDirectories = readdirSync(microservicesDir)
+            .filter(item => statSync(join(microservicesDir, item)).isDirectory());
+
+        // Start each service
+        await Promise.all(
+            serviceDirectories.map((dir) => {
+                logInfo({ message: `Starting service concurrently in: ${dir}` });
+                exec(`yarn workspace @microservices-suite${sep}${dir} dev`, { cwd: join(microservicesDir, dir) }, async (error, stdout, stderr) => {
+                    var error_message = ''
+                    if (error) {
+                        const _ = error.message.split('\n')
+                        if (_[1] && _[1].startsWith('error Command') && _[1].endsWith('not found.')) {
+                            error_message = `Missing script at ${dir}${sep}package.json: ${_[1].match(/"(.*?)"/)[1]}`
+                        }
+                        if (_[1] && _[1].includes('Unknown workspace')) {
+                            if (existsSync(`${microservicesDir}${sep}${dir}${sep}package.json`)) {
+                                logWarning({ message: 'Wrong workspace naming' })
+                                logAdvise({ message: 'Run suite fix -n to auto-fix all workspace naming issues' })
+                                logAdvise({ message: 'suite fix only changes the package.json. If any service depends on it you will need to update it manually' })
+                            } else {
+
+                                logError({ error: (`Missing package.json @microservices-suite${sep}${dir}`) })
+                            }
+                            exit(1)
+                        }
+                        logError({ error: error_message })
+                    } else {
+                        resolve(`Service in directory ${dir} started successfully`);
+                    }
+                });
+            }))
+
+    })
+}
 
 module.exports = {
     generateDirectoryPath,
@@ -311,4 +337,5 @@ module.exports = {
     addDepsAtWorkspace,
     startAll,
     start,
+    logWarning
 }
