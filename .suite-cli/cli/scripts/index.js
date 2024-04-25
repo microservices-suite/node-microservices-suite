@@ -11,3 +11,4 @@ module.exports.getPlatform = require('./commands/getPlatform.cmd');
 module.exports.checkDocker = require('./commands/checkDocker.cmd');
 module.exports.startDocker = require('./commands/startDocker.cmd');
 module.exports.startAll = require('./commands/startAll.cmd');
+module.exports.start = require('./commands/start.cmd');

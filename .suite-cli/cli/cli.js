@@ -82,19 +82,21 @@ program
     .action((workspace_name, options) => actionHandlers.generateDirectoryPath({ workspace_name, options }));
 program
     .command('start [components...]')
-    .description('Starts specified components (services or apps), or all services in dev mode if none are specified')
-    .option('-a, --app', 'Indicates that the components specified are apps. Defaults to Docker Compose.')
-    .option('-k, --kubectl', 'Run the components using kubectl instead of Docker Compose. This flag is ignored if -a is not provided.')
+    .description('Starts specified components (services or apps), or all services in dev mode if -m is not specified')
+    .option('-a, --app', 'Indicates that the components specified are apps. Defaults to Docker Compose')
+    .option('-k, --kubectl', 'Run the components using kubectl instead of Docker Compose. This flag is ignored if -a is not provided')
     .option('-v, --vanilla', 'Run the components directly without Docker. In development mode with Nodemon, otherwise with PM2')
+    .option('-m, --mode <name>', 'Environment to run the component', 'dev')
     .action(async (components, options) => {
         if (components.length === 0) {
+            const component_type = options.app ? 'apps' : 'services'
             // No components specified, default to starting all services in development mode
-            logInfo({message:"No specific components specified. Starting all services in development mode..."})
+            logInfo({ message: `No specific ${component_type} specified. Starting all ${component_type} in ${options.mode} mode...` })
             await actionHandlers.startAll({ options });
             return;
         }
 
-        await actionHandlers.start(components, options);
+        await actionHandlers.start({ components, options });
     });
 
 program.parse(process.argv);
