@@ -1,7 +1,9 @@
 const { join, sep } = require('node:path')
 const { cwd, chdir, exit } = require('node:process')
+const { cwd, chdir, exit } = require('node:process')
 const { existsSync, statSync, readdirSync } = require('node:fs');
 const { platform } = require('node:process');
+let { exec } = require('node:child_process');
 let { exec } = require('node:child_process');
 const chalk = require('chalk')
 
@@ -261,12 +263,29 @@ async function start(components, options) {
             // Logic to start the component with Docker Compose
         } else {
             logInfo({ message: `Running ${type} ${name} with kubectl` });
+            logInfo({ message: `Running ${type} ${name} with kubectl` });
             // Logic to start the component with kubectl
         }
     }
 }
 
 const startAll = ({ options }) => {
+    // console.log({ options })
+    // // case -k (--kubectl)
+    // if (options.kubectl) {
+    //     // -k(--kubectl) flag passed without specifying the app flag (-a,--app). Throw error & exit process
+    //     if (!options.app) {
+    //         logError({ error: 'kubectl is only used with -a to run apps. run suite help start for more info' })
+    //         exit(1)
+    //     }
+    //     //TODO: spin app with kubectl pods
+    //     spinKubectlPods({ app: options.app, mode: options.mode })
+    //     // TODO: listen on SIGTERM and other kill signals to exit gracefully eg with CTRL+[C,D,Z]
+    // }
+    // // case -v(--vanilla)
+    // // TODO: run services with nodemon in dev mode otherwise PM2
+    // runVanillaServices({ services: [], mode: options.mode })
+
     return new Promise(async (resolve, reject) => {
         logInfo({ message: "Starting all services in development mode..." });
         const currentDir = cwd();
@@ -321,7 +340,15 @@ const startAll = ({ options }) => {
 
     })
 }
+/**
+ * 
+ * @param {array} apps The apps to run 
+ * @param {Object} options Environment to run the 
+ * @param {string} [options.mode] App environment. Defaults to dev mode
+ */
+const spinKubectlPods = ({ app, mode = 'dev' }) => {
 
+}
 module.exports = {
     generateDirectoryPath,
     changeDirectory,

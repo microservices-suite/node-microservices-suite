@@ -1,5 +1,5 @@
 
-const { startDocker, logError, logInfo, logSuccess } = require('./scripts.module')
+const { startDocker, logError, logInfo, logSuccess } = require('../scripts.module')
 
 module.exports = async () => {
     try {

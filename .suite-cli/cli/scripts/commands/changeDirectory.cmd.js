@@ -1,6 +1,6 @@
 
 const { exit } = require('node:process')
-const { changeDirectory, logError, logSuccess } = require('./scripts.module')
+const { changeDirectory, logError, logSuccess } = require('../scripts.module')
 
 module.exports = ({ directory_path }) => {
     try {

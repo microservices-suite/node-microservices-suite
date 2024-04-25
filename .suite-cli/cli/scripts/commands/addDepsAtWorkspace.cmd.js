@@ -1,5 +1,5 @@
 
-const { addDepsAtWorkspace, logSuccess, logError } = require('./scripts.module')
+const { addDepsAtWorkspace, logSuccess, logError } = require('../scripts.module')
 
 module.exports = async ({ packages, options }) => {
   try {

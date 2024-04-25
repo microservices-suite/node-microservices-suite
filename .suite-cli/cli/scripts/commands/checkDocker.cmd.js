@@ -1,5 +1,5 @@
 
-const { checkDocker, getPlatform, logInfo } = require('./scripts.module');
+const { checkDocker, getPlatform, logInfo } = require('../scripts.module');
 
 module.exports = async () => {
     const isDockerRunning = await checkDocker();

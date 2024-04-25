@@ -2,7 +2,8 @@
 
 const actionHandlers = require('./scripts')
 const { Command } = require('commander');
-const figlet = require('figlet')
+const figlet = require('figlet');
+const { logInfo } = require('./scripts/scripts.module');
 
 const program = new Command()
 actionHandlers.logInfoMessage({ message: (figlet.textSync('Microservices-suite')) })
@@ -88,8 +89,8 @@ program
     .action(async (components, options) => {
         if (components.length === 0) {
             // No components specified, default to starting all services in development mode
-            console.log("No specific components specified. Starting all services in development mode...");
-            await actionHandlers.startAll({ vanilla: options.vanilla });
+            logInfo({message:"No specific components specified. Starting all services in development mode..."})
+            await actionHandlers.startAll({ options });
             return;
         }
 

@@ -1,5 +1,5 @@
 
-const { pathExists, logInfo, logError } = require('./scripts.module')
+const { pathExists, logInfo, logError } = require('../scripts.module')
 const { statSync } = require('fs')
 
 module.exports = ({ file_path }) => {

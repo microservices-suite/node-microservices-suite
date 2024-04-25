@@ -1,5 +1,5 @@
 
-const { logInfo } = require('./scripts.module')
+const { logInfo } = require('../scripts.module')
 
 module.exports = ({ message }) => {
     logInfo({ message });

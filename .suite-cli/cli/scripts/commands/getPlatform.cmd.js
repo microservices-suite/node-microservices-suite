@@ -1,5 +1,5 @@
 
-const { getPlatform, logInfo } = require('./scripts.module')
+const { getPlatform, logInfo } = require('../scripts.module')
 
 
 module.exports = () => {
