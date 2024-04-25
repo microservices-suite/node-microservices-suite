@@ -1,7 +1,9 @@
 const { join, sep } = require('node:path')
 const { cwd, chdir, exit } = require('node:process')
+const { cwd, chdir, exit } = require('node:process')
 const { existsSync, statSync, readdirSync } = require('node:fs');
 const { platform } = require('node:process');
+let { exec } = require('node:child_process');
 let { exec } = require('node:child_process');
 const chalk = require('chalk')
 
@@ -260,6 +262,7 @@ async function start(components, options) {
             logInfo({ message: `Running ${type} ${name} with Docker Compose` });
             // Logic to start the component with Docker Compose
         } else {
+            logInfo({ message: `Running ${type} ${name} with kubectl` });
             logInfo({ message: `Running ${type} ${name} with kubectl` });
             // Logic to start the component with kubectl
         }
