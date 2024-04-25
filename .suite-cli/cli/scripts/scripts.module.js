@@ -1,9 +1,7 @@
 const { join, sep } = require('node:path')
 const { cwd, chdir, exit } = require('node:process')
-const { cwd, chdir, exit } = require('node:process')
 const { existsSync, statSync, readdirSync } = require('node:fs');
 const { platform } = require('node:process');
-let { exec } = require('node:child_process');
 let { exec } = require('node:child_process');
 const chalk = require('chalk')
 
@@ -247,16 +245,17 @@ const addDepsAtWorkspace = ({ workspace_name, workspace_directory = 'microservic
 };
 
 // In actionHandlers.js
-async function start(components, options) {
-    logInfo({ message: `Starting ${components.length} components...` });
-    const useDockerCompose = options.app || (!options.app && !options.kubectl);
+const start = async ({ components, options }) => {
+    const type = options.app ? 'app' : 'service';
+    logInfo({ message: `Starting ${components.length||'all'} ${type}${components.length === 1 ? '' : 's'}...` });
+    const useDockerCompose = options.app && !options.kubectl;
 
     for (const component of components) {
         const [name] = component.split(':');
-        const type = options.app ? 'app' : 'service';
+        console.log({component,options})
         logInfo({ message: `Starting ${type}: ${name}...` });
         if (options.vanilla) {
-            logInfo({ message: `Running ${type} ${name} in development mode with Nodemon` });
+            logError({ error: `-v flag is only used to run services. Apps only run with kubectl or docker compose` });
             // Logic to start the component with Nodemon
         } else if (useDockerCompose) {
             logInfo({ message: `Running ${type} ${name} with Docker Compose` });
@@ -269,90 +268,149 @@ async function start(components, options) {
     }
 }
 
-const startAll = ({ options }) => {
-    // console.log({ options })
-    // // case -k (--kubectl)
-    // if (options.kubectl) {
-    //     // -k(--kubectl) flag passed without specifying the app flag (-a,--app). Throw error & exit process
-    //     if (!options.app) {
-    //         logError({ error: 'kubectl is only used with -a to run apps. run suite help start for more info' })
-    //         exit(1)
-    //     }
-    //     //TODO: spin app with kubectl pods
-    //     spinKubectlPods({ app: options.app, mode: options.mode })
-    //     // TODO: listen on SIGTERM and other kill signals to exit gracefully eg with CTRL+[C,D,Z]
-    // }
-    // // case -v(--vanilla)
-    // // TODO: run services with nodemon in dev mode otherwise PM2
+/**
+ * 
+ * @param {Object} options Environment to run the 
+ * @param {boolean} [options.kubectl] If true runs the app with kubectl
+ * @param {boolean} [options.mode] Service environment. Defaults to dev mode
+ * @param {boolean} [options.app] If true the assumes components defined are apps 
+ * @returns {void} Starts all components in the existing workspaces
+ */
+const startAll = async ({ options }) => {
+    // case -k (--kubectl)
+    if (options?.kubectl) {
+        // -k(--kubectl) flag passed without specifying the app flag (-a,--app). Throw error & exit process
+        if (!options.app) {
+            logError({ error: 'kubectl is only used with -a flag to run apps. run suite help start for more info' })
+            exit(1)
+        }
+        //TODO: spin app with kubectl pods
+        spinKubectlPods({ app: options.app, mode: options.mode })
+        // TODO: listen on SIGTERM and other kill signals to exit gracefully eg with CTRL+[C,D,Z]
+    }
+    // case -v(--vanilla)
+    // TODO: run services with nodemon in dev mode otherwise PM2
+    // runVanillaServices({ services: [], mode: options.mode })
+    const currentDir = cwd();
+
+    // Check if 'microservices' directory exists
+    const isMicroservicesDir = currentDir.split(sep).includes('microservices');
+
+    // Construct microservices directory path
+    const microservicesDir = isMicroservicesDir ?
+        currentDir.split(sep).slice(0, currentDir.split(sep).indexOf('microservices') + 1).join(sep) :
+        `${currentDir}${sep}microservices`;
+    logInfo({ message: `cwd: ${microservicesDir}` });
+
+    // Check if the microservices directory exists
+    if (!existsSync(microservicesDir) || !statSync(microservicesDir).isDirectory()) {
+        reject(`Microservices directory not found: ${microservicesDir}`);
+        return;
+    }
+
+    // Get a list of directories in the microservices directory
+    const serviceDirectories = readdirSync(microservicesDir)
+        .filter(item => statSync(join(microservicesDir, item)).isDirectory());
+
+    // Start each service
+    if (options.app) {
+        await spinApps({ components:[],  options })
+    } else {
+        await spinServices({ microservicesDir, serviceDirectories, mode: options.mode })
+    }
+    // TODO: listen on SIGTERM and other kill signals to exit gracefully eg with CTRL+[C,D,Z]
+    // case -v(--vanilla)
+    // TODO: run services with nodemon in dev mode otherwise PM2
     // runVanillaServices({ services: [], mode: options.mode })
 
-    return new Promise(async (resolve, reject) => {
-        logInfo({ message: "Starting all services in development mode..." });
-        const currentDir = cwd();
-
-        // Check if 'microservices' directory exists
-        const isMicroservicesDir = currentDir.split(sep).includes('microservices');
-
-        // Construct microservices directory path
-        const microservicesDir = isMicroservicesDir ?
-            currentDir.split(sep).slice(0, currentDir.split(sep).indexOf('microservices') + 1).join(sep) :
-            `${currentDir}${sep}microservices`;
-        logInfo({ message: `cwd: ${microservicesDir}` });
-
-        // Check if the microservices directory exists
-        if (!existsSync(microservicesDir) || !statSync(microservicesDir).isDirectory()) {
-            reject(`Microservices directory not found: ${microservicesDir}`);
-            return;
-        }
-
-        // Get a list of directories in the microservices directory
-        const serviceDirectories = readdirSync(microservicesDir)
-            .filter(item => statSync(join(microservicesDir, item)).isDirectory());
-
-        // Start each service
-        await Promise.all(
-            serviceDirectories.map((dir) => {
-                logInfo({ message: `Starting service concurrently in: ${dir}` });
-                exec(`yarn workspace @microservices-suite${sep}${dir} dev`, { cwd: join(microservicesDir, dir) }, async (error, stdout, stderr) => {
-                    var error_message = ''
-                    if (error) {
-                        const _ = error.message.split('\n')
-                        if (_[1] && _[1].startsWith('error Command') && _[1].endsWith('not found.')) {
-                            error_message = `Missing script at ${dir}${sep}package.json: ${_[1].match(/"(.*?)"/)[1]}`
-                        }
-                        if (_[1] && _[1].includes('Unknown workspace')) {
-                            if (existsSync(`${microservicesDir}${sep}${dir}${sep}package.json`)) {
-                                logWarning({ message: 'Wrong workspace naming' })
-                                logAdvise({ message: 'Run suite fix -n to auto-fix all workspace naming issues' })
-                                logAdvise({ message: 'suite fix only changes the package.json. If any service depends on it you will need to update it manually' })
-                            } else {
-
-                                logError({ error: (`Missing package.json @microservices-suite${sep}${dir}`) })
-                            }
-                            exit(1)
-                        }
-                        logError({ error: error_message })
-                    } else {
-                        resolve(`Service in directory ${dir} started successfully`);
-                    }
-                });
-            }))
-
-    })
 }
 /**
  * 
- * @param {array} apps The apps to run 
  * @param {Object} options Environment to run the 
- * @param {string} [options.mode] App environment. Defaults to dev mode
+ * @param {string} options.microservicesDir The the services root directory
+ * @param {string} options.serviceDirectories List of service directories  under [options.microservicesDir] 
+ * @param {string} [options.mode] Service environment. Defaults to dev mode
+ * @returns {void} Starts services with nodemon in devmode otherwise PM2
  */
-const spinKubectlPods = ({ app, mode = 'dev' }) => {
+const spinServices = async ({ serviceDirectories, microservicesDir, mode = 'dev' }) => {
+    logInfo({ message: `Starting all services in ${mode} mode...` });
+    await Promise.all(
+        serviceDirectories.map((dir) => {
+            logInfo({ message: `Starting service concurrently in: ${dir}` });
+            exec(`yarn workspace @microservices-suite${sep}${dir} ${mode}`, { cwd: join(microservicesDir, dir) }, async (error, stdout, stderr) => {
+                var error_message = ''
+                if (error) {
+                    const _ = error.message.split('\n')
+                    if (_[1] && _[1].startsWith('error Command') && _[1].endsWith('not found.')) {
+                        error_message = `Missing script at ${dir}${sep}package.json: ${_[1].match(/"(.*?)"/)[1]}`
+                    }
+                    if (_[1] && _[1].includes('Unknown workspace')) {
+                        if (existsSync(`${microservicesDir}${sep}${dir}${sep}package.json`)) {
+                            logWarning({ message: 'Wrong workspace naming' })
+                            logAdvise({ message: 'Run suite fix -n to auto-fix all workspace naming issues' })
+                            logAdvise({ message: 'suite fix only changes the package.json. If any service depends on it you will need to update it manually' })
+                        } else {
 
+                            logError({ error: (`Missing package.json @microservices-suite${sep}${dir}`) })
+                        }
+                        exit(1)
+                    }
+                    logError({ error: error_message })
+                } else {
+                    resolve(`Service in directory ${dir} started successfully`);
+                }
+            });
+        }))
 }
+
+/**
+ * 
+ * @param {Object} options Environment to run the 
+ * @param {string} [options.components] App environment. Defaults to dev mode
+ * @param {array} apps The apps to run 
+ */
+const spinApps = ({ components, options }) => {
+    start({ components, options })
+    // TODO: handle this case
+}
+
+/**
+ * 
+ * @param {Object} options Environment to run the 
+ * @param {string} [options.components] App environment. Defaults to dev mode
+ * @param {array} apps The apps to run 
+ */
+const spinApp = ({ app, options }) => {
+    if(options.kubectl){
+        startKubectlPods()
+    }
+    
+    exec(`yarn workspace @microservices-suite${sep}${dir} ${mode}`, { cwd: join(microservicesDir, dir) }, async (error, stdout, stderr) => {
+        var error_message = ''
+        if (error) {
+            const _ = error.message.split('\n')
+            if (_[1] && _[1].startsWith('error Command') && _[1].endsWith('not found.')) {
+                error_message = `Missing script at ${dir}${sep}package.json: ${_[1].match(/"(.*?)"/)[1]}`
+            }
+            if (_[1] && _[1].includes('Unknown workspace')) {
+                if (existsSync(`${microservicesDir}${sep}${dir}${sep}package.json`)) {
+                    logWarning({ message: 'Wrong workspace naming' })
+                    logAdvise({ message: 'Run suite fix -n to auto-fix all workspace naming issues' })
+                    logAdvise({ message: 'suite fix only changes the package.json. If any service depends on it you will need to update it manually' })
+                } else {
+
+                    logError({ error: (`Missing package.json @microservices-suite${sep}${dir}`) })
+                }
+                exit(1)
+            }
+            logError({ error: error_message })
+        } else {
+            resolve(`Service in directory ${dir} started successfully`);
+        }
+    });}
 module.exports = {
     generateDirectoryPath,
     changeDirectory,
-    pathExists,
     logInfo,
     logError,
     logSuccess,
