@@ -263,6 +263,7 @@ const start = async ({ components, options }) => {
         } else {
             logInfo({ message: `Running ${type} ${name} with kubectl` });
             logInfo({ message: `Running ${type} ${name} with kubectl` });
+            logInfo({ message: `Running ${type} ${name} with kubectl` });
             // Logic to start the component with kubectl
         }
     }
