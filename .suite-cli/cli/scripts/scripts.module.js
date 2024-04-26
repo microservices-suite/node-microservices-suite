@@ -18,7 +18,8 @@ const generateDirectoryPath = ({ workspace_name, workspace_directory = 'microser
 }
 /**
  * The function cds into given directory_path
- * @param {string} directory_path The path to the file
+ * @param {Object} options The path to the file
+ * @param {string} options.directory_path The path to the file
  * @returns void
  */
 const changeDirectory = ({ directory_path }) => {
@@ -28,7 +29,8 @@ const changeDirectory = ({ directory_path }) => {
 
 /**
  * Checks if the file exists at the given path.
- * @param {string} file_path  The path to the file to check.
+ * @param {Object} options 
+ * @param {string} options.file_path  The path to the file to check.
  * @returns {boolean} True if the file exists, false otherwise.
  */
 const pathExists = ({ file_path }) => {
@@ -36,44 +38,50 @@ const pathExists = ({ file_path }) => {
 }
 /**
  * Prints success message to screen
- * @param {string} message Message to display to console 
- * @returns {void}
+ * @param {Object} options 
+ * @param {string} options.message Message to display to console 
+ * @returns {string}
  */
 const logSuccess = ({ message }) => console.log(chalk.blue(`✓ ${message}`))
 
 /**
  * Prints error message to screen
- * @param {string} error Error message to display to console 
- * @returns {void}
+ * @param {Object} options
+ * @param {string} options.error Error message to display to console 
+ * @returns {string}
  */
 const logError = ({ error }) => console.log(chalk.red(`⚠️ ${error}`))
 
 /**
- * Prints informational message to screen
- * @param {string} message Info message to display to console 
- * @returns {void}
+ * Prints success message to screen
+ * @param {Object} options Message to display to console 
+ * @param {string} options.message Message to display to console 
+ * @returns {string}
  */
 const logInfo = ({ message }) => console.log(chalk.gray(`✓ ${message}`))
 
 
 /**
- * Prints warning message to screen
- * @param {string} message Warning message to display to console 
- * @returns {void}
+ * Prints Warning message to screen
+ * @param {Object} options 
+ * @param {string} options.message Warning to display to console 
+ * @returns {string}
  */
 const logWarning = ({ message }) => console.log(chalk.yellow(`✓ ${message}`))
 
 /**
- * Prints warning message to screen
- * @param {string} message Warning message to display to console 
- * @returns {void}
+ * Prints advise message to screen
+ * @param {Object} options 
+ * @param {string} options.message advise to display to console 
+ * @returns {string}
  */
 const logAdvise = ({ message }) => console.log(chalk.stderr(`✓ ${message}`))
 
 /**
  * Compares if 2 values match
- * @param {string} a first value 
- * @param {string} b second value 
+ * @param {Object} options
+ * @param {string} options.a first value 
+ * @param {string} options.b second value 
  * @returns {boolean} Returns true if a === b otherwise false
  */
 const isMatch = ({ a, b }) => a === b
@@ -244,15 +252,20 @@ const addDepsAtWorkspace = ({ workspace_name, workspace_directory = 'microservic
     });
 };
 
-// In actionHandlers.js
-const start = async ({ components, options }) => {
+/**
+ * Adds dependencies at given workspace and update package.json
+ * @param {Object} options Options object containing workspace_name and workspace_directory
+ * @param {string} [options.components]  Name of the workspace where to add dependencies
+ * @param {string} [options.options] Directory where to look for the workspace. Defaults to 'microservices'
+ * @returns {string}  Returns success message
+ */const start = async ({ components, options }) => {
     const type = options.app ? 'app' : 'service';
-    logInfo({ message: `Starting ${components.length||'all'} ${type}${components.length === 1 ? '' : 's'}...` });
+    logInfo({ message: `Starting ${components.length || 'all'} ${type}${components.length === 1 ? '' : 's'}...` });
     const useDockerCompose = options.app && !options.kubectl;
 
     for (const component of components) {
         const [name] = component.split(':');
-        console.log({component,options})
+        console.log({ component, options })
         logInfo({ message: `Starting ${type}: ${name}...` });
         if (options.vanilla) {
             logError({ error: `-v flag is only used to run services. Apps only run with kubectl or docker compose` });
@@ -295,10 +308,10 @@ const startAll = async ({ options }) => {
     const currentDir = cwd();
 
     // Check if 'microservices' directory exists
-    const isMicroservicesDir = currentDir.split(sep).includes('microservices');
+    const is_component_dir = currentDir.split(sep).includes('microservices');
 
     // Construct microservices directory path
-    const microservicesDir = isMicroservicesDir ?
+    const microservicesDir = is_component_dir ?
         currentDir.split(sep).slice(0, currentDir.split(sep).indexOf('microservices') + 1).join(sep) :
         `${currentDir}${sep}microservices`;
     logInfo({ message: `cwd: ${microservicesDir}` });
@@ -315,7 +328,7 @@ const startAll = async ({ options }) => {
 
     // Start each service
     if (options.app) {
-        await spinApps({ components:[],  options })
+        await spinApps({ components: [], options })
     } else {
         await spinServices({ microservicesDir, serviceDirectories, mode: options.mode })
     }
@@ -333,17 +346,22 @@ const startAll = async ({ options }) => {
  * @param {string} [options.mode] Service environment. Defaults to dev mode
  * @returns {void} Starts services with nodemon in devmode otherwise PM2
  */
-const spinServices = async ({ serviceDirectories, microservicesDir, mode = 'dev' }) => {
+const spinVanillaServices = async ({ serviceDirectories, microservicesDir, mode = 'dev' }) => {
     logInfo({ message: `Starting all services in ${mode} mode...` });
     await Promise.all(
-        serviceDirectories.map((dir) => {
+        serviceDirectories.map(async (dir) => {
             logInfo({ message: `Starting service concurrently in: ${dir}` });
-            exec(`yarn workspace @microservices-suite${sep}${dir} ${mode}`, { cwd: join(microservicesDir, dir) }, async (error, stdout, stderr) => {
+            await exec(`yarn workspace @microservices-suite${sep}${dir} ${mode}`, { cwd: join(microservicesDir, dir) }, async (error, stdout, stderr) => {
                 var error_message = ''
                 if (error) {
                     const _ = error.message.split('\n')
                     if (_[1] && _[1].startsWith('error Command') && _[1].endsWith('not found.')) {
                         error_message = `Missing script at ${dir}${sep}package.json: ${_[1].match(/"(.*?)"/)[1]}`
+                    }
+                    if (_[1] && _[1].startsWith('error There are more than one workspace')) {
+                        logError({ error: _[1] && _[1].replace('error ', '') })
+                        logAdvise({ message: 'Run suite fix -n to auto-fix all workspace naming issues' })
+                        exit(1)
                     }
                     if (_[1] && _[1].includes('Unknown workspace')) {
                         if (existsSync(`${microservicesDir}${sep}${dir}${sep}package.json`)) {
@@ -351,29 +369,19 @@ const spinServices = async ({ serviceDirectories, microservicesDir, mode = 'dev'
                             logAdvise({ message: 'Run suite fix -n to auto-fix all workspace naming issues' })
                             logAdvise({ message: 'suite fix only changes the package.json. If any service depends on it you will need to update it manually' })
                         } else {
-
                             logError({ error: (`Missing package.json @microservices-suite${sep}${dir}`) })
                         }
                         exit(1)
                     }
                     logError({ error: error_message })
                 } else {
-                    resolve(`Service in directory ${dir} started successfully`);
+                    logSuccess({ message: `Service in directory ${dir} started successfully` });
                 }
             });
         }))
 }
 
-/**
- * 
- * @param {Object} options Environment to run the 
- * @param {string} [options.components] App environment. Defaults to dev mode
- * @param {array} apps The apps to run 
- */
-const spinApps = ({ components, options }) => {
-    start({ components, options })
-    // TODO: handle this case
-}
+
 
 /**
  * 
@@ -382,10 +390,10 @@ const spinApps = ({ components, options }) => {
  * @param {array} apps The apps to run 
  */
 const spinApp = ({ app, options }) => {
-    if(options.kubectl){
+    if (options.kubectl) {
         startKubectlPods()
     }
-    
+
     exec(`yarn workspace @microservices-suite${sep}${dir} ${mode}`, { cwd: join(microservicesDir, dir) }, async (error, stdout, stderr) => {
         var error_message = ''
         if (error) {
@@ -408,7 +416,120 @@ const spinApp = ({ app, options }) => {
         } else {
             resolve(`Service in directory ${dir} started successfully`);
         }
-    });}
+    });
+}
+/**
+* 
+* @param {Object} options Environment to run the 
+* @param {boolean} [options.kubectl] If true runs the app with kubectl
+* @param {boolean} [options.mode] App environment
+* @param {string[]} [options.apps If true the assumes components defined are apps 
+* @returns {void} Starts all components in the existing workspaces
+*/
+const startApps = async ({ apps, mode, kubectl }) => {
+    const {
+        component_root_dir: apps_root_dir,
+        components_directories: apps_directories
+    } = await getComponentDirecotories({
+        components: apps,
+        component_type: 'app'
+    })
+    // case -k (--kubectl)
+    if (kubectl) {
+        //TODO: spin app with kubectl pods
+        spinKubectlPods({ apps, mode })
+        // TODO: listen on SIGTERM and other kill signals to exit gracefully eg with CTRL+[C,D,Z]
+    }
+    else {
+        // case -v(--vanilla)
+        // TODO: run services with nodemon in dev mode otherwise PM2
+        runVanillaApps({ apps, mode })
+    }
+
+    // TODO: listen on SIGTERM and other kill signals to exit gracefully eg with CTRL+[C,D,Z]
+    // case -v(--vanilla)
+    // TODO: run services with nodemon in dev mode otherwise PM2
+
+}
+
+/**
+ * 
+ * @param {Object} options  
+ * @param {array} options.component
+ * @param {string} options.component_type
+ * @returns {{component_root_dir: string, components_directories: string[]}} - An object containing the root directory of the components and an array of directories for each component.
+ */
+const getComponentDirecotories = async ({ components, component_type }) => {
+    const currentDir = cwd();
+    // Check if 'microservices' directory exists
+    const is_component_dir = currentDir.split(sep).includes(`${component_type === 'app' ? 'gateway/apps' : 'microservices'}`);
+
+    // Construct component directory path
+    const component_root_dir = is_component_dir ?
+        currentDir.split(sep).slice(0, currentDir.split(sep).indexOf(`${component_type === 'app' ? 'gateway/apps' : 'microservices'}`) + 1).join(sep) :
+        `${currentDir}${sep}${component_type === 'app' ? 'gateway/apps' : 'microservices'}`;
+    logInfo({ message: `cwd: ${component_root_dir}` });
+
+    // Check if the component directory exists
+    if (!existsSync(component_root_dir) || !statSync(component_root_dir).isDirectory()) {
+        reject(`Microservices directory not found: ${component_root_dir}`);
+        return;
+    }
+
+    // Get a list of directories in the component directory
+    let components_directories
+    if (!components.length) {
+        components_directories = readdirSync(component_root_dir)
+            .filter(item => statSync(join(component_root_dir, item)).isDirectory());
+    }
+    else {
+        components_directories = readdirSync(component_root_dir)
+            .filter(item => components.includes(item) && statSync(join(component_root_dir, item)).isDirectory()
+            );
+        components.forEach(service => {
+            const valid_dir = components_directories.includes(service) && statSync(join(component_root_dir, service)).isDirectory()
+            if (!valid_dir) {
+                logError({ error: `No such service under microservices workspace: ${service}` })
+                exit(1)
+            }
+        });
+        // .filter(item => {
+        // });
+    }
+    return { component_root_dir, components_directories }
+}
+
+/**
+* 
+* @param {Object} options Environment to run the 
+* @param {boolean} [options.vanilla] If true runs the service nodemon
+* @param {boolean} [options.mode] App environment
+* @param {string[]} [options.services] If true the assumes components defined are apps 
+* @returns {void} Starts all components in the existing workspaces
+*/
+const startServices = async ({ services, mode, vanilla }) => {
+    const {
+        component_root_dir: microservices_root_dir,
+        components_directories: microservices_directories
+    } = await getComponentDirecotories({
+        components: services,
+        component_type: 'microsevice'
+    })
+    if (vanilla) {
+        // TODO: run services with nodemon in dev mode otherwise PM2
+        await spinVanillaServices({
+            microservicesDir: microservices_root_dir,
+            serviceDirectories: microservices_directories,
+            mode
+        })
+    }
+    else {
+        // TODO: run services with nodemon in dev mode otherwise PM2
+        runDockerizedServices({ microservices, mode, vanilla })
+    }
+    // TODO: listen on SIGTERM and other kill signals to exit gracefully eg with CTRL+[C,D,Z]
+}
+
 module.exports = {
     generateDirectoryPath,
     changeDirectory,
@@ -423,5 +544,8 @@ module.exports = {
     addDepsAtWorkspace,
     startAll,
     start,
-    logWarning
+    logWarning,
+    startApps,
+    startServices,
+    pathExists
 }
