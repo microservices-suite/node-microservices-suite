@@ -88,15 +88,16 @@ program
     .option('-v, --vanilla', 'Run the components directly without Docker. In development mode with Nodemon, otherwise with PM2')
     .option('-m, --mode <name>', 'Environment to run the component', 'dev')
     .action(async (components, options) => {
-        if (components.length === 0) {
-            const component_type = options.app ? 'apps' : 'services'
-            // No components specified, default to starting all services in development mode
-            logInfo({ message: `No specific ${component_type} specified. Starting all ${component_type} in ${options.mode} mode...` })
-            await actionHandlers.startAll({ options });
-            return;
+        if (options.app) {
+            // running apps
+            logInfo({ message: `Starting all apps in ${options.mode} mode...` })
+            await actionHandlers.startApps({ components, options });
+        }
+        else {
+            // running services
+            await actionHandlers.startServices({ components, options });
         }
 
-        await actionHandlers.start({ components, options });
     });
 
 program.parse(process.argv);
