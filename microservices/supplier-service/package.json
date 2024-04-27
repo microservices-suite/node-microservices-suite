@@ -16,7 +16,7 @@
     },
     "scripts": {
         "start": "node index.js",
-        "dev": "NODE_ENV=dev nodemon index.js"
+        "dev": "NODE_ENV=dev nodemon -q index.js"
     },
     "devDependencies": {},
     "author": "Dhairya Doshi",

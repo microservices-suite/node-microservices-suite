@@ -21,7 +21,7 @@ const app = express();
 app.use(express.json());
 
 app.get('/', (req, res) => {
-  res.json({ messae: 'hello from microservices-suite' });
+  res.json({ messae: 'hello from @microservices-suite/user-service' });
 });
 
 const server = http.createServer(app);
