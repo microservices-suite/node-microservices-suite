@@ -1,5 +1,5 @@
 const { join, sep } = require('node:path')
-const { cwd, chdir, exit,platform } = require('node:process')
+const { cwd, chdir, exit, platform } = require('node:process')
 const { existsSync, statSync, readdirSync } = require('node:fs');
 // TODO: use spawn instead for whatever reasons. Yet to find out
 let { exec } = require('node:child_process');
@@ -464,18 +464,20 @@ const startApps = async ({ apps, mode, kubectl }) => {
  */
 const getComponentDirecotories = async ({ components, component_type }) => {
     const currentDir = cwd();
-    // Check if 'microservices' directory exists
-    const is_component_dir = currentDir.split(sep).includes(`${component_type === 'app' ? 'gateway/apps' : 'microservices'}`);
-
+    
     // Construct component directory path
-    const component_root_dir = is_component_dir ?
-        currentDir.split(sep).slice(0, currentDir.split(sep).indexOf(`${component_type === 'app' ? 'gateway/apps' : 'microservices'}`) + 1).join(sep) :
-        `${currentDir}${sep}${component_type === 'app' ? 'gateway/apps' : 'microservices'}`;
+    const component_root_dir = `${currentDir.split(sep).slice(0, currentDir.split(sep).indexOf("node-microservices-suite") + 1).join(sep)}${sep}${component_type === 'app' ? `gateway${sep}apps` : 'microservices'}`
     logInfo({ message: `cwd: ${component_root_dir}` });
 
     // Check if the component directory exists
     if (!existsSync(component_root_dir) || !statSync(component_root_dir).isDirectory()) {
-        reject(`Microservices directory not found: ${component_root_dir}`);
+        logError({ error: `${component_type === 'app' ? `gateway${sep}apps` : 'microservices'} directory not found: ${component_root_dir}` });
+        exit(1);
+    }
+
+    // Check if the component directory exists
+    if (!existsSync(component_root_dir) || !statSync(component_root_dir).isDirectory()) {
+        logError({ error: `Microservices directory not found: ${component_root_dir}` });
         return;
     }
 
