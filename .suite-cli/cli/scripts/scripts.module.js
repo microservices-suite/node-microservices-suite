@@ -1,7 +1,7 @@
 const { join, sep } = require('node:path')
-const { cwd, chdir, exit } = require('node:process')
+const { cwd, chdir, exit,platform } = require('node:process')
 const { existsSync, statSync, readdirSync } = require('node:fs');
-const { platform } = require('node:process');
+// TODO: use spawn instead for whatever reasons. Yet to find out
 let { exec } = require('node:child_process');
 const chalk = require('chalk')
 
@@ -351,7 +351,7 @@ const spinVanillaServices = async ({ serviceDirectories, microservicesDir, mode 
     await Promise.all(
         serviceDirectories.map(async (dir) => {
             logInfo({ message: `Starting service concurrently in: ${dir}` });
-            await exec(`yarn workspace @microservices-suite${sep}${dir} ${mode}`, { cwd: join(microservicesDir, dir) }, async (error, stdout, stderr) => {
+            const processes = await exec(`yarn  workspace @microservices-suite${sep}${dir}  ${mode}`, { cwd: join(microservicesDir, dir) }, async (error, stdout, stderr) => {
                 var error_message = ''
                 if (error) {
                     const _ = error.message.split('\n')
@@ -378,6 +378,7 @@ const spinVanillaServices = async ({ serviceDirectories, microservicesDir, mode 
                     logSuccess({ message: `Service in directory ${dir} started successfully` });
                 }
             });
+            processes.stdout.pipe(process.stdout);
         }))
 }
 
