@@ -4,19 +4,20 @@
   "description": "The product service serves as the central repository for managing product information within our microservices ecosystem. It stores detailed product catalogs, including attributes, images, pricing, and inventory levels, providing a single source of truth for product data across channels. With support for multi-lingual and multi-currency catalogs, it enables global reach and localization of product offerings. Through integrations with recommendation engines and analytics platforms, it facilitates personalized product recommendations and insights-driven merchandising strategies. Designed for flexibility and extensibility, it supports custom product types, categories, and attributes, empowering our platform to adapt to evolving business requirements and market trends.",
   "main": "index.js",
   "dependencies": {
-      "nodemon": "3.1.0",
-      "express" : "*",
-      "mongoose": "*",
-      "mongodb": "^6.5.0",
-      "amqplib": "0.10.3"
+    "nodemon": "3.1.0",
+    "express": "*",
+    "mongoose": "*",
+    "mongodb": "^6.5.0",
+    "amqplib": "0.10.3"
   },
-  "devDependencies": {
-  },
+  "devDependencies": {},
   "scripts": {
-      "start": "node index.js",
-      "dev": "nodemon index.js"
+    "test": "jest",
+    "dev": "NODE_ENV=dev nodemon -q index.js",
+    "start": "pm2-runtime start ecosystem.config.js --env production",
+    "stop:prod": "pm2 stop ecosystem.config.js",
+    "delete:prod": "pm2 delete ecosystem.config.js"
   },
   "author": "Dhairya Doshi",
   "license": "ISC"
-
 }

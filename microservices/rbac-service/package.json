@@ -1,5 +1,5 @@
 {
-    "name": "@microservices-suite/supplier-service",
+    "name": "@microservices-suite/rbac-service",
     "version": "1.0.0",
     "description": "The supplier service serves as the central repo for the supplier CRUD operation",
     "main": "index.js",
@@ -15,8 +15,11 @@
         "nodemon": "3.1.0"
     },
     "scripts": {
-        "start": "node index.js",
-        "dev": "NODE_ENV=dev nodemon index.js"
+        "test": "jest",
+        "dev": "NODE_ENV=dev nodemon -q index.js",
+        "start": "pm2-runtime start ecosystem.config.js --env production",
+        "stop:prod": "pm2 stop ecosystem.config.js",
+        "delete:prod": "pm2 delete ecosystem.config.js"
     },
     "devDependencies": {},
     "author": "Dhairya Doshi",
