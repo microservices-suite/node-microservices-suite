@@ -20,6 +20,8 @@ const generateDirectoryPath = ({ workspace_name, workspace_directory = 'microser
  * The function cds into given directory_path
  * @param {Object} options The path to the file
  * @param {string} options.directory_path The path to the file
+ * @param {Object} options The path to the file
+ * @param {string} options.directory_path The path to the file
  * @returns void
  */
 const changeDirectory = ({ directory_path }) => {
