@@ -8,12 +8,12 @@ module.exports = {
       instances:4,
       env_production: {
         NODE_ENV: "prod",
-        DATABASE_URL:"host.docker.internal:27017/customer_service_db_dev",
+        DATABASE_URL:"mongodb://localhost:27017/customer_service_db_dev",
         PORT:"9009"
      },
      env_development: {
       NODE_ENV: "dev",
-      DATABASE_URL:"host.docker.internal:27017/customer_service_db_dev",
+      DATABASE_URL:"mongodb://localhost:27017/customer_service_db_dev",
       PORT:"9009"
    }
     }]

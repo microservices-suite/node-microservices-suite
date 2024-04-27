@@ -10,9 +10,9 @@ const { router } = require('./src/routes');
 // const app = require('./src/app');
 
 mongoose.connect(config.db).then(() => {
-  logger.info(`successfully connected to mongoDB: ${config.db}`);
+  logger.info(`successfully connected to db: ${config.db}`);
 }).catch(err => {
-  logger.error(`failed to connect to mongo. exiting...${err.message}`);
+  logger.error(`failed to connect to db. exiting...${err.message}`);
   process.exit(0);
 });
 

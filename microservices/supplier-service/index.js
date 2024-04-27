@@ -14,7 +14,6 @@ app.use(express.json())
 
 async function startServer() {
     try {
-        console.log(process.env.NODE_ENV)
         const channel = await createRMQChannel()
         subscribeMessage(channel, "")
         app.use(rabbitMQMiddleware(channel))
@@ -22,7 +21,7 @@ async function startServer() {
         app.use(morgan.successHandler)
         app.use('/', routes)
         app.listen(9001, () => {
-            console.log('Server listening on port: 9001')
+            logger.info(`http server connected: ${config.port}`);
         })
         // global error handler should come after all other middlewares
         app.all('*', (req, res, next) => {
@@ -32,7 +31,7 @@ async function startServer() {
         app.use(errorHandler);
 
     } catch (error) {
-        console.error('Error starting server:', error)
+        logger.error(err);
     }
 }
 
