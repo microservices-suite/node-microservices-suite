@@ -11,8 +11,8 @@ const envVarsSchema = joi.object().keys({
     DATABASE_URL: joi.string().uri().required()
 }).unknown();
 
+
 const { value: envVars, error } = envVarsSchema.prefs({ errors: { label: 'key' } }).validate(process.env);
-console.log({ PORT: process.env.PORT, DB: process.env.DATABASE_URL })
 if (error) {
     throw new Error(`Config validation error: ${error.message}`);
 }

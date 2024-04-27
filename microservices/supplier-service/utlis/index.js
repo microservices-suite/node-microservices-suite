@@ -1,5 +1,6 @@
 const amqplib = require('amqplib')
 const {RMQ_URL, RMQ_EXCHANGE_NAME, RMQ_QUEUE_NAME} = require('../config')
+const { config, morgan, logger } = require('@microservices-suite/config');
 const { SUPPLIER_BINDING_KEY} = require('../config/index')
 
 // create channel
@@ -14,7 +15,7 @@ module.exports.createRMQChannel = async() => {
     
         return channel
     } catch (error) {
-        console.log(error)
+        logger.error(error.message)
     }
 }
 
@@ -23,9 +24,9 @@ module.exports.createRMQChannel = async() => {
 module.exports.publishMessage = async(channel, binding_key, message) => {
     try {
         await channel.publish(RMQ_EXCHANGE_NAME, binding_key, Buffer.from(message))
-        console.log("Message sent")
+        logger.info("Message sent")
     } catch (error) {
-        console.log(error)
+        logger.error(error.message)
     }
 }
 
@@ -34,17 +35,17 @@ module.exports.publishMessage = async(channel, binding_key, message) => {
 module.exports.subscribeMessage = async( channel, binding_key, message) => {
     try {
         const appQueue = await channel.assertQueue(RMQ_QUEUE_NAME)
-        console.log(` Waiting for messages in queue: ${appQueue.queue}`);
+        logger.info(` Waiting for messages in queue: ${appQueue.queue}`);
         channel.bindQueue( appQueue.queue, RMQ_EXCHANGE_NAME, SUPPLIER_BINDING_KEY)
         channel.consume(appQueue.queue, data => {
-            console.log("Data Received")
+            logger.info("Data Received")
             
             data && (
-                console.log("This is the data" ,data.content.toString()),
+                logger.info("This is the data" ,data.content.toString()),
                 channel.ack(data)
                 )
         })
     } catch (error) {
-        console.log(error)
+        logger.error(error.message)
     }
 }

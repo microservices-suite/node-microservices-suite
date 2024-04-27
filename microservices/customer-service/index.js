@@ -1,6 +1,7 @@
 const express = require('express')
 const app = express()
 const routes = require('./routes')
+const { config, morgan, logger } = require('@microservices-suite/config');
 const { createRMQChannel, subscribeMessage } = require('./utils/index')
 const { rabbitMQMiddleware } = require('./middlewares/rabbitmq')
 
@@ -14,10 +15,10 @@ async function startServer() {
         app.use(rabbitMQMiddleware(channel))
         app.use('/', routes)
         app.listen(9000, () => {
-            console.log('Server listening on port: 9000')
+            logger.info(`http server connected: ${config.port}`);
         })
     } catch (error) {
-        console.error('Error starting server:', error)
+        logger.error(err);
     }
 }
 
