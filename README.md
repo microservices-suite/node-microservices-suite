@@ -207,18 +207,22 @@ git clone https://github.com/microservices-suite/node-microservices-suite.git
 git checkout -b feat/<my-feature>
 ```
 3. Make your changes and make sure that tests pass.
-4. Commit your changes using the Angular commit message convention:
-   - For more details, please refer to the [Angular commit message convention](https://github.com/angular/angular/blob/master/CONTRIBUTING.md#commit).
+
+4. Before committing your changes, make sure it follows the [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) specification:
+
+   - We recommend you use the [Better Commits CLI](https://github.com/Everduin94/better-commits) tool. It is a CLI for writing better commits, following the conventional commits specification.
+
 5. Push to the branch: 
 ```bash
 git push origin feat/<my-feature>
 ```
 6. Submit a pull request detailing your changes.
+
 7. Please ensure that your pull request adheres to the project's code style and conventions.
 
 ## License
 
-- This project is licensed under the [MIT License](LICENSE). Feel free to use, modify, and distribute this code for any purpose.
+- This project is licensed under the [MIT License](./LICENSE). Feel free to use, modify, and distribute this code for any purpose.
 
 ## Acknowledgements
 
