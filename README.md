@@ -3,10 +3,17 @@
 ## Overview
 
 Welcome to the 📦 [Microservices](https://drive.google.com/file/d/1Noc_6WVe0CmzynnuURexm7MCv75OUAuQ/view?usp=drive_link) Suite project! This suite is a collection of Node.js microservices built using the 🦧 [mono-repo]() strategy and leveraging the [yarn workspaces](https://classic.yarnpkg.com/lang/en/docs/workspaces/) concept. Each microservice runs in its isolated Docker `container`, and `Kubernetes` orchestrates the deployment, providing scalability and efficiency.
+To easily work with a `@microservices-suite monorepo` you need to install [Suite CLI](https://www.npmjs.com/package/@microservices-suite/cli). With `Suite` you can easily scaffold,manage and automate your monorepo in development, CI as well as production. Check the installation guidelines in the `README.md` section of the `.suite-cli` root.
 
 ## Project file structure
 ```sequence
 ├─ node-microservices-suite
+│  ├─ .suite-cli/ #CLI tool for managing @microservices-suite monorepos
+|  │  ├─ cli/
+|  │  │  ├─ scripts/
+|  │  │  ├─ cli.js
+|  │  │  ├─ package.json
+|  │  │  ├─ README.md
 │  ├─ api-gateways/
 |  │  ├─ app-1/
 |  │  │  ├─ nginx
@@ -88,11 +95,17 @@ Welcome to the 📦 [Microservices](https://drive.google.com/file/d/1Noc_6WVe0Cm
   - simplify the automation of repetitive workflows.
 
 - **Code Sharing Anywhere:** 
-  - Publish and import organization-scoped libraries to the npm registry with 
+  - Publish and import organization-scoped libraries from the npm registry with 
 ```bash
-    yarn publish 
-    yarn add <@microservices-suite/foo> or
-    yarn @microservices-suite/<workspace-name> add <@microservices-suite/foo>
+    yarn release 
+    yarn add <@microservices-suite/foo>
+    yarn workspace @microservices-suite/<workspace-name> add  @microservices-suite/<library> 
+```
+  - Using `Suite CLI` you could achieve the results with the following commands
+```bash
+    suite release 
+    suite add <@microservices-suite/foo>
+    suite -W <workspace-name> add  @microservices-suite/<library> 
 ```
 
 - **Easily Containerize and Scale:** 
@@ -151,31 +164,37 @@ Welcome to our project! To ensure a smooth setup and development experience, ens
   - 👉 [Download LTS version here](https://nodejs.org/en/download)
 - At the project <service_root> create `.env`, `.env.dev` and `.env.staging` files and copy `environment variables` from the `.env.example` file
 
-## Running Services
+## Running Components
 
-- This project uses [Task Runner](https://taskfile.dev/usage/) Automation Tool to streamline the process of starting services in both development and production. Follow these steps to get your environment up and running:
-- You can derive the `service_name` of a service from the workspace name found in the `package.json "name": ` property e.g 
+- A `component` in our `suite` jargon refers to a `service` or `application`. With `@microservices-suite` you can create 1 or more services as well as applications.
+- Suite is `component-scoped` a our strategy that enhances modularity and at the same time makes using the monorepo intuitive. Its is inspired by `Single Responsibility` principle.
+- Apps are simply `cohessive` microservices `aggregated` under the `./gateway/apps/` directory to create decoupled services to serve your client. An example is an `Ecommerce app`. This app can have `customer, supplier,orders and products` microservices under the `./microservices/` directory. These microservices are then referenced in `docker-compose` file definitions placed under the `./gateway/apps/ecommerce-app/` directory. Other apps can be added to the `./gateway/apps` directory with their `docker-compose` definitions and `api-gateway configs(nginx/appache)`.
+- Suite scales applications with `kubernetes` and app-scoped `k8s` configs are located under the `./k8s/` directory. Therefore the kubernetes configurations for our Ecommerce app will be located at `./k8s/ecommerce-app`
+- [Suite CLI](https://github.com/microservices-suite/node-microservices-suite/tree/main/.suite-cli/cli) streamlines the process of starting a services(s) or app(s) in both `development`,`CI` & `production`. Follow these steps to get your environment up and running:
+- You can derive the `service_name` or `app-name` from the workspace name found in the `package.json "name": ` property e.g 
 ```json
-"name": "@microservices-suite/<service_name>"
+"name": "@microservices-suite/<component-name>"
 ```
-- To run a service in either modes [dev,staging,prod]:
-- Action is similar to [up,down] docker compose syntax where `up` & `down` `start` and `stop` the `service` respectively with `docker-compose <action>`
+- To run an app in either modes [dev,staging,prod]:
+- If -k or --kubectl flag is specified `suite` spins your app with `kubectl` . You need to have [minikube](https://minikube.sigs.k8s.io/docs/start/) installed and [kubectl](https://kubernetes.io/docs/tasks/tools/). Otherwise defaults to docker compose
+- If -m or --mode is specified you need to have a `docker-compose.<mode>` specified but this is not necessary with kubectl since we only run the development version of kubectl.
 ```bash
-task do:<service_name>:<mode>:<action>
+suite start [--kubectl,--mode]|[-km] <mode> <app-name...> 
 ```
-- This command uses docker-compose to start your service(s)
-- The task runner will handle the setup, ensuring your service is ready.
+- This command uses docker-compose to start your app(s)
+- Suite will handle the setup, ensuring your app is ready.
 
-### Running Services Without Docker
-- If you prefer not to use Docker, you can use the `vanilla` task command to start services using node `PM2` engine in production or `nodemon` in any other mode:
+### Running Services with -v --vanilla
+- If you prefer not to use Docker, you can use the `-v,--vanilla`  command to start service(s) using node `PM2` engine in production or `nodemon` in any other mode:
 ```bash
-task vanilla:<service_name>:<mode>
+suite start [--vanilla,--mode]|[-vm] <mode> <service_name...>
 ```
 
 ### Using Docker-Compose Directly
 - Should you need to use docker-compose directly for more control over the container orchestration, you can utilize the standard commands provided by Docker:
+- You can replace the yml files with your compose file path and production.yml has been used as an overide. There are many ways to kill the cat in dockers world 😎.
 ```bash
-docker-compose up
+ docker-compose  -f docker-compose.yml -f production.yml up --build -d
 docker-compose down
 ```
 
