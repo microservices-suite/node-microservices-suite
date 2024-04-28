@@ -163,10 +163,10 @@ Welcome to our project! To ensure a smooth setup and development experience, ens
 ## Running Components
 
 - A `component` in our `suite` jargon refers to a `service` or `application`. With `@microservices-suite` you can create 1 or more services as well as applications.
-- Suite is `component-scoped` a our strategy that enhances modularity and at the same time makes using the monorepo intuitive. Its is inspired by `Single Responsibility` principle.
+- Suite is `component-scoped`, giour strategy that enhances modularity and at the same time makes using the monorepo intuitive. Its is inspired by `Single Responsibility` principle.
 - Apps are simply `cohessive` microservices `aggregated` under the `./gateway/apps/` directory to create decoupled services to serve your client. An example is an `Ecommerce app`. This app can have `customer, supplier,orders and products` microservices under the `./microservices/` directory. These microservices are then referenced in `docker-compose` file definitions placed under the `./gateway/apps/ecommerce-app/` directory. Other apps can be added to the `./gateway/apps` directory with their `docker-compose` definitions and `api-gateway configs(nginx/appache)`.
 - Suite scales applications with `kubernetes` and app-scoped `k8s` configs are located under the `./k8s/` directory. Therefore the kubernetes configurations for our Ecommerce app will be located at `./k8s/ecommerce-app`
-- [Suite CLI](https://github.com/microservices-suite/node-microservices-suite/tree/main/.suite-cli/cli) streamlines the process of starting a services(s) or app(s) in both `development`,`CI` & `production`. Follow these steps to get your environment up and running:
+- [Suite CLI](https://github.com/microservices-suite/node-microservices-suite/tree/main/.suite-cli/cli) streamlines the process of starting a service(s) or app(s) in `development` & `production`. Follow these steps to get your environment up and running:
 - You can derive the `service_name` or `app-name` from the workspace name found in the `package.json "name": ` property e.g 
 ```json
 "name": "@microservices-suite/<component-name>"
@@ -191,7 +191,7 @@ suite start [--vanilla,--mode]|[-vm] <mode> <service_name...>
 - You can replace the yml files with your compose file path and production.yml has been used as an overide. There are many ways to kill the cat in dockers world 😎.
 ```bash
  docker-compose  -f docker-compose.yml -f production.yml up --build -d
-docker-compose down
+ docker-compose down
 ```
 
 ## Contributing
