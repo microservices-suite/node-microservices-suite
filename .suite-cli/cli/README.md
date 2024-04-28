@@ -15,17 +15,9 @@ npm install -g @microservices-suite/cli
 Alternatively, you can use this command `npx @microservices-suite/cli@latest` without installing the cli globally.
 
 ### Basic workflow
-
-- Install dependencies
-```bash
-suite --help
-```
-
-### UsageBasic workflow#
-
 - Once installed, you can invoke CLI commands directly from your OS command line through the `suite` executable. See the available `suite` commands by entering the following:
 ```bash
-suite install
+suite --help
 ```
 
 - Get help on an individual command using the following construct. Substitute any command, like `host`, `docker:start`, etc., where you see `start` in the example below to get detailed help on that command:
