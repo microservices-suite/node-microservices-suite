@@ -2,7 +2,7 @@ const { join, sep } = require('node:path')
 const { cwd, chdir, exit, platform } = require('node:process')
 const { existsSync, statSync, readdirSync } = require('node:fs');
 // TODO: use spawn instead for whatever reasons. Yet to find out
-let { exec } = require('node:child_process');
+let { exec, spawn } = require('node:child_process');
 const chalk = require('chalk')
 
 /**
