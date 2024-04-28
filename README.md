@@ -8,7 +8,7 @@ To easily work with a `@microservices-suite monorepo` you need to install [Suite
 ## Project file structure
 ```sequence
 ├─ node-microservices-suite
-│  ├─ .suite-cli/ #CLI tool for managing @microservices-suite monorepos
+│  ├─ .suite-cli/
 |  │  ├─ cli/
 |  │  │  ├─ scripts/
 |  │  │  ├─ cli.js
@@ -21,14 +21,11 @@ To easily work with a `@microservices-suite monorepo` you need to install [Suite
 |  │  │  ├─ README.md
 │  ├─ graphql/
 |  │  ├─ app-1/
-|  │  │  ├─ apollo-server # placeholder file atm
+|  │  │  ├─ apollo-server
 |  │  │  ├─ README.md
 │  ├─ data-persistence/
 |  │  ├─ db-1/
 |  │  │  ├─ Dockerfile
-|  │  │  ├─ README.md
-|  │  ├─ sqlite/ #for in memory or disk db for miniature devices or prototyping
-|  │  ├─ ├─ db/
 |  │  │  ├─ README.md
 │  ├─ k8s/
 |  │  ├─ service-1/
@@ -61,7 +58,7 @@ To easily work with a `@microservices-suite monorepo` you need to install [Suite
 |  │  ├─ service-1/
 |  │  │  ├─ e2e/
 |  │  │  ├─ integration/
-|  │  │  ├─ snapshot/ #if it's a micro-frontend service
+|  │  │  ├─ snapshot/
 |  │  │  ├─ unit/
 |  │  │  ├─ README.md
 |  ├─ .gitignore
@@ -71,7 +68,6 @@ To easily work with a `@microservices-suite monorepo` you need to install [Suite
 |  ├─ package.json
 |  ├─ production.yml
 |  ├─ README.md
-|  ├─ Taskfile.yml
 |  ├─ yarn.lock
 ```
 ## Monorepo strategy benefits for microservices:
