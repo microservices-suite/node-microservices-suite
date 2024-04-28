@@ -7,6 +7,9 @@
   "author": "Gilber Andanje <gilbertandanje@gmail.com>",
   "license": "MIT",
   "private": false,
+  "bin": {
+    "suite": "cli.js"
+  },
   "keywords": [
     "cli"
   ],
