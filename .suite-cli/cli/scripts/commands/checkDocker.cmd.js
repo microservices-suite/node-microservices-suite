@@ -5,7 +5,7 @@ module.exports = async () => {
     const isDockerRunning = await checkDocker();
     const platform = getPlatform();
     const platformEmoji = platform === 'MacOS' ? '🍏' : platform === 'Linux' ? '🐧' : '🪟';
-    const dockerStatusMessage = isDockerRunning ? 'running...' : 'not running. Attempting to start docker...';
+    const dockerStatusMessage = isDockerRunning ? 'running...' : 'not running.';
     const dockerStatusIcon = isDockerRunning ? '✓' : '⚠️';
 
     logInfo({
