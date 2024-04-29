@@ -152,9 +152,9 @@ Welcome to our project! To ensure a smooth setup and development experience, ens
   - 👉 [Install docker here](https://docs.docker.com/engine/install/).
   - We love 💚 [alpine images](https://alpinelinux.org/) <small,simple,secure>. 
   - You can read about the specific flavor [here](https://github.com/nodejs/docker-node/blob/main/README.md#how-to-use-this-image)
-- **Task Runner Automation Tool:** 
-  - For task automation and workflow management.  
-  - 👉 [Install task runner here](https://taskfile.dev/installation/).
+- **Suite CLI:** 
+  - For easy project scaffolding task automation and workflow management.
+  - Install `suite`: check the installation guidelines below.
 - **Node.js:** 
   - As the runtime environment for executing the application code.  
   - 👉 [Download LTS version here](https://nodejs.org/en/download)
