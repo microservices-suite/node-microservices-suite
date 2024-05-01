@@ -7,7 +7,10 @@ const { logInfo } = require('./scripts/scripts.module');
 
 const program = new Command()
 actionHandlers.logInfoMessage({ message: (figlet.textSync('Microservices-suite')) })
-
+program
+    .command('reset')
+    .description('deep remove all node modules and artefacts generated during yarn install')
+    .action(async ({options,components}) => await actionHandlers.repoReset({options,components}));
 program
     .command('err')
     .description('Prints Error message to screen')
@@ -85,6 +88,7 @@ program
     .description('Starts specified components (services or apps), or all services in dev mode if -m is not specified')
     .option('-a, --app', 'Indicates that the components specified are apps. Defaults to Docker Compose')
     .option('-k, --kubectl', 'Run the components using kubectl instead of Docker Compose. This flag is ignored if -a is not provided')
+    .option('-b, --build', 'If running dockerized up docker compose rebuilds the images i.e docker compose up --build')
     .option('-v, --vanilla', 'Run the components directly without Docker. In development mode with Nodemon, otherwise with PM2')
     .option('-m, --mode <name>', 'Environment to run the component', 'dev')
     .action(async (components, options) => {

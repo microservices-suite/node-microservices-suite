@@ -384,7 +384,84 @@ const spinVanillaServices = async ({ serviceDirectories, microservicesDir, mode 
         }))
 }
 
+/**
+ * 
+ * @param {Object} options Environment to run the 
+ * @param {string} options.apps_dir The the apps root directory
+ * @param {string} options.apps_directories List of app directories  under [options.apps_dir] 
+ * @param {string} [options.mode] App environment. Defaults to dev mode
+ * @param {string} [options.args] App environment. Defaults to dev mode
+ * @returns {void} Starts apps with nodemon in devmode otherwise PM2
+ */
+const runDockerizedApps = async ({ apps_dir, apps_directories, mode = 'dev', build }) => {
+    // console.log({ apps_dir, apps_directories, mode })
+    logInfo({ message: `Starting all apps in ${mode} mode...` });
+    await Promise.all(
+        apps_directories.map(async (dir) => {
+            logInfo({ message: `Starting app concurrently in: ${dir}` });
+            const dockerIsRunning = await checkDocker()
+            if (!dockerIsRunning) await startDocker()
+            // const composeCommand = 'docker';
+            // const composeFile = mode === 'prod' ? 'docker-compose.yml' : `docker-compose.${mode}.yml`;
 
+            // const args = [
+            //     'compose',
+            //     '-f',
+            //     `${apps_dir}${sep}${dir}${sep}${composeFile}`,
+            //     'up',
+            //     ...(build ? ['--build'] : [])
+            // ];
+
+            // const options = {
+            //     cwd: join(apps_dir, dir),
+            //     stdio: 'inherit' // to redirect child's stdout/stderr to process's stdout/stderr
+            // };
+
+            // const processes = spawn(composeCommand, args, options);
+
+            // //TODO: handle docker errors
+            // processes.on('exit', (code) => {
+            //     if (code !== 0) {
+            //         logError({ error: `Docker process exited with code ${code}` });
+            //     }
+            // });
+
+            const composeFile = mode === 'prod' ? 'docker-compose.yml' : `docker-compose.${mode}.yml`;
+
+            const spawn_child = spawn('docker-compose', ['-f', `${apps_dir}${sep}${dir}${sep}${composeFile}`, 'up', ...(build ? ['--build'] : [])]);
+
+            spawn_child.stdout.on('data', (data) => {
+                const message = data.toString().trim();
+                logInfo({ message });
+            });
+
+            spawn_child.stderr.on('data', (data) => {
+                const message = data.toString().trim();
+                logSuccess({ message });
+                // logError({ error }); // Uncomment this line if you prefer logging errors
+            });
+            spawn_child.stderr.on('error', (data) => {
+                const error = data.toString().trim();
+                logError({ error });
+                // logError({ error }); // Uncomment this line if you prefer logging errors
+            });
+            spawn_child.on('error', (error) => {
+                logError({ error: 'Failed to start child process.' });
+                logError({ error });
+                // logError({ error }); // Uncomment this line if you prefer logging errors
+            });
+
+            spawn_child.on('exit', (code, signal) => {
+                if (code !== 0) {
+                    logWarning({ message: `Process exited with code: ${code}, signal: ${signal}` });
+                    // logWarning({ message: `exited with code: ${code} signal: ${signal}` }); // Uncomment this line if you prefer logging warnings
+                } else {
+                    logInfo({ message: 'Process exited successfully' });
+                }
+            });
+            //TODO: handle docker errors
+        }))
+}
 
 /**
  * 
@@ -429,24 +506,24 @@ const spinApp = ({ app, options }) => {
 * @param {string[]} [options.apps If true the assumes components defined are apps 
 * @returns {void} Starts all components in the existing workspaces
 */
-const startApps = async ({ apps, mode, kubectl }) => {
+const startApps = async ({ apps, options }) => {
     const {
-        component_root_dir: apps_root_dir,
+        component_root_dir: apps_dir,
         components_directories: apps_directories
     } = await getComponentDirecotories({
         components: apps,
         component_type: 'app'
     })
     // case -k (--kubectl)
-    if (kubectl) {
+    if (options.kubectl) {
         //TODO: spin app with kubectl pods
-        spinKubectlPods({ apps, mode })
+        spinKubectlPods({ apps, mode: options.mode })
         // TODO: listen on SIGTERM and other kill signals to exit gracefully eg with CTRL+[C,D,Z]
     }
     else {
         // case -v(--vanilla)
         // TODO: run services with nodemon in dev mode otherwise PM2
-        runVanillaApps({ apps, mode })
+        runDockerizedApps({ apps_dir, apps_directories, mode: options.mode, build: options.build })
     }
 
     // TODO: listen on SIGTERM and other kill signals to exit gracefully eg with CTRL+[C,D,Z]
@@ -528,13 +605,12 @@ const startServices = async ({ services, mode, vanilla }) => {
             mode
         })
     }
-    else {
-        // TODO: run services with nodemon in dev mode otherwise PM2
-        runDockerizedServices({ microservices, mode, vanilla })
-    }
+
     // TODO: listen on SIGTERM and other kill signals to exit gracefully eg with CTRL+[C,D,Z]
 }
-
+const repoReset = ({ components, options }) => {
+    spawn('yarn', ['repo:reset'], { stdio: 'inherit' })
+}
 module.exports = {
     generateDirectoryPath,
     changeDirectory,
@@ -552,5 +628,6 @@ module.exports = {
     logWarning,
     startApps,
     startServices,
-    pathExists
+    pathExists,
+    repoReset
 }

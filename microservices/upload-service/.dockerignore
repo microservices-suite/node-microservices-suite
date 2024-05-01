@@ -1,0 +1,3 @@
+# ignore nodemodules
+node_modules
+bar
