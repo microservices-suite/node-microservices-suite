@@ -10,7 +10,17 @@ actionHandlers.logInfoMessage({ message: (figlet.textSync('Microservices-suite')
 program
     .command('reset')
     .description('deep remove all node modules and artefacts generated during yarn install')
-    .action(async ({options,components}) => await actionHandlers.repoReset({options,components}));
+    .action(async ({ options, components }) => await actionHandlers.repoReset({ options, components }));
+program
+    .command('stop [components...]')
+    .description('stop running containers. Stops all containers if no app is specified')
+    .action(async (components, options) => {
+
+            // running apps
+            logInfo({ message: `Starting all apps in ${options.mode} mode...` })
+            await actionHandlers.stopApps({ components, options });
+
+    });
 program
     .command('err')
     .description('Prints Error message to screen')
