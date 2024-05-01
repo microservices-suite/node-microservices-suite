@@ -15,3 +15,4 @@ module.exports.start = require('./commands/start.cmd');
 module.exports.startApps = require('./commands/startApps.cmd');
 module.exports.startServices = require('./commands/startServices.cmd');
 module.exports.repoReset = require('./commands/repoReset.cmd');
+module.exports.stopApps = require('./commands/stopApps.cmd');

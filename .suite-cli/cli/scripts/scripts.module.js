@@ -412,10 +412,10 @@ const runDockerizedApps = async ({ apps_dir, apps_directories, mode = 'dev', bui
             //     ...(build ? ['--build'] : [])
             // ];
 
-            // const options = {
-            //     cwd: join(apps_dir, dir),
-            //     stdio: 'inherit' // to redirect child's stdout/stderr to process's stdout/stderr
-            // };
+            const options = {
+                cwd: join(apps_dir, dir),
+                stdio: 'inherit' // to redirect child's stdout/stderr to process's stdout/stderr
+            };
 
             // const processes = spawn(composeCommand, args, options);
 
@@ -428,7 +428,7 @@ const runDockerizedApps = async ({ apps_dir, apps_directories, mode = 'dev', bui
 
             const composeFile = mode === 'prod' ? 'docker-compose.yml' : `docker-compose.${mode}.yml`;
 
-            const spawn_child = spawn('docker-compose', ['-f', `${apps_dir}${sep}${dir}${sep}${composeFile}`, 'up', ...(build ? ['--build'] : [])]);
+            const spawn_child = spawn('docker-compose', ['-f', `${apps_dir}${sep}${dir}${sep}${composeFile}`, 'up', ...(build ? ['--build'] : [])], options);
 
             spawn_child.stdout.on('data', (data) => {
                 const message = data.toString().trim();
@@ -541,7 +541,7 @@ const startApps = async ({ apps, options }) => {
  */
 const getComponentDirecotories = async ({ components, component_type }) => {
     const currentDir = cwd();
-    
+
     // Construct component directory path
     const component_root_dir = `${currentDir.split(sep).slice(0, currentDir.split(sep).indexOf("node-microservices-suite") + 1).join(sep)}${sep}${component_type === 'app' ? `gateway${sep}apps` : 'microservices'}`
     logInfo({ message: `cwd: ${component_root_dir}` });
@@ -611,6 +611,17 @@ const startServices = async ({ services, mode, vanilla }) => {
 const repoReset = ({ components, options }) => {
     spawn('yarn', ['repo:reset'], { stdio: 'inherit' })
 }
+
+const stopApps = async ({ components, options }) => {
+    const {
+        component_root_dir: apps_dir,
+    } = await getComponentDirecotories({
+        components,
+        component_type: 'app'
+    })
+    // TODO: handle case where no app is specified. component.length === 0 and if -k or --kill command is passed
+    spawn('docker', ['compose', '-f', `${apps_dir}${sep}${components}${sep}docker-compose.dev.yml`, 'down'], { stdio: 'inherit' })
+}
 module.exports = {
     generateDirectoryPath,
     changeDirectory,
@@ -629,5 +640,6 @@ module.exports = {
     startApps,
     startServices,
     pathExists,
-    repoReset
+    repoReset,
+    stopApps
 }
