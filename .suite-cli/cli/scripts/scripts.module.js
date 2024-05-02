@@ -44,7 +44,7 @@ const pathExists = ({ file_path }) => {
  * @param {string} options.message Message to display to console 
  * @returns {string}
  */
-const logSuccess = ({ message }) => console.log(chalk.blue(`✓ ${message}`))
+const logSuccess = ({ message }) => console.log(chalk.blue(`✓  ${message}`))
 
 /**
  * Prints error message to screen
@@ -52,7 +52,7 @@ const logSuccess = ({ message }) => console.log(chalk.blue(`✓ ${message}`))
  * @param {string} options.error Error message to display to console 
  * @returns {string}
  */
-const logError = ({ error }) => console.log(chalk.red(`⚠️ ${error}`))
+const logError = ({ error }) => console.log(chalk.red(`⚠️  ${error}`))
 
 /**
  * Prints success message to screen
@@ -60,7 +60,7 @@ const logError = ({ error }) => console.log(chalk.red(`⚠️ ${error}`))
  * @param {string} options.message Message to display to console 
  * @returns {string}
  */
-const logInfo = ({ message }) => console.log(chalk.gray(`✓ ${message}`))
+const logInfo = ({ message }) => console.log(chalk.gray(`✓  ${message}`))
 
 
 /**
@@ -69,7 +69,7 @@ const logInfo = ({ message }) => console.log(chalk.gray(`✓ ${message}`))
  * @param {string} options.message Warning to display to console 
  * @returns {string}
  */
-const logWarning = ({ message }) => console.log(chalk.yellow(`✓ ${message}`))
+const logWarning = ({ message }) => console.log(chalk.yellow(`✓  ${message}`))
 
 /**
  * Prints advise message to screen
@@ -77,7 +77,7 @@ const logWarning = ({ message }) => console.log(chalk.yellow(`✓ ${message}`))
  * @param {string} options.message advise to display to console 
  * @returns {string}
  */
-const logAdvise = ({ message }) => console.log(chalk.stderr(`✓ ${message}`))
+const logAdvise = ({ message }) => console.log(chalk.stderr(`✓  ${message}`))
 
 /**
  * Compares if 2 values match
@@ -320,7 +320,7 @@ const startAll = async ({ options }) => {
 
     // Check if the microservices directory exists
     if (!existsSync(microservicesDir) || !statSync(microservicesDir).isDirectory()) {
-        reject(`Microservices directory not found: ${microservicesDir}`);
+        reject(`This does not seem to be a suite monorepo project`);
         return;
     }
 
@@ -401,64 +401,66 @@ const runDockerizedApps = async ({ apps_dir, apps_directories, mode = 'dev', bui
             logInfo({ message: `Starting app concurrently in: ${dir}` });
             const dockerIsRunning = await checkDocker()
             if (!dockerIsRunning) await startDocker()
-            // const composeCommand = 'docker';
-            // const composeFile = mode === 'prod' ? 'docker-compose.yml' : `docker-compose.${mode}.yml`;
+            // TODO: method 1. Has less control but works fine
+            const composeCommand = 'docker';
+            const composeFile = mode === 'prod' ? 'docker-compose.yml' : `docker-compose.${mode}.yml`;
 
-            // const args = [
-            //     'compose',
-            //     '-f',
-            //     `${apps_dir}${sep}${dir}${sep}${composeFile}`,
-            //     'up',
-            //     ...(build ? ['--build'] : [])
-            // ];
+            const args = [
+                'compose',
+                '-f',
+                `${apps_dir}${sep}${dir}${sep}${composeFile}`,
+                'up',
+                ...(build ? ['--build'] : [])
+            ];
 
             const options = {
                 cwd: join(apps_dir, dir),
                 stdio: 'inherit' // to redirect child's stdout/stderr to process's stdout/stderr
             };
 
-            // const processes = spawn(composeCommand, args, options);
+            const processes = spawn(composeCommand, args, options);
 
-            // //TODO: handle docker errors
-            // processes.on('exit', (code) => {
-            //     if (code !== 0) {
-            //         logError({ error: `Docker process exited with code ${code}` });
-            //     }
-            // });
-
-            const composeFile = mode === 'prod' ? 'docker-compose.yml' : `docker-compose.${mode}.yml`;
-
-            const spawn_child = spawn('docker-compose', ['-f', `${apps_dir}${sep}${dir}${sep}${composeFile}`, 'up', ...(build ? ['--build'] : [])], options);
-
-            spawn_child.stdout.on('data', (data) => {
-                const message = data.toString().trim();
-                logInfo({ message });
-            });
-
-            spawn_child.stderr.on('data', (data) => {
-                const message = data.toString().trim();
-                logSuccess({ message });
-                // logError({ error }); // Uncomment this line if you prefer logging errors
-            });
-            spawn_child.stderr.on('error', (data) => {
-                const error = data.toString().trim();
-                logError({ error });
-                // logError({ error }); // Uncomment this line if you prefer logging errors
-            });
-            spawn_child.on('error', (error) => {
-                logError({ error: 'Failed to start child process.' });
-                logError({ error });
-                // logError({ error }); // Uncomment this line if you prefer logging errors
-            });
-
-            spawn_child.on('exit', (code, signal) => {
+            processes.on('exit', (code) => {
                 if (code !== 0) {
-                    logWarning({ message: `Process exited with code: ${code}, signal: ${signal}` });
-                    // logWarning({ message: `exited with code: ${code} signal: ${signal}` }); // Uncomment this line if you prefer logging warnings
-                } else {
-                    logInfo({ message: 'Process exited successfully' });
+                    logError({ error: `Docker process exited with code ${code}` });
                 }
             });
+
+            // TODO: handle docker errors
+            // TODO: Method2 with more control has a child_process.stdout.on(...) errror
+            // const composeFile = mode === 'prod' ? 'docker-compose.yml' : `docker-compose.${mode}.yml`;
+
+            // const spawn_child = await spawn('docker-compose', ['-f', `${apps_dir}${sep}${dir}${sep}${composeFile}`, 'up', ...(build ? ['--build'] : [])], options);
+
+            // spawn_child.stdout.on('data', (data) => {
+            //     const message = data.toString().trim();
+            //     logInfo({ message });
+            // });
+
+            // spawn_child.stderr.on('data', (data) => {
+            //     const message = data.toString().trim();
+            //     logSuccess({ message });
+            //     // logError({ error }); // Uncomment this line if you prefer logging errors
+            // });
+            // spawn_child.stderr.on('error', (data) => {
+            //     const error = data.toString().trim();
+            //     logError({ error });
+            //     // logError({ error }); // Uncomment this line if you prefer logging errors
+            // });
+            // spawn_child.on('error', (error) => {
+            //     logError({ error: 'Failed to start child process.' });
+            //     logError({ error });
+            //     // logError({ error }); // Uncomment this line if you prefer logging errors
+            // });
+
+            // spawn_child.on('exit', (code, signal) => {
+            //     if (code !== 0) {
+            //         logWarning({ message: `Process exited with code: ${code}, signal: ${signal}` });
+            //         // logWarning({ message: `exited with code: ${code} signal: ${signal}` }); // Uncomment this line if you prefer logging warnings
+            //     } else {
+            //         logInfo({ message: 'Process exited successfully' });
+            //     }
+            // });
             //TODO: handle docker errors
         }))
 }
@@ -469,11 +471,7 @@ const runDockerizedApps = async ({ apps_dir, apps_directories, mode = 'dev', bui
  * @param {string} [options.components] App environment. Defaults to dev mode
  * @param {array} apps The apps to run 
  */
-const spinApp = ({ app, options }) => {
-    if (options.kubectl) {
-        startKubectlPods()
-    }
-
+const spinKubectlPods = ({ apps_dir, apps_directories, mode }) => {
     exec(`yarn workspace @microservices-suite${sep}${dir} ${mode}`, { cwd: join(microservicesDir, dir) }, async (error, stdout, stderr) => {
         var error_message = ''
         if (error) {
@@ -517,7 +515,7 @@ const startApps = async ({ apps, options }) => {
     // case -k (--kubectl)
     if (options.kubectl) {
         //TODO: spin app with kubectl pods
-        spinKubectlPods({ apps, mode: options.mode })
+        spinKubectlPods({ apps_dir, apps_directories, mode: options.mode })
         // TODO: listen on SIGTERM and other kill signals to exit gracefully eg with CTRL+[C,D,Z]
     }
     else {
@@ -548,13 +546,14 @@ const getComponentDirecotories = async ({ components, component_type }) => {
 
     // Check if the component directory exists
     if (!existsSync(component_root_dir) || !statSync(component_root_dir).isDirectory()) {
-        logError({ error: `${component_type === 'app' ? `gateway${sep}apps` : 'microservices'} directory not found: ${component_root_dir}` });
+        logWarning({ message: `This does not seem to be a suite monorepo project` });
+        logWarning({message:'If it is kindly open an issue here: https://github.com/microservices-suite/node-microservices-suite/issues'})
         exit(1);
     }
 
     // Check if the component directory exists
     if (!existsSync(component_root_dir) || !statSync(component_root_dir).isDirectory()) {
-        logError({ error: `Microservices directory not found: ${component_root_dir}` });
+        logError({ error: `This does not seem to be a suite monorepo project` });
         return;
     }
 
