@@ -39,6 +39,14 @@ const pathExists = ({ file_path }) => {
     return existsSync(file_path)
 }
 /**
+ * Prints title to screen
+ * @param {Object} options 
+ * @param {string} options.message title to print
+ * @returns {string}
+ */
+const logTitle = ({ message }) => console.log(chalk.grey(`${message}`))
+
+/**
  * Prints success message to screen
  * @param {Object} options 
  * @param {string} options.message Message to display to console 
@@ -153,6 +161,7 @@ const startDocker = () => {
                 return reject('Unsupported platform');
         }
 
+        // TODO: switch to spawnSync
         exec(command, async (error, stdout, stderr) => {
             if (error) {
                 reject(`⇣ Install Docker to run this command: ${chalk.blue('https://docs.docker.com/engine/install/')}`);
@@ -400,7 +409,13 @@ const runDockerizedApps = async ({ apps_dir, apps_directories, mode = 'dev', bui
         apps_directories.map(async (dir) => {
             logInfo({ message: `Starting app concurrently in: ${dir}` });
             const dockerIsRunning = await checkDocker()
-            if (!dockerIsRunning) await startDocker()
+            if (!dockerIsRunning) {
+
+                await startDocker()
+            }
+            setTimeout(() => {
+
+            }, 1000)
             // TODO: method 1. Has less control but works fine
             const composeCommand = 'docker';
             const composeFile = mode === 'prod' ? 'docker-compose.yml' : `docker-compose.${mode}.yml`;
@@ -547,7 +562,7 @@ const getComponentDirecotories = async ({ components, component_type }) => {
     // Check if the component directory exists
     if (!existsSync(component_root_dir) || !statSync(component_root_dir).isDirectory()) {
         logWarning({ message: `This does not seem to be a suite monorepo project` });
-        logWarning({message:'If it is kindly open an issue here: https://github.com/microservices-suite/node-microservices-suite/issues'})
+        logWarning({ message: 'If it is kindly open an issue here: https://github.com/microservices-suite/node-microservices-suite/issues' })
         exit(1);
     }
 
@@ -621,9 +636,63 @@ const stopApps = async ({ components, options }) => {
     // TODO: handle case where no app is specified. component.length === 0 and if -k or --kill command is passed
     spawn('docker', ['compose', '-f', `${apps_dir}${sep}${components}${sep}docker-compose.dev.yml`, 'down'], { stdio: 'inherit' })
 }
+
+/**
+ * prunes docker artifacts.See docker system prune --help
+ * @param {Object} options If true does not prompt for confirmation  
+ * @returns void
+ */
+const dockerPrune = ({ volume, all, force }) => {
+    if (volume && all) {
+        logError({ error: 'Use all or volume not both' })
+        exit(1)
+    }
+    if (all) {
+        const pruneSystem = spawn('docker', ['system', 'prune', '-a', '-f'], { stdio: 'inherit' });
+        const pruneVolume = spawn('docker', ['volume', 'prune', '-a', '-f'], { stdio: 'inherit' });
+
+        pruneSystem.on('exit', (code) => {
+            if (code === 0) {
+                logSuccess({ message: 'Docker system prune successful' });
+            } else {
+                logError({ error: `Docker system prune failed with code ${code}` });
+            }
+        });
+
+        pruneVolume.on('exit', (code) => {
+            if (code === 0) {
+                logSuccess({ message: 'Docker volume prune successful' });
+            } else {
+                logError({ error: `Docker volume prune failed with code ${code}` });
+            }
+        });
+    }
+    if (volume) {
+        const pruneVolume = spawn('docker', ['volume', 'prune', '-a', ...(force ? ['-f'] : [])], { stdio: 'inherit' });
+        pruneVolume.on('exit', (code) => {
+            if (code === 0) {
+                logSuccess({ message: 'Docker volume prune successful' });
+            } else {
+                logError({ error: `Docker volume prune failed with code ${code}` });
+            }
+        });
+    }
+    if (!volume && !all) {
+        const pruneSystem = spawn('docker', ['system', 'prune', '-a', ...(force ? ['-f'] : [])], { stdio: 'inherit' });
+        pruneSystem.on('exit', (code) => {
+            if (code === 0) {
+                logSuccess({ message: 'Docker system prune successful' });
+            } else {
+                logError({ error: `Docker system prune failed with code ${code}` });
+            }
+        });
+    }
+
+}
 module.exports = {
     generateDirectoryPath,
     changeDirectory,
+    logTitle,
     logInfo,
     logError,
     logSuccess,
@@ -640,5 +709,6 @@ module.exports = {
     startServices,
     pathExists,
     repoReset,
-    stopApps
+    stopApps,
+    dockerPrune
 }

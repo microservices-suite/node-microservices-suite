@@ -6,7 +6,7 @@ const figlet = require('figlet');
 const { logInfo } = require('./scripts/scripts.module');
 
 const program = new Command()
-actionHandlers.logInfoMessage({ message: (figlet.textSync('Microservices-suite')) })
+actionHandlers.logTitle({ message: (figlet.textSync('Microservices-suite')) })
 program
     .command('add')
     .description('Adds dependencies at given workspace and updates package.json')
@@ -26,7 +26,14 @@ program
 program
     .command('host')
     .description('Gets the host platorm Os the app is running on')
-    .action(() => actionHandlers.getPlatform());
+    .action(() => actionHandlers.getPlatform())
+program
+    .command('prune')
+    .description('prunes docker artifacts. Does not prompt for confirmation. See docker [system,volume] prune --help')
+    .option('-f, --force', 'Do not prompt for confirmation')
+    .option('-v, --volume', 'runs docker volume prune')
+    .option('-a, --all', 'runs docker system && docker volume prune')
+    .action(async (options) => { await actionHandlers.dockerPrune({ options }) });
 program
     .command('install')
     .description('Installs dependencies at given workspace. If not specified workspace defaults to "microservices"')
@@ -34,11 +41,10 @@ program
     .option('-d, --workspace-directory <directory>', 'Name of the workspace where to install dependencies', 'microservices')
     .argument('<packages...>', 'Space-separated list of packages to install')
     .action(async (packages, options) => await actionHandlers.installDepsAtWorkspace({ packages, options }));
-
 program
-    .command('reset')
+    .command('reset [components...]')
     .description('deep remove all node modules and artefacts generated during yarn install')
-    .action(async ({ options, components }) => await actionHandlers.repoReset({ options, components }));
+    .action(async (components,options) => await actionHandlers.repoReset({ options, components }));
 program
     .command('start [components...]')
     .description('Starts specified components (services or apps), or all services in dev mode if -m is not specified')
