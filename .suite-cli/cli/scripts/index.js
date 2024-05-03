@@ -16,3 +16,5 @@ module.exports.startApps = require('./commands/startApps.cmd');
 module.exports.startServices = require('./commands/startServices.cmd');
 module.exports.repoReset = require('./commands/repoReset.cmd');
 module.exports.stopApps = require('./commands/stopApps.cmd');
+module.exports.logTitle = require('./commands/logTitle.cmd');
+module.exports.dockerPrune = require('./commands/dockerPrune');
