@@ -65,6 +65,8 @@ services:
     build:
       context: ../../../microservices/customer-service
       dockerfile: DockerFile.dev
+    ports:
+      - 9000:9000
     volumes:
       - /app/node_modules
       - ../../../microservices/customer-service:/app
@@ -79,6 +81,8 @@ services:
     build:
       context: ../../../microservices/supplier-service
       dockerfile: DockerFile.dev
+    ports:
+      - 9001:9001
     volumes:
       - /app/node_modules
       - ../../../microservices/supplier-service:/app  
@@ -90,6 +94,9 @@ services:
     build:
       context: ../../../microservices/product-service
       dockerfile: DockerFile.dev
+    ports:
+      - 9002:9002
+
     volumes:
       - /app/node_modules
       - ../../../microservices/product-service:/app
@@ -101,7 +108,7 @@ services:
       context: ../../../microservices/rbac-service
       dockerfile: DockerFile.dev
     ports:
-      - "8080:8080"
+      - "9005:9005"
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
