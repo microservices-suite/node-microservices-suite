@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
-const actionHandlers = require('./scripts')
 const { Command } = require('commander');
+const {createPromptModule} = require('inquirer');
 const figlet = require('figlet');
+const actionHandlers = require('./scripts')
 const { logInfo } = require('./scripts/scripts.module');
-
 const program = new Command()
-actionHandlers.logTitle({ message: (figlet.textSync('Microservices-suite')) })
+const prompt = createPromptModule()
 program
     .command('add')
     .description('Adds dependencies at given workspace and updates package.json')
@@ -44,7 +44,7 @@ program
 program
     .command('reset [components...]')
     .description('deep remove all node modules and artefacts generated during yarn install')
-    .action(async (components,options) => await actionHandlers.repoReset({ options, components }));
+    .action(async (components, options) => await actionHandlers.repoReset({ options, components }));
 program
     .command('start [components...]')
     .description('Starts specified components (services or apps), or all services in dev mode if -m is not specified')
@@ -72,6 +72,65 @@ program
         logInfo({ message: `Stopping all apps in ${components}` })
         await actionHandlers.stopApps({ components, options });
     });
+    program
+    .command('generate')
+    .description('Generate a new monorepo resource')
+    .action(() => {
+      prompt([
+        {
+          type: 'list',
+          name: 'resource',
+          message: 'What would you like to generate?',
+          choices: ['repo', 'service', 'app', 'gateway', 'workspace']
+        }
+      ])
+      .then(answers => {
+        switch (answers.resource) {
+          case 'repo':
+            // Additional prompts specific to 'repo' resource
+            prompt([
+              {
+                type: 'input',
+                name: 'repo_name',
+                message: `What would you like to name your repo?`,
+                validate: input => input ? true : 'Repo name cannot be empty.'
+              },
+              {
+                type: 'checkbox',
+                name: 'apis',
+                message: 'Select APIs to use in your repo',
+                choices: ['RESTful', 'GraphQL', 'SOAP'],
+                default: ['RESTful', 'GraphQL']
+            
+              },
+              {
+                type: 'list',
+                name: 'webserver',
+                message: 'Select webserver',
+                choices: ['nginx', 'apache'],
+                default: 'nginx'
+              },
+              {
+                type: 'list',
+                name: 'license',
+                message: 'Select license',
+                choices: ['ISC', 'MIT'],
+                default: 'ISC'
+              }
+            ])
+            .then(repo_answers => {
+            //   find out if this separater works on windows
+              const project_base = `@${repo_answers.repo_name}-${Date.now()}`
+              actionHandlers.scaffoldNewRepo({repo_answers:{...repo_answers,project_base}});
+            });
+            break;
+          default:
+            console.log('Handling other resources, not yet implemented.');
+            // Handle other cases or provide feedback that other options are not yet implemented
+        }
+      });
+    });
+  
 
 program.parse(process.argv);
 module.exports = program
