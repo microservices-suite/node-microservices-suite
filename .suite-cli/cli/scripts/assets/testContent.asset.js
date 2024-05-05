@@ -1,0 +1,1 @@
+module.exports = () => '//TODO: write your tests here'

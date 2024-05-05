@@ -1,0 +1,1 @@
+module.exports = () => 'const { hello } = require(\'./controllers\');\nmodule.exports = controllers;';

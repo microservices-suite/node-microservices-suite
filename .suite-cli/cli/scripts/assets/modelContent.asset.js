@@ -1,0 +1,1 @@
+module.exports = () => 'module.exports = {};'; // Example content for model

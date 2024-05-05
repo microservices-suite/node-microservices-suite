@@ -1,11 +1,12 @@
 const { join, sep } = require('node:path')
-const { mkdirSync } = require('fs')
+const chalk = require('chalk')
 const os = require('os')
+const { mkdirSync } = require('fs')
 const { cwd, chdir, exit, platform } = require('node:process')
 const { existsSync, statSync, readdirSync, writeFileSync } = require('node:fs');
-// TODO: use spawn instead for whatever reasons. Yet to find out
 let { exec, spawn } = require('node:child_process');
-const chalk = require('chalk')
+const { writeFile } = require('node:fs/promises');
+const assets = require('./assets')
 
 /**
  * Dynamically generate directory path given workspace_name
@@ -330,6 +331,7 @@ const startAll = async ({ options }) => {
     logInfo({ message: `cwd: ${microservicesDir}` });
 
     // Check if the microservices directory exists
+    // TODO: Find a smart way to detect non-suite compliant repos
     if (!existsSync(microservicesDir) || !statSync(microservicesDir).isDirectory()) {
         reject(`This does not seem to be a suite monorepo project`);
         return;
@@ -405,7 +407,6 @@ const spinVanillaServices = async ({ serviceDirectories, microservicesDir, mode 
  * @returns {void} Starts apps with nodemon in devmode otherwise PM2
  */
 const runDockerizedApps = async ({ apps_dir, apps_directories, mode = 'dev', build }) => {
-    // console.log({ apps_dir, apps_directories, mode })
     logInfo({ message: `Starting all apps in ${mode} mode...` });
     await Promise.all(
         apps_directories.map(async (dir) => {
@@ -525,7 +526,7 @@ const startApps = async ({ apps, options }) => {
     const {
         component_root_dir: apps_dir,
         components_directories: apps_directories
-    } = await getComponentDirecotories({
+    } = getComponentDirecotories({
         components: apps,
         component_type: 'app'
     })
@@ -533,17 +534,12 @@ const startApps = async ({ apps, options }) => {
     if (options.kubectl) {
         //TODO: spin app with kubectl pods
         spinKubectlPods({ apps_dir, apps_directories, mode: options.mode })
-        // TODO: listen on SIGTERM and other kill signals to exit gracefully eg with CTRL+[C,D,Z]
     }
     else {
-        // case -v(--vanilla)
-        // TODO: run services with nodemon in dev mode otherwise PM2
         runDockerizedApps({ apps_dir, apps_directories, mode: options.mode, build: options.build })
     }
 
     // TODO: listen on SIGTERM and other kill signals to exit gracefully eg with CTRL+[C,D,Z]
-    // case -v(--vanilla)
-    // TODO: run services with nodemon in dev mode otherwise PM2
 
 }
 
@@ -641,7 +637,10 @@ const stopApps = async ({ components, options }) => {
 
 /**
  * prunes docker artifacts.See docker system prune --help
- * @param {Object} options If true does not prompt for confirmation  
+ * @param {Object} options  
+ * @param {boolean} options.volume If true this command targets docker volumes otherwise system  
+ * @param {boolean} options.all If true this command prunes system & volume artifacts  
+ * @param {boolean} options.force If true does not prompt for confirmation  
  * @returns void
  */
 const dockerPrune = ({ volume, all, force }) => {
@@ -691,48 +690,19 @@ const dockerPrune = ({ volume, all, force }) => {
     }
 
 }
+
+/**
+ * Adds initial minimal dependencies and installs at microservice workspace and shared workspace
+ * @param {Object} options 
+ * @param {Object} options.answers 
+ * @param {string} options.answers.project_base 
+ * @param {string} options.answers.repo_name 
+ * @param {string} options.projectPath
+ * @returns void
+ */
 const addPackageJson = ({ projectPath, answers }) => {
     // Add a package.json
-    const packageJson = {
-        name: `${answers.project_base}${sep}${answers.repo_name}`,
-        version: "1.0.0",
-        description: "This is a microservices project",
-        main: "index.js",
-        scripts: {
-            "test": "jest",
-            "dev": "NODE_ENV=dev nodemon -q index.js",
-            "start": "pm2-runtime start ecosystem.config.js --env production",
-            "stop:prod": "pm2 stop ecosystem.config.js",
-            "delete:prod": "pm2 delete ecosystem.config.js"
-        },
-        "author": os.userInfo().username,
-        "license": answers.license,
-        "private": answers.private,
-        "scripts": {
-            "repo:reset": `find ..${sep}${answers.repo_name} -type d -name 'node_modules' -exec rm -rf {} + && find ..${sep}${answers.repo_name} -type f -name 'package-lock.json' -delete && find ..${sep}${answers.repo_name} -type f -name 'yarn.lock' -delete && find ..${sep}${answers.repo_name} -type d -name 'yarn-*' -exec rm -rf {} +`,
-            "repo:reset:1": "rm -rf node_modules",
-            "generate:release": "npx changelogen@latest --release",
-            "release:config": `yarn workspace ${answers.project_base}/config run release`,
-            "release:errors": `yarn workspace ${answers.project_base}/errors run release`,
-            "release:middlewares": `yarn workspace ${answers.project_base}/middlewares run release`,
-            "release:utilities": `yarn workspace ${answers.project_base}/utilities run release`,
-            "test": "jest"
-        },
-        "workspaces": {
-            "packages": [
-                `microservices${sep}*`,
-                `shared${sep}*`,
-            ],
-            "nohoist": [
-                `**${sep}${answers.project_base}${sep}utilities`,
-                `**${sep}${answers.project_base}${sep}errors`,
-                `**${sep}${answers.project_base}${sep}config`,
-                `**${sep}${answers.project_base}${sep}middleware`
-            ]
-        },
-    };
-
-    writeFileSync(join(projectPath, 'package.json'), JSON.stringify(packageJson, null, 2));
+    writeFileSync(join(projectPath, 'package.json'), JSON.stringify(assets.rootPackageJsonContent({ answers, os, sep }), null, 2));
 
     const dependencies = [
         `${answers.project_base}/config@1.0.0`,
@@ -743,7 +713,6 @@ const addPackageJson = ({ projectPath, answers }) => {
         "express",
         "helmet",
         "morgan",
-        "pm2",
         "winston",
         "mongoose"
     ];
@@ -756,7 +725,7 @@ const addPackageJson = ({ projectPath, answers }) => {
 
     // Build the command
     const command = `yarn workspace ${answers.project_base}${sep}microservice1 add ${depsCommand} && yarn workspace ${answers.project_base}${sep}microservice1 add -D ${devDepsCommand}&& yarn workspace ${answers.project_base}${sep}utilities add ${utilitiesDependencies}&& yarn workspace ${answers.project_base}${sep}config add ${configDependencies.join(' ')}`;
-    
+
     // Execute the command
     const childProcess = spawn(command, {
         cwd: projectPath,
@@ -787,573 +756,20 @@ const addPackageJson = ({ projectPath, answers }) => {
         logSuccess({ message: `To start the project, run 'cd ${answers.repo_name} && yarn dev'` });
     });
 }
+
+/**
+ * Scaffolds a new project generating suite standard file structure with initial boiler plate
+ * @param {Object} options 
+ * @param {Object} options.answers 
+ * @param {string} options.answers.webserver 
+ * @param {string} options.answers.apis 
+ * @param {string} options.answers.license 
+ * @param {string} options.answers.project_base 
+ * @param {string} options.answers.repo_name 
+ * @returns void
+ */
 const addMicroservice = ({ projectPath, answers }) => {
 
-    // TODO: move this to a separate assets folder and readfileSync
-    const serverContent = `
-    const http = require('http');
-    const express = require('express');
-    const mongoose = require('mongoose');
-    const { config, morgan, logger } = require('${answers.project_base}${sep}config');
-    const { errorHandler } = require('${answers.project_base}${sep}errors');
-    const { validate, APIError } = require('${answers.project_base}${sep}utilities');
-    const { getUsers } = require('./src/services');
-    const { router } = require('./src/routes');
-    // const app = require('./src/app');
-
-    mongoose.connect(config.db).then(() => {
-    logger.info(\`successfully connected to db: \${config.db}\`);
-    }).catch(err => {
-    logger.error(\`failed to connect to db.exiting...\${err.message}\`);
-    process.exit(0);
-    });
-
-    const app = express();
-
-    app.use(express.json());
-
-    app.get('/', (req, res) => {
-    res.json({ messae: 'hello from ${answers.project_base}' });
-    });
-
-    const server = http.createServer(app);
-
-    server.on('error', (err) => {
-    logger.error(err);
-    if (err.code === 'EADDRINUSE') {
-        logger.error('Address already in use, retrying...');
-        setTimeout(() => {
-        server.close();
-        server.listen(config.port, 'localhost');
-        }, 1000);
-        errorHandler(err);
-    }
-    })
-
-    server.listen(config.port, () => {
-        logger.info(\`${answers.project_base} service connected 🚀 here: http://localhost:\${config.port}\`);
-    });
-
-    app.use(morgan.errorHandler);
-
-    app.use(morgan.successHandler);
-
-    app.use('/api/v1', router);
-
-    // global error handler should come after all other middlewares
-    app.all('*', (req, res, next) => {
-    const err = new APIError(404, \`requested resource not found on server: \${req.originalUrl}\`);
-    next(err);
-    });
-
-    app.use(errorHandler);
-    `;
-    const testContent = '//TODO: write your tests here'
-    // const modelContent = `
-    // const mongoose = require('mongoose')
-    // const ObjectId = require('mongodb')
-
-    // const service1Schema = new mongoose.Schema(
-    //     {
-    //     name:{
-    //         type: String,
-    //         require: true
-    //     },
-    //     phone:{
-    //         type : String,
-    //         require : true
-    //     },
-    //     email : {
-    //         type : String,
-    //         require : true
-    //     },
-    //     product_list:{
-    //         type : Array
-    //     }
-    // },
-    // {
-    //     timestamp : true
-    // }
-    // )
-
-    // service1Schema.index({ name, phone, email}, { unique : true})
-    // module.exports = mongoose.model('service1', service1Schema)
-    // `
-    // const routesContent = `
-    // const express = require('express')
-    // const router = express.Router()
-    // const {service1Controller} = require('../../controllers')
-
-    // router.route('/')
-    //     .get(service1Controller.getService1)
-
-    // module.exports = router
-    // `
-    // const controllersContent = `
-    // const { publishMessage , subscribeMessage} = require('../utlis/index')
-    // const {PRODUCT_BINDING_KEY, CUSTOMER_BINDING_KEY, SUPPLIER_BINDING_KEY} = require('../config/index')
-    // const { json } = require('express')
-
-    // const getService1 = async(req, res) => {
-    //     try {    
-    //         // const channel = req.rabbitMQChannel; 
-    //         publishMessage(req.rabbitMQChannel, CUSTOMER_BINDING_KEY, JSON.stringify({ "name" : "Supplie"}))   
-    //         res.status(200).send({data : ["This is fetch service1"]})
-    //     } catch (error) {
-    //         console.log(error)
-    //     }
-    // }
-
-    // module.exports = {
-    //     getService1
-    // }
-    // `
-    // Content templates - Define these according to what each file should contain
-    const modelContent = 'module.exports = {};'; // Example content for model
-    const controllersContent = `
-    const services = require('../services')
-    const { asyncErrorHandler, APIError } = require('${answers.project_base}/utilities')
-    const hello = asyncErrorHandler(async (req, res) => {
-        res.status(200).json({ data:'Hello from ${answers.project_base}' })
-    })
-    module.exports = {
-        hello,
-    }`;
-    const routesContent = 'const express = require(\'express\');\nconst router = express.Router();\nmodule.exports = { router };';
-    const servicesContent = 'module.exports = {};';
-    const servicesIndexContent = 'module.exports = {};';
-    const modelIndexContent = 'const models = require(\'./model\');\nmodule.exports = models;';
-    const routesIndexContent = 'const { router } = require(\'./routes\');\nmodule.exports = { router };';
-    const controllersIndexContent = 'const { hello } = require(\'./controllers\');\nmodule.exports = controllers;';
-    const configConfigContent = `
-    const dotenv = require('dotenv');
-    const joi = require('joi');
-    const path = require('path');
-
-    if (process.env.NODE_ENV === 'prod') dotenv.config({ path: \`\${path.resolve('./.env')}\` });
-    else {
-        dotenv.config({ path: \`\${path.resolve('./.env')}.\${process.env.NODE_ENV}\` })
-    }
-    const envVarsSchema = joi.object().keys({
-        PORT: joi.number().required(),
-        DATABASE_URL: joi.string().uri().required()
-    }).unknown();
-
-
-    const { value: envVars, error } = envVarsSchema.prefs({ errors: { label: 'key' } }).validate(process.env);
-    if (error) {
-        throw new Error(\`Config validation error: \${error.message}\`);
-    }
-
-
-    module.exports = {
-        db: envVars.DATABASE_URL,
-        port: envVars.PORT,
-        env: process.env.NODE_ENV
-
-    }
-`;
-    const configIndexContent = `
-    module.exports.config = require('./config')
-    module.exports.logger = require('./logger')
-    module.exports.morgan = require('./morgan')
-`;
-
-    const configLoggerContent = `
-    const winston = require('winston');
-    const config = require('./config');
-
-    // Logger configurations
-    const enumerateErrorFormat = winston.format((info) => {
-        if (info instanceof Error) {
-            Object.assign(info, { message: info.stack });
-        }
-        return info;
-    });
-
-    const logger = winston.createLogger({
-        level: config.env === 'dev' ? 'debug' : 'info',
-        format: winston.format.combine(
-            enumerateErrorFormat(),
-            config.env === 'dev' ? winston.format.colorize() : winston.format.uncolorize(),
-            winston.format.splat(),
-            winston.format.printf(({ level, message }) => \`\${level}: \${message}\`)
-        ),
-        transports: [
-            new winston.transports.Console({
-                stderrLevels: ['error'],
-            }),
-        ],
-    });
-
-    module.exports = logger
-`;
-    const configMorganContent = `
-    const morgan = require('morgan');
-    const config = require('./config');
-    const logger = require('./logger');
-
-    morgan.token('message', (req, res) => res.locals.errorMessage || '');
-
-    const getIpFormat = () => (config.env === 'prod' ? ':remote-addr - ' : '');
-    const successResponseFormat = \`\${getIpFormat()}:method :url :status - :response-time ms\`;
-    const errorResponseFormat = \`\${getIpFormat()}:method :url :status - :response-time ms - message: :message\`;
-
-    const successHandler = morgan(successResponseFormat, {
-        skip: (req, res) => res.statusCode >= 400,
-        stream: {
-            write: (message) => {
-                if (config.env === 'dev') {
-                    logger.info(message.trim());
-                }
-            }
-        },
-    });
-
-    const errorHandler = morgan(errorResponseFormat, {
-        skip: (req, res) => res.statusCode < 400,
-        stream: { write: (message) => logger.error(message.trim()) },
-    });
-
-    module.exports = {
-        successHandler,
-        errorHandler,
-    };
-    `;
-    const genericPackageJsonContent = ({ suffix, isMicroservice, description }) => (
-        {
-            name: `${answers.project_base}/${suffix}`,
-            version: "1.0.0",
-            description,
-            main: "index.js",
-            author: `${os.userInfo().username}`,
-            license: `${answers.license}`,
-            publishConfig: {
-                access: "public",
-                registry: "http://registry.npmjs.org"
-            },
-            scripts: {
-                release: "npx bumpp-version@latest && npm publish",
-                ...(isMicroservice ? {
-                    dev: "NODE_ENV=dev nodemon -q index.js",
-                    start: "pm2-runtime start ecosystem.config.js --env production",
-                    stoprod: "pm2 stop ecosystem.config.js",
-                    deletprod: "pm2 delete ecosystem.config.js",
-                    test: "jest",
-                } : {}
-                )
-            },
-            private: false,
-        })
-        ;
-    const configReadmeContent = `
-    # ${answers.project_base.charAt(0).toUpperCase() + answers.project_base.slice(1)}
-
-    ## Configuration Package
-
-    Welcome to the ${answers.project_base.charAt(0).toUpperCase() + answers.project_base.slice(1)} Configuration Package! This package, part of our monorepo, offers a centralized solution for managing configuration settings across your microservices applications. By consolidating configuration options, you ensure consistency and ease of maintenance throughout your codebase.
-    `;
-    const errorHandlerContent = `
-    const config = require("../config/config");
-    const { APIError } = require("../utilities");
-
-    const prodErrors = (err, res) => {
-        if (err.isOperational) {
-            res.status(err.statusCode).json({
-                status: err.status,
-                message: err.message
-            });
-        } else {
-            res.status(500).json({
-                status: 'error',
-                message: 'Something wrong happened! Try again later'
-            });
-        }
-    }
-    const devErrors = (err, res) => {
-        res.status(err.statusCode).json({
-            status: err.statusCode,
-            message: err.message,
-            stack: err.stack,
-            err
-        });
-    }
-    const castErrorHandler = (err) => {
-        err.message = \`Invalid value \${err.value} for field \${err.path}\`
-        return new APIError(400, err.message)
-    }
-    const duplicateKeyErrorHandler = (err) => {
-        const key = Object.keys(err.keyValue)[0]
-        const value = err.keyValue[key]
-        const message = \`Entry with \${key}:\${value} already exists\`
-        return new APIError(400, message)
-    }
-    const errorHandler = (err, req, res, next) => {
-        // TODO: create the global error handler
-        err.message = err.message || 'Internal Server Error';
-        err.statusCode = err.statusCode || 500;
-        if (config.env === 'dev') {
-            devErrors(err, res);
-        }
-        else {
-            let error = { ...err, message: err.message }
-            if (err.name === 'CastError') {
-                error = castErrorHandler(error)
-            }
-            if (err.code === 11000) {
-                error = duplicateKeyErrorHandler(error)
-            }
-            prodErrors(error, res)
-        }
-    }
-
-    module.exports = errorHandler;
-    `;
-    const errorReadmeContent = `
-    # ${answers.project_base.charAt(0).toUpperCase() + answers.project_base.slice(1)}
-
-    ## Error handler package
-    
-    Welcome to the ${answers.project_base.charAt(0).toUpperCase() + answers.project_base.slice(1)} Error Handler Package! This package, residing within our monorepo, provides robust error handling capabilities tailored for microservices architecture. It equips you with the tools to effectively manage and respond to errors across your microservices applications, ensuring reliability and resilience.
-`;
-    const errorIndexContent = `
-    module.exports.errorHandler = require('./errors.handler')
-`;
-    const ApiErrorContent = `
-    class APIError extends Error {
-        constructor(statusCode, message) {
-            super(message);
-            this.statusCode = statusCode;
-            this.status = statusCode >= 400 && statusCode <= 500 ? 'fail' : 'error';
-
-            // use this to optionally to send error message to client
-            this.isOperational = true
-
-            // preserve stack trace from base class
-            Error.captureStackTrace(this, this.constructor)
-        }
-    }
-
-    module.exports = APIError
-`;
-    const utilitiesIndexContent = `
-    module.exports.APIError = require('./APIError')
-    module.exports.asyncErrorHandler = require('./asyncErrorHandler')
-    module.exports.pick = require('./pick')
-    module.exports.validate = require('./validate')
-`;
-    const utilitiesPickContent = `
-    const pick = (object, keys) => {
-        const validSchema = keys.reduce((obj, key) => {
-        if (object && object.hasOwnProperty(key)) {
-            obj[key] = object[key];
-        }
-        return obj;
-        }, {});
-        return validSchema;
-    };
-    
-    module.exports = pick
-  `;
-    const utilitiesValidateContent = `
-  const Joi = require('joi')
-const pick = require('./pick')
-const { APIError } = require('.')
-
-const validate = (schema) => (req, res, next) => {
-    const validSchema = pick(schema, ['params', 'body', 'query'])
-    const filterdRequest = pick(req, Object.keys(validSchema))
-    const { error, warning, value } = Joi.compile(validSchema).preferences({ abortEarly: false, convert: true, allowUnknown: true }).validate(filterdRequest)
-    if (error) {
-        const errorMessage = error.details.map((details) => details.message).join(', ');
-        next(new APIError(400, errorMessage));
-    }
-    next()
-}
-
-module.exports = validate
-`;
-    const utilitiesReadmeContent = `
-    # ${answers.project_base.charAt(0).toUpperCase() + answers.project_base.slice(1)}
-
-    ## Utilities
-
-    Welcome to the ${answers.project_base.charAt(0).toUpperCase() + answers.project_base.slice(1)} Utilities Package! This package is a part of the larger monorepo dedicated to housing reusable utility functions tailored for microservices architecture. Within this package, you'll find a collection of utility functions designed to streamline various aspects of microservices development.
-
-  `;
-    const unitilitiesAsyncErrorHandlerContent = `
-    const asyncErrorHandler = (fn) => (req, res, next) => {
-        return Promise.resolve(fn(req, res, next)).catch((err) => {
-            next(err)
-        })
-    }
-
-    module.exports = asyncErrorHandler
-    `;
-    const middlewaresReadmeContent = `
-    # ${answers.project_base.charAt(0).toUpperCase() + answers.project_base.slice(1)}
-
-    ## Middlewares Package
-
-    Welcome to the ${answers.project_base.charAt(0).toUpperCase() + answers.project_base.slice(1)} Middlewares Package! This package, residing within our monorepo, provides a collection of middleware functions tailored for microservices architecture. These middleware functions enable you to enhance and extend the functionality of your microservices applications with ease.
-    `;
-    const middlewaresIndexContent = `
-    module.exports.middleware1 = (req,res,next)=>{
-    next()
-    }
-    `;
-    const e2eTestContent = `
-const puppeteer = require('puppeteer');
-
-describe('End-to-End Tests', () => {
-    let browser;
-    let page;
-
-    beforeAll(async () => {
-        browser = await puppeteer.launch();
-        page = await browser.newPage();
-    });
-
-    afterAll(async () => {
-        await browser.close();
-    });
-
-    test('Example E2E Test', async () => {
-        await page.goto('https://${answers.project_base}.com');
-        // Write your test logic here
-    });
-});
-`;
-    const unitTestContent = `
-describe('Unit Tests', () => {
-    test('Example Unit Test', () => {
-        // Write your unit test logic here
-    });
-
-    // Add more unit tests as needed
-});
-`;
-    const integrationTestContent = `
-describe('Integration Tests', () => {
-    test('Example Integration Test', async () => {
-        // Write your integration test logic here
-    });
-
-    // Add more integration tests as needed
-});
-`;
-    const snapshotTestContent = `
-import React from 'react';
-import renderer from 'react-test-renderer';
-import MyComponent from './MyComponent';
-
-describe('Snapshot Tests', () => {
-    test('MyComponent snapshot', () => {
-        const component = renderer.create(<MyComponent />);
-        const tree = component.toJSON();
-        expect(tree).toMatchSnapshot();
-    });
-
-    // Add more snapshot tests as needed
-});
-`;
-    const k8sReadmeContent = `
-# ${answers.project_base.charAt(0).toUpperCase() + answers.project_base.slice(1)}
-## kubernetes orchestration package
-
-All services workflow orchestration live here. Write scalable workflows and orchestrate using the \`declarative\` approach. To use \`imperative\` approach you can issue direct \`kubectl\` commands to your \`pod clusters\` e.g during development. 
-`;
-    const k8sClientNodeContent = `
-apiVersion: v1
-kind: Service
-metadata:
-  name: supplier-service-port
-spec:
-  type: NodePort
-  ports:
-    - port: 8008
-      targetPort: 9008
-      NodePort: 31008
-  selector:
-    app: ecommerce-app
-`;
-    const k8sClientPodContent = `
-apiVersion: v1
-kind: Pod
-metadata:
-  name: supplier-service-pod
-  labels:
-    component: supplier
-spec:
-  containers:
-    - name: supplier-service
-      image: gandie/ecommerce-supplier-service
-      resources:
-        limits:
-          memory: "128Mi"
-          cpu: "500m"
-      ports:
-        - containerPort: 9001
-`;
-    const k8sClusterIpServiceContent = `
-#TODO: to add cluster IP service here
-`;
-    const k8sIngressServiceContent = `
-#TODO: to add Ingress service here
-`;
-    const k8sClusterDeploymentContent = `
-#TODO: to add Deployment logic here
-`;
-    const apolloServerContent = `
-const { ApolloServer, gql } = require('apollo-server-express');
-const express = require('express');
-
-const typeDefs = gql\`
-  type Query {
-    hello: String
-  }
-\`;
-
-const resolvers = {
-  Query: {
-    hello: () => 'Hello world!',
-  },
-};
-
-const server = new ApolloServer({ typeDefs, resolvers });
-
-const app = express();
-server.applyMiddleware({ app });
-
-app.listen({ port: 4000 }, () =>
-  console.log(\`🚀 Server ready at http://localhost:4000\${server.graphqlPath}\`)
-);
-`;
-    const envContent = `
-PORT=9001
-DATABASE_URL=mongodb://localhost:27017
-`;
-    const ecosystemContent = `
-apps : [{
-    name   : "upload_service",
-    autorestart: true,
-    watch: true,
-    time: true,
-    script : "./index.js",
-    instances:4,
-    env_production: {
-      NODE_ENV: "prod",
-      DATABASE_URL:"mongodb://localhost:27017",
-      PORT:9001
-   },
-   env_development: {
-    NODE_ENV: "dev",
-    DATABASE_URL:"mongodb://localhost:27017",
-    PORT:9001
- }
-  }]
-}
-`;
     [
         `shared${sep}config`,
         `shared${sep}errors`,
@@ -1372,71 +788,79 @@ apps : [{
         mkdirSync(current_dir, { recursive: true });
         switch (dir) {
             case `shared${sep}config`:
-                writeFileSync(join(current_dir, 'config.js'), configConfigContent);
-                writeFileSync(join(current_dir, 'index.js'), configIndexContent);
-                writeFileSync(join(current_dir, 'logger.js'), configLoggerContent);
-                writeFileSync(join(current_dir, 'morgan.js'), configMorganContent);
-                writeFileSync(join(current_dir, 'package.json'), JSON.stringify(genericPackageJsonContent({
+                writeFile(join(current_dir, 'config.js'), assets.configConfigContent());
+                writeFile(join(current_dir, 'index.js'), assets.configIndexContent());
+                writeFile(join(current_dir, 'logger.js'), assets.configLoggerContent());
+                writeFile(join(current_dir, 'morgan.js'), assets.configMorganContent());
+                writeFile(join(current_dir, 'package.json'), JSON.stringify(assets.genericPackageJsonContent({
+                    answers,
                     suffix: 'config',
                     isMicroservice: false,
+                    os,
                     description: "This contains common configurations for things like env files,loggers etc for easy setup of environment specific settings"
                 }), null, 2));
-                writeFileSync(join(current_dir, 'README.md'), configReadmeContent);
+                writeFile(join(current_dir, 'README.md'), assets.configReadmeContent({ answers }));
                 break;
             case `shared${sep}errors`:
-                writeFileSync(join(current_dir, 'errors.handler.js'), errorHandlerContent);
-                writeFileSync(join(current_dir, 'index.js'), errorIndexContent);
-                writeFileSync(join(current_dir, 'package.json'), JSON.stringify(genericPackageJsonContent({
+                writeFile(join(current_dir, 'errors.handler.js'), assets.errorHandlerContent());
+                writeFile(join(current_dir, 'index.js'), assets.errorIndexContent());
+                writeFile(join(current_dir, 'package.json'), JSON.stringify(assets.genericPackageJsonContent({
+                    answers,
                     suffix: 'errors',
                     isMicroservice: false,
+                    os,
                     description: "This is the global error handler for handling error messages in development and production environments"
                 }), null, 2));
-                writeFileSync(join(current_dir, 'README.md'), errorReadmeContent);
+                writeFile(join(current_dir, 'README.md'), assets.errorReadmeContent({ answers }));
                 break;
             case `shared${sep}utilities`:
-                writeFileSync(join(current_dir, 'APIError.js'), ApiErrorContent);
-                writeFileSync(join(current_dir, 'index.js'), utilitiesIndexContent);
-                writeFileSync(join(current_dir, 'package.json'), JSON.stringify(genericPackageJsonContent({
+                writeFile(join(current_dir, 'APIError.js'), assets.apiErrorContent());
+                writeFile(join(current_dir, 'index.js'), assets.utilitiesIndexContent());
+                writeFile(join(current_dir, 'package.json'), JSON.stringify(assets.genericPackageJsonContent({
+                    answers,
                     suffix: 'utilities',
                     isMicroservice: false,
+                    os,
                     description: ""
                 }), null, 2));
-                writeFileSync(join(current_dir, 'README.md'), utilitiesReadmeContent);
-                writeFileSync(join(current_dir, 'pick.js'), utilitiesPickContent);
-                writeFileSync(join(current_dir, 'validate.js'), utilitiesValidateContent);
-                writeFileSync(join(current_dir, 'asyncErrorHandler.js'), unitilitiesAsyncErrorHandlerContent);
+                writeFile(join(current_dir, 'README.md'), assets.utilitiesReadmeContent({ answers }));
+                writeFile(join(current_dir, 'pick.js'), assets.utilitiesPickContent());
+                writeFile(join(current_dir, 'validate.js'), assets.utilitiesValidateContent());
+                writeFile(join(current_dir, 'asyncErrorHandler.js'), assets.utilitiesAsyncErrorHandlerContent());
                 break;
             case `shared${sep}middlewares`:
-                writeFileSync(join(current_dir, 'index.js'), middlewaresIndexContent);
-                writeFileSync(join(current_dir, 'package.json'), JSON.stringify(genericPackageJsonContent({
+                writeFile(join(current_dir, 'index.js'), assets.middlewaresIndexContent());
+                writeFile(join(current_dir, 'package.json'), JSON.stringify(assets.genericPackageJsonContent({
+                    answers,
                     suffix: 'middlewares',
                     isMicroservice: false,
+                    os,
                     description: ""
                 }), null, 2));
-                writeFileSync(join(current_dir, 'README.md'), middlewaresReadmeContent);
+                writeFile(join(current_dir, 'README.md'), assets.middlewaresReadmeContent({ answers }));
                 break;
             case `tests${sep}microservice1${sep}e2e`:
-                writeFileSync(join(current_dir, 'test1.js'), e2eTestContent);
+                writeFile(join(current_dir, 'test1.js'), assets.e2eTestContent({ answers }));
                 break;
             case `tests${sep}microservice1${sep}integration`:
-                writeFileSync(join(current_dir, 'test1.js'), integrationTestContent);
+                writeFile(join(current_dir, 'test1.js'), assets.integrationTestContent());
                 break;
             case `tests${sep}microservice1${sep}unit`:
-                writeFileSync(join(current_dir, 'test1.js'), unitTestContent);
+                writeFile(join(current_dir, 'test1.js'), assets.unitTestContent());
                 break;
             case `tests${sep}microservice1${sep}snapshot`:
-                writeFileSync(join(current_dir, 'test1.js'), snapshotTestContent);
+                writeFile(join(current_dir, 'test1.js'), assets.snapshotTestContent());
                 break;
             case `graphql${sep}app1`:
-                writeFileSync(join(current_dir, 'appollo-server.js'), apolloServerContent);
+                writeFile(join(current_dir, 'appollo-server.js'), assets.apolloServerContent());
                 break;
             case `k8s${sep}microservice1`:
-                writeFileSync(join(current_dir, 'client-node-port.yaml'), k8sClientNodeContent);
-                writeFileSync(join(current_dir, 'client-pod.yaml'), k8sClientPodContent);
-                writeFileSync(join(current_dir, 'cluster-deployment.yml'), k8sClusterDeploymentContent);
-                writeFileSync(join(current_dir, 'README.md'), k8sReadmeContent);
-                writeFileSync(join(current_dir, 'cluster-ip-service.yml'), k8sClusterIpServiceContent);
-                writeFileSync(join(current_dir, 'ingress-service.yml'), k8sIngressServiceContent);
+                writeFile(join(current_dir, 'client-node-port.yaml'), assets.k8sClientNodeContent());
+                writeFile(join(current_dir, 'client-pod.yaml'), assets.k8sClientPodContent());
+                writeFile(join(current_dir, 'cluster-deployment.yml'), assets.k8sClusterDeploymentContent());
+                writeFile(join(current_dir, 'README.md'), assets.k8sReadmeContent({ answers }));
+                writeFile(join(current_dir, 'cluster-ip-service.yml'), assets.k8sClusterIpServiceContent());
+                writeFile(join(current_dir, 'ingress-service.yml'), assets.k8sIngressServiceContent());
         }
     });
     ['models', 'controllers', 'routes', 'services'].forEach(mcs => {
@@ -1446,29 +870,37 @@ apps : [{
         const fileExtension = mcs === 'models' ? 'model.js' : mcs === 'routes' ? 'routes.js' : 'controllers.js';
 
         // Write main file content
-        const mainContent = mcs === 'models' ? modelContent : mcs === 'routes' ? routesContent : mcs === 'controllers'?controllersContent:servicesContent;
-        writeFileSync(join(mcsPath, `${fileExtension}`), mainContent);
+        const mainContent = mcs === 'models' ? assets.modelContent() : mcs === 'routes' ? assets.routesContent() : mcs === 'controllers' ? assets.controllersContent({ answers }) : assets.servicesContent();
+        writeFile(join(mcsPath, `${fileExtension}`), mainContent);
 
         // Write index file content
-        const indexContent = mcs === 'models' ? modelIndexContent : mcs === 'routes' ? routesIndexContent : mcs === 'controllers' ? controllersIndexContent : servicesIndexContent;
-        writeFileSync(join(mcsPath, 'index.js'), indexContent);
+        const indexContent = mcs === 'models' ? assets.modelIndexContent() : mcs === 'routes' ? assets.routesIndexContent() : mcs === 'controllers' ? assets.controllersIndexContent() : assets.servicesIndexContent();
+        writeFile(join(mcsPath, 'index.js'), indexContent);
     });
-    writeFileSync(join(`${projectPath}${sep}microservices${sep}microservice1`, 'index.js'), serverContent);
-    writeFileSync(join(`${projectPath}${sep}microservices${sep}microservice1`, '.env'), envContent);
-    writeFileSync(join(`${projectPath}${sep}microservices${sep}microservice1`, '.env.dev'), envContent);
-    writeFileSync(join(`${projectPath}${sep}microservices${sep}microservice1`, 'ecosystem.config.js'), ecosystemContent);
-    writeFileSync(join(`${projectPath}${sep}microservices${sep}microservice1`, 'package.json'), JSON.stringify(genericPackageJsonContent({
+    writeFile(join(`${projectPath}${sep}microservices${sep}microservice1`, 'index.js'), assets.serverContent({ answers, sep }));
+    writeFile(join(`${projectPath}${sep}microservices${sep}microservice1`, '.env'), assets.envContent());
+    writeFile(join(`${projectPath}${sep}microservices${sep}microservice1`, '.env.dev'), assets.envContent());
+    writeFile(join(`${projectPath}${sep}microservices${sep}microservice1`, 'ecosystem.config.js'), assets.ecosystemContent());
+    writeFile(join(`${projectPath}${sep}microservices${sep}microservice1`, 'package.json'), JSON.stringify(assets.genericPackageJsonContent({
+        answers,
         suffix: 'microservice1',
         isMicroservice: true,
+        os,
         description: "This is a sample server that returns Hello at localhost:3000"
     }), null, 2));
 
     logSuccess({ message: `Project ${answers.repo_name} created successfully!` });
     logSuccess({ message: 'Installing dependencies...' });
 }
+
+/**
+ * Scaffolds a new project generating suite standard file structure with initial boiler plate
+ * @param {Object} options 
+ * @param {Object} options.answers 
+ * @returns void
+ */
 const scaffoldNewRepo = async ({ answers }) => {
     const projectPath = join(cwd(), answers.repo_name);
-    const gateway_dir = `${projectPath}${sep}microservice1`
     mkdirSync(projectPath, { recursive: true });
     addMicroservice({ projectPath, answers })
     addPackageJson({ projectPath, answers: { ...answers, private: true } })
