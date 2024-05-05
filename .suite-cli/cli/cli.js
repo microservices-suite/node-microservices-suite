@@ -99,8 +99,8 @@ program
                 type: 'checkbox',
                 name: 'apis',
                 message: 'Select APIs to use in your repo',
-                choices: ['RESTful', 'GraphQL', 'SOAP'],
-                default: ['RESTful', 'GraphQL']
+                choices: ['REST', 'GraphQL', 'SOAP'],
+                default: ['REST', 'GraphQL']
             
               },
               {
