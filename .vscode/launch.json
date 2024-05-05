@@ -20,7 +20,7 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}/microservices/user-service/src/controllers.js"
+            "program": "${file}"
         }
     ]
 }

@@ -702,8 +702,11 @@ const dockerPrune = ({ volume, all, force }) => {
  */
 const addPackageJson = ({ projectPath, answers }) => {
     // Add a package.json 
+    mkdirSync(join(projectPath, '.vscode'), { recursive: true })
+    writeFileSync(join(projectPath, 'package.json'), JSON.stringify(assets.rootPackageJsonContent({ answers, os, sep }), null, 2));
     writeFileSync(join(projectPath, 'package.json'), JSON.stringify(assets.rootPackageJsonContent({ answers, os, sep }), null, 2));
     writeFileSync(join(projectPath, '.gitignore'), assets.gitignoreContent());
+    writeFileSync(join(projectPath, '.vscode', 'launch.json'), JSON.stringify(assets.debuggerConfigContent(), null, 2));
 
     const dependencies = [
         `${answers.project_base}/config@1.0.0`,
