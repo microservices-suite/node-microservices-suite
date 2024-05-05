@@ -769,23 +769,11 @@ const addPackageJson = ({ projectPath, answers }) => {
  * @returns void
  */
 const addMicroservice = ({ projectPath, answers }) => {
-
-    [
-        `shared${sep}config`,
-        `shared${sep}errors`,
-        `shared${sep}utilities`,
-        `shared${sep}middlewares`,
-        `tests${sep}microservice1${sep}e2e`,
-        `tests${sep}microservice1${sep}integration`,
-        `tests${sep}microservice1${sep}unit`,
-        `tests${sep}microservice1${sep}snapshot`,
-        `microservices`,
-        `k8s${sep}microservice1`,
-        `gateways${sep}apps${sep}app1${sep}${answers.webserver}`,
-        ...(answers.apis.map((api) => `${api}${sep}app1`)),
-    ].forEach((dir) => {
+    const directories = assets.fileStructureContent({ sep, answers })
+    directories.forEach((dir) => {
+        console.log
         const current_dir = `${projectPath}${sep}${dir}`
-        mkdirSync(current_dir, { recursive: true });
+        if (dir !== `REST${sep}app1`) mkdirSync(current_dir, { recursive: true });
         switch (dir) {
             case `shared${sep}config`:
                 writeFile(join(current_dir, 'config.js'), assets.configConfigContent());
@@ -851,7 +839,7 @@ const addMicroservice = ({ projectPath, answers }) => {
             case `tests${sep}microservice1${sep}snapshot`:
                 writeFile(join(current_dir, 'test1.js'), assets.snapshotTestContent());
                 break;
-            case `graphql${sep}app1`:
+            case `GraphQL${sep}app1`:
                 writeFile(join(current_dir, 'appollo-server.js'), assets.apolloServerContent());
                 break;
             case `k8s${sep}microservice1`:
@@ -861,6 +849,7 @@ const addMicroservice = ({ projectPath, answers }) => {
                 writeFile(join(current_dir, 'README.md'), assets.k8sReadmeContent({ answers }));
                 writeFile(join(current_dir, 'cluster-ip-service.yml'), assets.k8sClusterIpServiceContent());
                 writeFile(join(current_dir, 'ingress-service.yml'), assets.k8sIngressServiceContent());
+                break;
         }
     });
     ['models', 'controllers', 'routes', 'services'].forEach(mcs => {
