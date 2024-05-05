@@ -701,8 +701,9 @@ const dockerPrune = ({ volume, all, force }) => {
  * @returns void
  */
 const addPackageJson = ({ projectPath, answers }) => {
-    // Add a package.json
+    // Add a package.json 
     writeFileSync(join(projectPath, 'package.json'), JSON.stringify(assets.rootPackageJsonContent({ answers, os, sep }), null, 2));
+    writeFileSync(join(projectPath, '.gitignore'), assets.gitignoreContent());
 
     const dependencies = [
         `${answers.project_base}/config@1.0.0`,
@@ -725,11 +726,13 @@ const addPackageJson = ({ projectPath, answers }) => {
 
     // Build the command
     const command = `yarn workspace ${answers.project_base}${sep}microservice1 add ${depsCommand} && yarn workspace ${answers.project_base}${sep}microservice1 add -D ${devDepsCommand}&& yarn workspace ${answers.project_base}${sep}utilities add ${utilitiesDependencies}&& yarn workspace ${answers.project_base}${sep}config add ${configDependencies.join(' ')}`;
-
+    // TODO: find a way to use spawn instead
+    exec(`cd ${answers.repo_name} && git init`)
     // Execute the command
     const childProcess = spawn(command, {
         cwd: projectPath,
-        shell: true
+        shell: true,
+        // stdio: 'inherit'
     });
 
     // Log output
