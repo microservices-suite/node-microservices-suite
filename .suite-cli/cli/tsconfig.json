@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "target": "ESNext", // The “target” property is used to specify which version of JavaScript ECMAScript version your TypeScript should emit/compile into.
+        "lib": [
+            "DOM",
+            "ESNext"
+        ], // The “lib” property is used to specify which library files to include at compilation time.
+        "module": "ESNext", // The “module” property sets the module system supported for the compiled program. During runtime, a module loader is used to locate and execute dependencies based on the specified module system.
+        "moduleResolution": "Bundler", // If we are using any bundler. In our scenario, we are using `tsup` as our bundler.
+        "resolveJsonModule": true, // Allows importing modules with a .json extension
+        "strict": true, // The “strict” property enables stronger guarantees and enhances type safety. 
+        "strictNullChecks": true, // When strictNullChecks is true, null and undefined have their own distinct types and you’ll get a type error if you try to use them where a concrete value is expected.
+        "esModuleInterop": true, // The “esModuleInterop” property allows import default from CommonJS modules that did not export using the “default” property, this property provides a shim to ensure compatibility in the emitted JavaScript.
+        "skipLibCheck": true, // Skip type checking of declaration files.
+    }
+}
