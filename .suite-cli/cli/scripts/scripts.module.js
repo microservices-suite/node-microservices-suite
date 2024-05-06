@@ -1,7 +1,7 @@
 const { join, sep } = require('node:path')
 const chalk = require('chalk')
 const os = require('os')
-const { mkdirSync } = require('fs')
+const { mkdirSync, readFile } = require('fs')
 const { cwd, chdir, exit, platform } = require('node:process')
 const { existsSync, statSync, readdirSync, writeFileSync } = require('node:fs');
 let { exec, spawn } = require('node:child_process');
@@ -901,6 +901,37 @@ const scaffoldNewRepo = async ({ answers }) => {
     addPackageJson({ projectPath, answers: { ...answers, private: true } })
 }
 
+/**
+ * Scaffolds a new project generating suite standard file structure with initial boiler plate
+ * @param {Object} options 
+ * @param {Object} options.answers 
+ * @returns void
+ */
+const releasePackage = async ({ package }) => {
+    const packageJsonPath = join(cwd(), 'package.json');
+
+    // Read the package.json file
+    readFile(packageJsonPath, 'utf8', (err, data) => {
+        if (err) {
+            logError({ error: `Error reading file: ${err.message}` });
+            return;
+        }
+        try {
+            // Parse the JSON data
+            const packageJson = JSON.parse(data);
+
+            // Access the 'name' property, which is the first item listed in your package.json example
+            const firstItemValue = packageJson.name.split('/')[0];
+            package && logInfo({ message: `Looking for package: ${firstItemValue}/${package}` });
+            spawn('yarn',['workspace',`${firstItemValue}/${package}`, 'release'],{
+                stdio:'inherit'
+            })
+        } catch (parseError) {
+            console.error('Error parsing JSON:', parseError);
+        }
+    });
+    spawn('yarn')
+}
 module.exports = {
     generateDirectoryPath,
     changeDirectory,
@@ -923,5 +954,6 @@ module.exports = {
     repoReset,
     stopApps,
     dockerPrune,
-    scaffoldNewRepo
+    scaffoldNewRepo,
+    releasePackage
 }
