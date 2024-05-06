@@ -4,28 +4,28 @@ services:
     build: 
       dockerfile: DockerFile
       context: ../../../data-persistence/mongodb
-  user-service:
-    build:
-      dockerfile: DockerFile.dev
-      context: ../../../microservices/user-service
-    ports:
-      - '9003:9003'
-    depends_on:
-      - mongodb
-    volumes:
-      - /app/node_modules
-      - ../../../microservices/user-service:/app
-  upload-service:
-    build:
-      dockerfile: DockerFile.dev
-      context: ../../../microservices/upload-service
-    ports:
-      - '9004:9004'
-    depends_on:
-      - mongodb
-    volumes:
-      - /app/node_modules
-      - ../../../microservices/upload-service:/app
+  # user-service:
+  #   build:
+  #     dockerfile: DockerFile.dev
+  #     context: ../../../microservices/user-service
+  #   ports:
+  #     - '9003:9003'
+  #   depends_on:
+  #     - mongodb
+  #   volumes:
+  #     - /app/node_modules
+  #     - ../../../microservices/user-service:/app
+  # upload-service:
+  #   build:
+  #     dockerfile: DockerFile.dev
+  #     context: ../../../microservices/upload-service
+  #   ports:
+  #     - '9004:9004'
+  #   depends_on:
+  #     - mongodb
+  #   volumes:
+  #     - /app/node_modules
+  #     - ../../../microservices/upload-service:/app
   rabbitmq:
     image: rabbitmq:3.8
     container_name: rabbitmq
@@ -46,7 +46,7 @@ services:
   nginx:
     depends_on:
       - customer-service
-      - product-service
+      # - product-service
       - supplier-service
     restart: always
     build:
@@ -86,29 +86,29 @@ services:
     volumes:
       - /app/node_modules
       - ../../../microservices/supplier-service:/app  
-  product-service:
-    depends_on:
-      - rabbitmq
-    container_name: product
-    restart: always
-    build:
-      context: ../../../microservices/product-service
-      dockerfile: DockerFile.dev
-    ports:
-      - 9002:9002
+  # product-service:
+  #   depends_on:
+  #     - rabbitmq
+  #   container_name: product
+  #   restart: always
+  #   build:
+  #     context: ../../../microservices/product-service
+  #     dockerfile: DockerFile.dev
+  #   ports:
+  #     - 9002:9002
 
-    volumes:
-      - /app/node_modules
-      - ../../../microservices/product-service:/app
-  keycloak:
-    container_name: keycloak
-    depends_on:
-        - nginx
-    build:
-      context: ../../../microservices/rbac-service
-      dockerfile: DockerFile.dev
-    ports:
-      - "9005:9005"
-    environment:
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
+  #   volumes:
+  #     - /app/node_modules
+  #     - ../../../microservices/product-service:/app
+  # keycloak:
+  #   container_name: keycloak
+  #   depends_on:
+  #       - nginx
+  #   build:
+  #     context: ../../../microservices/rbac-service
+  #     dockerfile: DockerFile.dev
+  #   ports:
+  #     - "9005:9005"
+  #   environment:
+  #     KEYCLOAK_ADMIN: admin
+  #     KEYCLOAK_ADMIN_PASSWORD: admin
