@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // const commander = require('commander'); // (normal include)
-const { Command } = require('commander') // include commander in git clone of commander repo
+import { Command } from 'commander' // include commander in git clone of commander repo
 const program = new Command();
 
 // Commander supports nested subcommands.
@@ -24,7 +24,7 @@ brew
 // Add nested commands using `.addCommand().
 // The command could be created separately in another module.
 function makeHeatCommand() {
-    const heat = new commander.Command('heat');
+    const heat = new Command('heat');
     heat
         .command('jug')
         .action(() => {
