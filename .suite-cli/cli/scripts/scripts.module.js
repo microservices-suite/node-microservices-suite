@@ -526,7 +526,7 @@ const startApps = async ({ apps, options }) => {
     const {
         component_root_dir: apps_dir,
         components_directories: apps_directories
-    } = getComponentDirecotories({
+    } = await getComponentDirecotories({
         components: apps,
         component_type: 'app'
     })
