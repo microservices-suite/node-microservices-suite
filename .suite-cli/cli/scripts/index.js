@@ -19,3 +19,4 @@ module.exports.stopApps = require('./commands/stopApps.cmd');
 module.exports.logTitle = require('./commands/logTitle.cmd');
 module.exports.dockerPrune = require('./commands/dockerPrune');
 module.exports.scaffoldNewRepo = require('./commands/scaffoldNewRepo.cmd');
+module.exports.releasePackage = require('./commands/releasePackage.cmd');
