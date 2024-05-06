@@ -47,7 +47,7 @@ program
   .action(async (components, options) => await actionHandlers.repoReset({ options, components }));
 program
   .command('release [package]')
-  .description('make a package release and publish simultaneously to npm')
+  .description('make a package release and publish simultaneously to npm.If no package is passed then generate:release for changelog is run')
   .action(async (package) => await actionHandlers.releasePackage({ package }));
 program
   .command('start [components...]')

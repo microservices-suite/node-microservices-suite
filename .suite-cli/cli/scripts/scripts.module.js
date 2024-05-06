@@ -902,9 +902,9 @@ const scaffoldNewRepo = async ({ answers }) => {
 }
 
 /**
- * Scaffolds a new project generating suite standard file structure with initial boiler plate
+ * makes package releases
  * @param {Object} options 
- * @param {Object} options.answers 
+ * @param {Object} options.package 
  * @returns void
  */
 const releasePackage = async ({ package }) => {
@@ -923,8 +923,12 @@ const releasePackage = async ({ package }) => {
             // Access the 'name' property, which is the first item listed in your package.json example
             const firstItemValue = packageJson.name.split('/')[0];
             package && logInfo({ message: `Looking for package: ${firstItemValue}/${package}` });
-            spawn('yarn',['workspace',`${firstItemValue}/${package}`, 'release'],{
-                stdio:'inherit'
+            package && spawn('yarn', ['workspace', `${firstItemValue}/${package}`, 'release'], {
+                stdio: 'inherit'
+            })
+            !package && spawn('yarn', ['generate:release'], {
+                stdio: 'inherit',
+                cwd: cwd()
             })
         } catch (parseError) {
             console.error('Error parsing JSON:', parseError);
