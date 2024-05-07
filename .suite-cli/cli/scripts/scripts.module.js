@@ -902,9 +902,8 @@ const scaffoldNewRepo = async ({ answers }) => {
  * @returns void
  */
 const scaffoldNewService = async ({ answers }) => {
-    const project_path = join(cwd(), 'microservices', answers.service_name);
+    const project_path = cwd()
     const package_json_path = join(cwd(), 'package.json')
-    mkdirSync(project_path, { recursive: true });
     const { workspace_name } = retrieveWorkSpaceName({ package_json_path })
     generateMCSHelper({ project_path, answers: { ...answers, project_base: workspace_name } })
     writeFile(join(`${project_path}`, 'package.json'), JSON.stringify(assets.genericPackageJsonContent({
