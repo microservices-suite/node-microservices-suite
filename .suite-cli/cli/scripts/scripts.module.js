@@ -878,6 +878,7 @@ const addMicroservice = ({ project_path, answers }) => {
     logSuccess({ message: 'Installing dependencies...' });
 }
 
+
 /**
  * Scaffolds a new project generating suite standard file structure with initial boiler plate
  * @param {Object} options 
@@ -887,7 +888,6 @@ const addMicroservice = ({ project_path, answers }) => {
  * @returns void
  */
 const scaffoldNewRepo = async ({ answers }) => {
-
     const project_path = join(cwd(), answers.repo_name);
     mkdirSync(project_path, { recursive: true });
     addMicroservice({ project_path, answers: { ...answers, service_name: 'microservice1' } })
@@ -982,7 +982,6 @@ const retrieveWorkSpaceName = ({ package_json_path }) => {
         logError({ error: error.message })
     }
 }
-
 module.exports = {
     generateDirectoryPath,
     changeDirectory,
