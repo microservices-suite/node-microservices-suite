@@ -72,3 +72,6 @@ suite start <service-name...>
 - To publish to npm registry any shared libray simply run the `suite release` passing the name of the library
 - Suite will automatically figure out what library in your workspace you are targeting and initiate an interactive release workflow where you will specify the semver.
 - To run this command succesfully you need to create one `automation & publish` `auth_token` on your private registry and then run `npm or yarn login`
+```bash
+suite release [package]
+```
