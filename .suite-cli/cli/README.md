@@ -24,15 +24,30 @@ suite --help
 ```bash
 suite start --help
 ```
-- Install dependencies at workspace
+
+### Scaffold new repo
+- Suite-CLI can help you quickly initialize a new monorepo project and save you alot of project setup and devops overhead. The new project comes ready with our standard file structure with version control and workspaces configured to start code sharing and realize the full power of symlinking:
+```bash
+suite generate 
+```
+
+- This is an interactive command that progressively builds the project by selecting options for the name, API architecture to work with, webservers of choice and more.
+- When done generating your project you can still generate other components piece-wise like microservice, library or workspace. This makes your development work easier as it automatically builds your package.json or better yet generates a valid workspace compatible with the current project.
+
+### Install dependencies at workspace
+- This command lets you install dependencies with more control for where to install. This leverages no-hoisting feature to deliver symlinking close to the relevant workspace.
 ```bash
 suite add <@microservices-suite/<workspace_name>> express axios
 ```
-- Check if docker is running
+
+### Docker instances management
+- Suite has abstracted away the complexity of working with  `docker compose` and `vanilla docker` commands in monorepo environment by using `suite's` concise and consistent syntax
+- Run `docker volume|system prune -f`
 ```bash
-suite do, docker:check 
+suite prune  [-fav]
 ```
-- Start docker daemon
+- This command works behaves exactly as docker and if `[-v-a]` flags are passed they specify you are targeting `volumes or al(volumes & system)`. 
+- This is part of house keeping that suite exposes to clean up your environemnt when its blotted with dangling images or containers and volumes.
 ```bash
 suite docker:start
 ```
@@ -52,3 +67,8 @@ suite start -v <...services>
 ```bash
 suite start <service-name...>
 ```
+### Package management and release 
+- To easily release your builds and generate changelogs, suite makes it easy using `suite release` command
+- To publish to npm registry any shared libray simply run the `suite release` passing the name of the library
+- Suite will automatically figure out what library in your workspace you are targeting and initiate an interactive release workflow where you will specify the semver.
+- To run this command succesfully you need to create one `automation & publish` `auth_token` on your private registry and then run `npm or yarn login`
