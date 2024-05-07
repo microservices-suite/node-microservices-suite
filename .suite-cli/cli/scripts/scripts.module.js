@@ -1,9 +1,9 @@
-const { join, sep } = require('node:path')
 const chalk = require('chalk')
+const { join, sep } = require('node:path')
 const os = require('os')
 const { mkdirSync, readFile } = require('fs')
 const { cwd, chdir, exit, platform } = require('node:process')
-const { existsSync, statSync, readdirSync, writeFileSync } = require('node:fs');
+const { existsSync, statSync, readdirSync, writeFileSync, readFileSync } = require('node:fs');
 let { exec, spawn } = require('node:child_process');
 const { writeFile } = require('node:fs/promises');
 const assets = require('./assets')
@@ -697,16 +697,13 @@ const dockerPrune = ({ volume, all, force }) => {
  * @param {Object} options.answers 
  * @param {string} options.answers.project_base 
  * @param {string} options.answers.repo_name 
- * @param {string} options.projectPath
+ * @param {string} options.project_path
  * @returns void
  */
-const addPackageJson = ({ projectPath, answers }) => {
+const addPackageJson = ({ project_path, answers }) => {
     // Add a package.json 
-    mkdirSync(join(projectPath, '.vscode'), { recursive: true })
-    writeFileSync(join(projectPath, 'package.json'), JSON.stringify(assets.rootPackageJsonContent({ answers, os, sep }), null, 2));
-    writeFileSync(join(projectPath, 'package.json'), JSON.stringify(assets.rootPackageJsonContent({ answers, os, sep }), null, 2));
-    writeFileSync(join(projectPath, '.gitignore'), assets.gitignoreContent());
-    writeFileSync(join(projectPath, '.vscode', 'launch.json'), JSON.stringify(assets.debuggerConfigContent(), null, 2));
+    writeFileSync(join(project_path, 'package.json'), JSON.stringify(assets.rootPackageJsonContent({ answers, os, sep }), null, 2));
+    writeFileSync(join(project_path, 'package.json'), JSON.stringify(assets.rootPackageJsonContent({ answers, os, sep }), null, 2));
 
     const dependencies = [
         `${answers.project_base}/config@1.0.0`,
@@ -728,14 +725,13 @@ const addPackageJson = ({ projectPath, answers }) => {
     const devDepsCommand = devDependencies.join(' ');
 
     // Build the command
-    const command = `yarn workspace ${answers.project_base}${sep}microservice1 add ${depsCommand} && yarn workspace ${answers.project_base}${sep}microservice1 add -D ${devDepsCommand}&& yarn workspace ${answers.project_base}${sep}utilities add ${utilitiesDependencies}&& yarn workspace ${answers.project_base}${sep}config add ${configDependencies.join(' ')}`;
+    const command = `yarn workspace ${answers.project_base}${sep}${answers.service_name} add ${depsCommand} && yarn workspace ${answers.project_base}${sep}${answers.service_name} add -D ${devDepsCommand}&& yarn workspace ${answers.project_base}${sep}utilities add ${utilitiesDependencies}&& yarn workspace ${answers.project_base}${sep}config add ${configDependencies.join(' ')}`;
     // TODO: find a way to use spawn instead
     exec(`cd ${answers.repo_name} && git init`)
     // Execute the command
     const childProcess = spawn(command, {
-        cwd: projectPath,
+        cwd: project_path,
         shell: true,
-        // stdio: 'inherit'
     });
 
     // Log output
@@ -774,11 +770,10 @@ const addPackageJson = ({ projectPath, answers }) => {
  * @param {string} options.answers.repo_name 
  * @returns void
  */
-const addMicroservice = ({ projectPath, answers }) => {
+const addMicroservice = ({ project_path, answers }) => {
     const directories = assets.fileStructureContent({ sep, answers })
     directories.forEach((dir) => {
-        console.log
-        const current_dir = `${projectPath}${sep}${dir}`
+        const current_dir = `${project_path}${sep}${dir}`
         if (dir !== `REST${sep}app1`) mkdirSync(current_dir, { recursive: true });
         switch (dir) {
             case `shared${sep}config`:
@@ -833,22 +828,23 @@ const addMicroservice = ({ projectPath, answers }) => {
                 }), null, 2));
                 writeFile(join(current_dir, 'README.md'), assets.middlewaresReadmeContent({ answers }));
                 break;
-            case `tests${sep}microservice1${sep}e2e`:
+            case `tests${sep}${answers.service_name}${sep}e2e`:
                 writeFile(join(current_dir, 'test1.js'), assets.e2eTestContent({ answers }));
                 break;
-            case `tests${sep}microservice1${sep}integration`:
+            case `tests${sep}${answers.service_name}${sep}integration`:
                 writeFile(join(current_dir, 'test1.js'), assets.integrationTestContent());
                 break;
-            case `tests${sep}microservice1${sep}unit`:
+            case `tests${sep}${answers.service_name}${sep}unit`:
                 writeFile(join(current_dir, 'test1.js'), assets.unitTestContent());
                 break;
-            case `tests${sep}microservice1${sep}snapshot`:
+            case `tests${sep}${answers.service_name}${sep}snapshot`:
                 writeFile(join(current_dir, 'test1.js'), assets.snapshotTestContent());
                 break;
             case `GraphQL${sep}app1`:
                 writeFile(join(current_dir, 'appollo-server.js'), assets.apolloServerContent());
                 break;
-            case `k8s${sep}microservice1`:
+            case `k8s${sep}${answers.service_name}`:
+                // TODO: move k8s into a function
                 writeFile(join(current_dir, 'client-node-port.yaml'), assets.k8sClientNodeContent());
                 writeFile(join(current_dir, 'client-pod.yaml'), assets.k8sClientPodContent());
                 writeFile(join(current_dir, 'cluster-deployment.yml'), assets.k8sClusterDeploymentContent());
@@ -858,27 +854,21 @@ const addMicroservice = ({ projectPath, answers }) => {
                 break;
         }
     });
-    ['models', 'controllers', 'routes', 'services'].forEach(mcs => {
-        // Correct the file extension based on directory
-        const mcsPath = `${projectPath}${sep}microservices${sep}microservice1${sep}src${sep}${mcs}`
-        mkdirSync(mcsPath, { recursive: true })
-        const fileExtension = mcs === 'models' ? 'model.js' : mcs === 'routes' ? 'routes.js' : 'controllers.js';
 
-        // Write main file content
-        const mainContent = mcs === 'models' ? assets.modelContent() : mcs === 'routes' ? assets.routesContent() : mcs === 'controllers' ? assets.controllersContent({ answers }) : assets.servicesContent();
-        writeFile(join(mcsPath, `${fileExtension}`), mainContent);
-
-        // Write index file content
-        const indexContent = mcs === 'models' ? assets.modelIndexContent() : mcs === 'routes' ? assets.routesIndexContent() : mcs === 'controllers' ? assets.controllersIndexContent() : assets.servicesIndexContent();
-        writeFile(join(mcsPath, 'index.js'), indexContent);
-    });
-    writeFile(join(`${projectPath}${sep}microservices${sep}microservice1`, 'index.js'), assets.serverContent({ answers, sep }));
-    writeFile(join(`${projectPath}${sep}microservices${sep}microservice1`, '.env'), assets.envContent());
-    writeFile(join(`${projectPath}${sep}microservices${sep}microservice1`, '.env.dev'), assets.envContent());
-    writeFile(join(`${projectPath}${sep}microservices${sep}microservice1`, 'ecosystem.config.js'), assets.ecosystemContent());
-    writeFile(join(`${projectPath}${sep}microservices${sep}microservice1`, 'package.json'), JSON.stringify(assets.genericPackageJsonContent({
+    generateMCSHelper({ project_path, answers })
+    writeFile(join(`${project_path}${sep}microservices${sep}${answers.service_name}`, 'index.js'), assets.serverContent({ answers, sep }));
+    writeFile(join(`${project_path}${sep}microservices${sep}${answers.service_name}`, '.env'), assets.envContent());
+    writeFile(join(`${project_path}${sep}microservices${sep}${answers.service_name}`, '.env.dev'), assets.envContent());
+    writeFile(join(`${project_path}${sep}microservices${sep}${answers.service_name}`, 'ecosystem.config.js'), assets.ecosystemContent());
+    mkdirSync(join(project_path, '.vscode'), { recursive: true })
+    writeFileSync(join(project_path, '.gitignore'), assets.gitignoreContent());
+    writeFileSync(join(project_path, '.vscode', 'launch.json'), JSON.stringify(assets.debuggerConfigContent(), null, 2));
+    writeFileSync(join(project_path, '.gitignore'), assets.gitignoreContent());
+    mkdirSync(join(project_path, '.vscode'), { recursive: true })
+    writeFileSync(join(project_path, '.vscode', 'launch.json'), JSON.stringify(assets.debuggerConfigContent(), null, 2));
+    writeFile(join(`${project_path}${sep}microservices${sep}${answers.service_name}`, 'package.json'), JSON.stringify(assets.genericPackageJsonContent({
         answers,
-        suffix: 'microservice1',
+        suffix: `${answers.service_name}`,
         isMicroservice: true,
         os,
         description: "This is a sample server that returns Hello at localhost:3000"
@@ -888,17 +878,67 @@ const addMicroservice = ({ projectPath, answers }) => {
     logSuccess({ message: 'Installing dependencies...' });
 }
 
+
 /**
  * Scaffolds a new project generating suite standard file structure with initial boiler plate
  * @param {Object} options 
  * @param {Object} options.answers 
+ * @param {string} options.answers.service_name
+ * @param {boolean} options.answers.private
  * @returns void
  */
 const scaffoldNewRepo = async ({ answers }) => {
-    const projectPath = join(cwd(), answers.repo_name);
-    mkdirSync(projectPath, { recursive: true });
-    addMicroservice({ projectPath, answers })
-    addPackageJson({ projectPath, answers: { ...answers, private: true } })
+    const project_path = join(cwd(), answers.repo_name);
+    mkdirSync(project_path, { recursive: true });
+    addMicroservice({ project_path, answers: { ...answers, service_name: 'microservice1' } })
+    addPackageJson({ project_path, answers: { ...answers, private: true, service_name: 'microservice1' } })
+}
+
+/**
+ * Scaffolds a new service generating suite standard mcs file structure with initial boiler plate
+ * @param {Object} options 
+ * @param {Object} options.answers additional options
+ * @param {string} options.answers.service_name Name of the service to generate
+ * @returns void
+ */
+const scaffoldNewService = async ({ answers }) => {
+    const project_path = join(cwd(), 'microservices', answers.service_name);
+    const package_json_path = join(cwd(), 'package.json')
+    mkdirSync(project_path, { recursive: true });
+    const { workspace_name } = retrieveWorkSpaceName({ package_json_path })
+    generateMCSHelper({ project_path, answers: { ...answers, project_base: workspace_name } })
+    writeFile(join(`${project_path}`, 'package.json'), JSON.stringify(assets.genericPackageJsonContent({
+        answers: { ...answers, project_base: workspace_name },
+        suffix: `${answers.service_name}`,
+        isMicroservice: true,
+        os,
+        description: "This is a sample server that returns Hello at localhost:3000"
+    }), null, 2));
+}
+
+/**
+ * Generates a service using MCS architecture with initial boiler plate 
+ * @param {Object} options 
+ * @param {string} options.project_path  Path to root directory or workspace
+ * @param {Object} options.answers
+ * @param {string} options.answers.project_base The project name usually a part of the root workspace name
+ * @returns {void}
+ */
+const generateMCSHelper = ({ project_path, answers }) => {
+    ['models', 'controllers', 'routes', 'services'].forEach(mcs => {
+        // Correct the file extension based on directory
+        const mcsPath = `${project_path}${sep}microservices${sep}${answers.service_name}${sep}src${sep}${mcs}`
+        mkdirSync(mcsPath, { recursive: true })
+        const fileExtension = mcs === 'models' ? 'model.js' : mcs === 'routes' ? 'routes.js' : 'controllers.js';
+
+        // Write main file content
+        const mainContent = mcs === 'models' ? assets.modelContent() : mcs === 'routes' ? assets.routesContent() : mcs === 'controllers' ? assets.controllersContent({ answers }) : assets.servicesContent();
+        writeFileSync(join(mcsPath, `${fileExtension}`), mainContent);
+
+        // Write index file content
+        const indexContent = mcs === 'models' ? assets.modelIndexContent() : mcs === 'routes' ? assets.routesIndexContent() : mcs === 'controllers' ? assets.controllersIndexContent() : assets.servicesIndexContent();
+        writeFileSync(join(mcsPath, 'index.js'), indexContent);
+    });
 }
 
 /**
@@ -908,33 +948,39 @@ const scaffoldNewRepo = async ({ answers }) => {
  * @returns void
  */
 const releasePackage = async ({ package }) => {
-    const packageJsonPath = join(cwd(), 'package.json');
+    const package_json_path = join(cwd(), 'package.json');
 
     // Read the package.json file
-    readFile(packageJsonPath, 'utf8', (err, data) => {
-        if (err) {
-            logError({ error: `Error reading file: ${err.message}` });
-            return;
-        }
-        try {
-            // Parse the JSON data
-            const packageJson = JSON.parse(data);
+    const { workspace_name } = retrieveWorkSpaceName({ package_json_path });
+    package && logInfo({ message: `Looking for package: ${workspace_name}/${package}` });
+    package && spawn('yarn', ['workspace', `${workspace_name}/${package}`, 'release'], {
+        stdio: 'inherit'
+    })
+    !package && spawn('yarn', ['generate:release'], {
+        stdio: 'inherit',
+        cwd: cwd()
+    })
+}
 
-            // Access the 'name' property, which is the first item listed in your package.json example
-            const firstItemValue = packageJson.name.split('/')[0];
-            package && logInfo({ message: `Looking for package: ${firstItemValue}/${package}` });
-            package && spawn('yarn', ['workspace', `${firstItemValue}/${package}`, 'release'], {
-                stdio: 'inherit'
-            })
-            !package && spawn('yarn', ['generate:release'], {
-                stdio: 'inherit',
-                cwd: cwd()
-            })
-        } catch (parseError) {
-            console.error('Error parsing JSON:', parseError);
-        }
-    });
-    spawn('yarn')
+/**
+ * 
+ * @param {Object} options 
+ * @param {string} options.package_json_path Path to workspace
+ * @returns workspace_name|undefined Returns workspace name or undefined if does not exist
+ */
+const retrieveWorkSpaceName = ({ package_json_path }) => {
+    // Read the package.json file
+    const data = readFileSync(package_json_path, { 'encoding': 'utf8' })
+    try {
+        // Parse the JSON data
+        const packageJson = JSON.parse(data);
+
+        // Access the 'name' property, which is the first item listed in your package.json example
+        const workspace_name = packageJson.name.split('/')[0];
+        return { workspace_name }
+    } catch (error) {
+        logError({ error: error.message })
+    }
 }
 module.exports = {
     generateDirectoryPath,
@@ -959,5 +1005,6 @@ module.exports = {
     stopApps,
     dockerPrune,
     scaffoldNewRepo,
-    releasePackage
+    releasePackage,
+    scaffoldNewService
 }

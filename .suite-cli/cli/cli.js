@@ -96,7 +96,8 @@ program
               {
                 type: 'input',
                 name: 'repo_name',
-                message: `What would you like to name your repo?`,
+                message: `Enter repo name...`,
+                // TODO: validate workspace compliant name using regex
                 validate: input => input ? true : 'Repo name cannot be empty.'
               },
               {
@@ -128,6 +129,17 @@ program
                 actionHandlers.scaffoldNewRepo({ repo_answers: { ...repo_answers, project_base } });
               });
             break;
+          case 'service':
+            prompt([
+              {
+                type: 'input',
+                name: 'service_name',
+                message: 'Enter service name...',
+                // TODO: validate workspace compliant name using regex
+                validate: input => input ? true : 'Name cannot be empty',
+              }
+            ]).then((answers) => actionHandlers.scaffoldNewService({ answers }))
+            break
           default:
             console.log('Handling other resources, not yet implemented.');
           // Handle other cases or provide feedback that other options are not yet implemented
