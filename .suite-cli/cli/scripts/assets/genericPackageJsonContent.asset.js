@@ -1,4 +1,4 @@
-module.exports = ({ answers,suffix, isMicroservice, description, os }) => (
+module.exports = ({ answers, suffix, isMicroservice, description, os }) => (
     {
         name: `${answers.project_base}/${suffix}`,
         version: "1.0.0",
@@ -21,6 +21,6 @@ module.exports = ({ answers,suffix, isMicroservice, description, os }) => (
             } : {}
             )
         },
-        private: false,
+        private: isMicroservice,
     })
     ;
