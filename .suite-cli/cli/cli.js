@@ -85,7 +85,7 @@ program
         type: 'list',
         name: 'resource',
         message: 'What would you like to generate?',
-        choices: ['repo', 'service', 'app', 'gateway', 'workspace']
+        choices: ['repo', 'service', 'library', 'app', 'gateway']
       }
     ])
       .then(answers => {
@@ -96,7 +96,7 @@ program
               {
                 type: 'input',
                 name: 'repo_name',
-                message: `Enter repo name...`,
+                message: `Enter repo name:`,
                 // TODO: validate workspace compliant name using regex
                 validate: input => input ? true : 'Repo name cannot be empty.'
               },
@@ -134,11 +134,22 @@ program
               {
                 type: 'input',
                 name: 'service_name',
-                message: 'Enter service name...',
+                message: 'Enter service name:',
                 // TODO: validate workspace compliant name using regex
                 validate: input => input ? true : 'Name cannot be empty',
               }
             ]).then((answers) => actionHandlers.scaffoldNewService({ answers }))
+            break;
+          case 'library':
+            prompt([
+              {
+                type: 'input',
+                name: 'library_name',
+                message: 'Enter library name:',
+                // TODO: validate workspace compliant name using regex
+                validate: input => input ? true : 'Name cannot be empty',
+              }
+            ]).then((answers) => actionHandlers.scaffoldNewLibrary({ answers }))
             break
           default:
             console.log('Handling other resources, not yet implemented.');

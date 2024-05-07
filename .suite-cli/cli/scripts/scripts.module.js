@@ -871,7 +871,7 @@ const addMicroservice = ({ project_path, answers }) => {
         suffix: `${answers.service_name}`,
         isMicroservice: true,
         os,
-        description: "This is a sample server that returns Hello at localhost:3000"
+        description: `This is the ${answers.service_name} service listening at http://localhost:9001. TODO: update this description`
     }), null, 2));
 
     logSuccess({ message: `Project ${answers.repo_name} created successfully!` });
@@ -912,7 +912,7 @@ const scaffoldNewService = async ({ answers }) => {
         suffix: `${answers.service_name}`,
         isMicroservice: true,
         os,
-        description: "This is a sample server that returns Hello at localhost:3000"
+        description: `This is the ${answers.service_name} service. TODO: update this description`
     }), null, 2));
 }
 
@@ -982,6 +982,27 @@ const retrieveWorkSpaceName = ({ package_json_path }) => {
         logError({ error: error.message })
     }
 }
+
+/**
+ * Scaffolds a new library workspace 
+ * @param {Object} options 
+ * @param {Object} options.answers additional options
+ * @param {string} options.answers.library_name Name of the library to scaffold
+ * @returns void
+ */
+const scaffoldNewLibrary = async ({ answers }) => {
+    const project_path = join(cwd(), 'shared', answers.library_name);
+    const package_json_path = join(cwd(), 'package.json')
+    mkdirSync(project_path, { recursive: true });
+    const { workspace_name } = retrieveWorkSpaceName({ package_json_path })
+    writeFile(join(`${project_path}`, 'package.json'), JSON.stringify(assets.genericPackageJsonContent({
+        answers: { ...answers, project_base: workspace_name },
+        suffix: `${answers.library_name}`,
+        isMicroservice: false,
+        os,
+        description: `This is the ${answers.library_name} library. TODO: update this description`
+    }), null, 2));
+}
 module.exports = {
     generateDirectoryPath,
     changeDirectory,
@@ -1006,5 +1027,6 @@ module.exports = {
     dockerPrune,
     scaffoldNewRepo,
     releasePackage,
-    scaffoldNewService
+    scaffoldNewService,
+    scaffoldNewLibrary
 }
