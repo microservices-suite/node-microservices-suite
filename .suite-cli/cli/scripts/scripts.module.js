@@ -363,10 +363,12 @@ const startAll = async ({ options }) => {
  */
 const spinVanillaServices = async ({ serviceDirectories, microservicesDir, mode = 'dev' }) => {
     logInfo({ message: `Starting all services in ${mode} mode...` });
+    const package_json_path = join(microservicesDir.replace(`${sep}microservices`, ''), 'package.json')
     await Promise.all(
         serviceDirectories.map(async (dir) => {
             logInfo({ message: `Starting service concurrently in: ${dir}` });
-            const processes = await exec(`yarn  workspace @microservices-suite${sep}${dir}  ${mode}`, { cwd: join(microservicesDir, dir) }, async (error, stdout, stderr) => {
+            // pass the cwd as the workspace directory and run the script at package.son eg yarn prod
+            const processes = await exec(`yarn ${mode}`, { cwd: join(microservicesDir, dir) }, async (error, stdout, stderr) => {
                 var error_message = ''
                 if (error) {
                     const _ = error.message.split('\n')
@@ -552,9 +554,10 @@ const startApps = async ({ apps, options }) => {
  */
 const getComponentDirecotories = async ({ components, component_type }) => {
     const currentDir = cwd();
-
     // Construct component directory path
-    const component_root_dir = `${currentDir.split(sep).slice(0, currentDir.split(sep).indexOf("node-microservices-suite") + 1).join(sep)}${sep}${component_type === 'app' ? `gateway${sep}apps` : 'microservices'}`
+    const package_json_path = join(cwd(), 'package.json')
+    const { workspace_name } = retrieveWorkSpaceName({ package_json_path })
+    const component_root_dir = `${currentDir.split(sep).slice(0, currentDir.split(sep).indexOf(`${workspace_name.slice(1)}`) + 1).join(sep)}${sep}${component_type === 'app' ? `gateway${sep}apps` : 'microservices'}`
     logInfo({ message: `cwd: ${component_root_dir}` });
 
     // Check if the component directory exists
