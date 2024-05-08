@@ -103,7 +103,7 @@ program
               {
                 type: 'checkbox',
                 name: 'apis',
-                message: 'Select APIs to use in your repo',
+                message: 'Select APIs to use in your repo:',
                 choices: ['REST', 'GraphQL', 'SOAP'],
                 default: ['REST', 'GraphQL']
 
@@ -111,21 +111,22 @@ program
               {
                 type: 'list',
                 name: 'webserver',
-                message: 'Select webserver',
+                message: 'Select webserver:',
                 choices: ['nginx', 'apache'],
                 default: 'nginx'
               },
               {
                 type: 'list',
                 name: 'license',
-                message: 'Select license',
+                message: 'Select license:',
                 choices: ['ISC', 'MIT'],
                 default: 'ISC'
               }
             ])
               .then(repo_answers => {
                 //   find out if this separater works on windows
-                const project_base = `@${repo_answers.repo_name}-${Date.now()}`
+                // const project_base = `@${repo_answers.repo_name}-${Date.now()}`
+                const project_base = `@${repo_answers.repo_name}`
                 actionHandlers.scaffoldNewRepo({ repo_answers: { ...repo_answers, project_base } });
               });
             break;
