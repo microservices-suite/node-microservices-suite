@@ -7,6 +7,7 @@ const { existsSync, statSync, readdirSync, writeFileSync, readFileSync } = requi
 let { exec, spawn } = require('node:child_process');
 const { writeFile } = require('node:fs/promises');
 const assets = require('./assets')
+const ora = require('ora')
 
 /**
  * Dynamically generate directory path given workspace_name
@@ -727,38 +728,55 @@ const addPackageJson = ({ project_path, answers }) => {
     const depsCommand = dependencies.join(' ');
     const devDepsCommand = devDependencies.join(' ');
 
-    // Build the command
-    const command = `yarn workspace ${answers.project_base}${sep}${answers.service_name} add ${depsCommand} && yarn workspace ${answers.project_base}${sep}${answers.service_name} add -D ${devDepsCommand}&& yarn workspace ${answers.project_base}${sep}utilities add ${utilitiesDependencies}&& yarn workspace ${answers.project_base}${sep}config add ${configDependencies.join(' ')}`;
-    // TODO: find a way to use spawn instead
+
     exec(`cd ${answers.repo_name} && git init`)
+    const spinner = ora(`Project ${answers.repo_name} created successfully!`).start();
+    spinner.color
+    spinner.text = 'Installing dependencies...' 
+    const command = `yarn workspace ${answers.project_base}${sep}${answers.service_name} add ${depsCommand} && yarn workspace ${answers.project_base}${sep}${answers.service_name} add -D ${devDepsCommand} && yarn workspace ${answers.project_base}${sep}utilities add ${utilitiesDependencies} && yarn workspace ${answers.project_base}${sep}config add ${configDependencies.join(' ')}`;
+
     // Execute the command
     const childProcess = spawn(command, {
         cwd: project_path,
         shell: true,
     });
 
-    // Log output
+
+
     childProcess.stdout.on('data', data => {
-        logInfo({ message: `${data}` });
+        const output = data.toString();
+        // Check for different stages
+        if (output.includes('[1/4] Resolving packages...')) {
+            spinner.text = 'Resolving packages...';
+        } else if (output.includes('[2/4] Fetching packages...')) {
+            spinner.text = 'Fetching packages...';
+        } else if (output.includes('[3/4] Linking dependencies...')) {
+            spinner.text = 'Linking dependencies...';
+        } else if (output.includes('[4/4] Building fresh packages...')) {
+            spinner.text = 'Building packages...';
+        } else {
+            const match = output.match(/├─ ([\w@/.-]+)\s/);
+            if (match) {
+                spinner.text = `Installed ${match[1]}`;
+            }
+        }
     });
 
     childProcess.stderr.on('data', data => {
-        logWarning({ message: `${data}` });
+        spinner.text = 'Encountered an issue, check logs for more info.';
     });
 
-    // Handle errors
     childProcess.on('error', error => {
-        logError({ error: `Error executing command: ${error.message}` });
+        spinner.fail('Failed to execute command');
     });
 
-    // Handle process exit
     childProcess.on('exit', (code, signal) => {
         if (code !== 0) {
-            logError({ error: `Command exited with code ${code} and signal ${signal}` });
+            spinner.fail('Command failed to complete successfully');
             return;
         }
-        logSuccess({ message: 'Dependencies installed' });
-        logSuccess({ message: `To start the project, run 'cd ${answers.repo_name} && yarn dev'` });
+        spinner.succeed('Dependencies installed successfully');
+        spinner.info(`To start the project, run 'cd ${answers.repo_name} && yarn dev'`)
     });
 }
 
@@ -876,9 +894,7 @@ const addMicroservice = ({ project_path, answers }) => {
         os,
         description: `This is the ${answers.service_name} service listening at http://localhost:9001. TODO: update this description`
     }), null, 2));
-
-    logSuccess({ message: `Project ${answers.repo_name} created successfully!` });
-    logSuccess({ message: 'Installing dependencies...' });
+   
 }
 
 
@@ -918,6 +934,11 @@ const scaffoldNewService = async ({ answers }) => {
     }), null, 2));
 }
 
+const generatRootPath = () => {
+    const isSuiteRepo = cwd().split(sep).includes('microservices')
+    if (!cwd().split(sep).includes('microservices') || !cwd())
+        return
+}
 /**
  * Generates a service using MCS architecture with initial boiler plate 
  * @param {Object} options 
