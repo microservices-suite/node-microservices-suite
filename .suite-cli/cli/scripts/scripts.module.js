@@ -1056,6 +1056,22 @@ const scaffoldNewLibrary = async ({ answers }) => {
         description: `This is the ${answers.library_name} library. TODO: update this description`
     }), null, 2));
 }
+
+/**
+ * Adds initial minimal dependencies and installs at microservice workspace and shared workspace.
+ * @param {Object} options - Options for adding initial minimal dependencies and installing at workspaces.
+ * @param {Object} options.answers - Answers containing information for configuring the project.
+ * @param {string} options.answers.project_base - The base directory of the project.
+ * @param {string} options.answers.repo_name - The name of the project.
+ * @param {string} options.project_root - The root directory of the project.
+ * @returns {void}
+ */
+const addProjectConfigs = ({ project_root, answers }) => {
+    writeFile(join(project_root, 'suite.json'), JSON.stringify(assets.suiteJSON({ answers }), null, 2));
+    writeFile(join(project_root, 'suite.config'), assets.suiteConfig({ answers }));
+    writeFile(join(project_root, '.suiterc'), assets.suiteRC({ answers }));
+
+}
 module.exports = {
     generateDirectoryPath,
     changeDirectory,
