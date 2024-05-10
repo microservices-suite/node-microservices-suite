@@ -121,13 +121,19 @@ program
                 message: 'Select license:',
                 choices: ['ISC', 'MIT'],
                 default: 'ISC'
+              },{
+                type: 'input',
+                name: 'service_name',
+                message: 'Initial service:',
+                default: 'microservice1'
               }
+              
             ])
-              .then(repo_answers => {
+              .then(answers => {
                 //   find out if this separater works on windows
-                // const project_base = `@${repo_answers.repo_name}-${Date.now()}`
-                const project_base = `@${repo_answers.repo_name}`
-                actionHandlers.scaffoldNewRepo({ repo_answers: { ...repo_answers, project_base } });
+                // const project_base = `@${answers.repo_name}-${Date.now()}`
+                const project_base = `@${answers.repo_name}`
+                actionHandlers.scaffoldNewRepo({ answers: { ...answers, project_base, private: true } });
               });
             break;
           case 'service':
@@ -139,7 +145,7 @@ program
                 // TODO: validate workspace compliant name using regex
                 validate: input => input ? true : 'Name cannot be empty',
               }
-            ]).then((answers) => actionHandlers.scaffoldNewService({ answers }))
+            ]).then((answers) => actionHandlers.scaffoldNewService({ answers: { ...answers, private: true } }))
             break;
           case 'library':
             prompt([
@@ -150,7 +156,7 @@ program
                 // TODO: validate workspace compliant name using regex
                 validate: input => input ? true : 'Name cannot be empty',
               }
-            ]).then((answers) => actionHandlers.scaffoldNewLibrary({ answers }))
+            ]).then((answers) => actionHandlers.scaffoldNewLibrary({ answers: { ...answers, private: false } }))
             break
           default:
             console.log('Handling other resources, not yet implemented.');
