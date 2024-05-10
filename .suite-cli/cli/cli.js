@@ -85,25 +85,25 @@ program
         type: 'list',
         name: 'resource',
         message: 'What would you like to generate?',
-        choices: ['repo', 'service', 'library', 'app', 'gateway']
+        choices: ['monorepo', 'service', 'library', 'app', 'gateway']
       }
     ])
       .then(answers => {
         switch (answers.resource) {
-          case 'repo':
-            // Additional prompts specific to 'repo' resource
+          case 'monorepo':
+            // Additional prompts specific to 'monorepo' resource
             prompt([
               {
                 type: 'input',
                 name: 'repo_name',
-                message: `Enter repo name:`,
+                message: `Enter monorepo name:`,
                 // TODO: validate workspace compliant name using regex
                 validate: input => input ? true : 'Repo name cannot be empty.'
               },
               {
                 type: 'checkbox',
                 name: 'apis',
-                message: 'Select APIs to use in your repo:',
+                message: 'Select APIs to use in your monorepo:',
                 choices: ['REST', 'GraphQL', 'SOAP'],
                 default: ['REST', 'GraphQL']
 
