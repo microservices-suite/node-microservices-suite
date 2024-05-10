@@ -298,12 +298,12 @@ const addDepsAtWorkspace = ({ workspace_name, workspace_directory = 'microservic
 }
 
 /**
- * 
- * @param {Object} options Environment to run the 
- * @param {boolean} [options.kubectl] If true runs the app with kubectl
- * @param {boolean} [options.mode] Service environment. Defaults to dev mode
- * @param {boolean} [options.app] If true the assumes components defined are apps 
- * @returns {void} Starts all components in the existing workspaces
+ * Starts all components in the existing workspaces based on the provided options.
+ * @param {Object} options - Environment settings for running the components.
+ * @param {boolean} [options.kubectl] - If true, runs the app with kubectl.
+ * @param {boolean} [options.mode] - Service environment mode. Defaults to 'dev' mode.
+ * @param {boolean} [options.app] - If true, assumes the components defined are apps.
+ * @returns {void} - Starts all components and logs their startup status.
  */
 const startAll = async ({ options }) => {
     // case -k (--kubectl)
@@ -354,13 +354,14 @@ const startAll = async ({ options }) => {
     // runVanillaServices({ services: [], mode: options.mode })
 
 }
+
 /**
- * 
- * @param {Object} options Environment to run the 
- * @param {string} options.microservicesDir The the services root directory
- * @param {string} options.serviceDirectories List of service directories  under [options.microservicesDir] 
- * @param {string} [options.mode] Service environment. Defaults to dev mode
- * @returns {void} Starts services with nodemon in devmode otherwise PM2
+ * Starts services with nodemon in development mode by default, otherwise with PM2.
+ * @param {Object} options - Environment settings for running the services.
+ * @param {string[]} options.serviceDirectories - List of service directories under `options.microservicesDir`.
+ * @param {string} options.microservicesDir - The root directory of the services.
+ * @param {string} [options.mode='dev'] - The environment mode for running the services. Defaults to 'dev'.
+ * @returns {void} Starts the services and logs their startup status.
  */
 const spinVanillaServices = async ({ serviceDirectories, microservicesDir, mode = 'dev' }) => {
     logInfo({ message: `Starting all services in ${mode} mode...` });
@@ -487,11 +488,14 @@ const runDockerizedApps = async ({ apps_dir, apps_directories, mode = 'dev', bui
 }
 
 /**
- * 
- * @param {Object} options Environment to run the 
- * @param {string} [options.components] App environment. Defaults to dev mode
- * @param {array} apps The apps to run 
+ * Spins Kubernetes pods for the specified apps.
+ * @param {Object} options - Environment settings for running the apps.
+ * @param {string} options.apps_dir - The root directory where the apps are located.
+ * @param {string[]} options.apps_directories - An array of directories containing the apps to run.
+ * @param {string} options.mode - The environment mode for running the apps.
+ * @returns {Promise<string>} A promise that resolves with a message indicating the success or failure of starting the service.
  */
+
 const spinKubectlPods = ({ apps_dir, apps_directories, mode }) => {
     exec(`yarn workspace @microservices-suite${sep}${dir} ${mode}`, { cwd: join(microservicesDir, dir) }, async (error, stdout, stderr) => {
         var error_message = ''
@@ -517,14 +521,17 @@ const spinKubectlPods = ({ apps_dir, apps_directories, mode }) => {
         }
     });
 }
+
 /**
-* 
-* @param {Object} options Environment to run the 
-* @param {boolean} [options.kubectl] If true runs the app with kubectl
-* @param {boolean} [options.mode] App environment
-* @param {string[]} [options.apps If true the assumes components defined are apps 
-* @returns {void} Starts all components in the existing workspaces
-*/
+ * Starts all components in the existing workspaces.
+ * @param {Object} options - Environment settings for running the apps.
+ * @param {string[]} [options.apps] - An array of app names to start.
+ * @param {Object} options.options - Additional options for starting apps.
+ * @param {boolean} [options.options.kubectl] - If true, runs the apps with kubectl.
+ * @param {boolean} [options.options.mode] - The app environment mode.
+ * @param {boolean} [options.options.build] - If true, builds the Docker images before running the apps.
+ * @returns {void}
+ */
 const startApps = async ({ apps, options }) => {
     const {
         component_root_dir: apps_dir,
@@ -547,11 +554,11 @@ const startApps = async ({ apps, options }) => {
 }
 
 /**
- * 
- * @param {Object} options  
- * @param {array} options.component
- * @param {string} options.component_type
- * @returns {{component_root_dir: string, components_directories: string[]}} - An object containing the root directory of the components and an array of directories for each component.
+ * Retrieves the root directory and directories of the specified component type.
+ * @param {Object} options - Options for retrieving component directories.
+ * @param {string[]} options.components - An array of component names.
+ * @param {string} options.component_type - The type of component ('app' or 'microservice').
+ * @returns {{component_root_dir: string, components_directories: string[]}} An object containing the root directory of the components and an array of directories for each component.
  */
 const getComponentDirecotories = async ({ components, component_type }) => {
     const currentDir = cwd();
@@ -624,9 +631,26 @@ const startServices = async ({ services, mode, vanilla }) => {
 
     // TODO: listen on SIGTERM and other kill signals to exit gracefully eg with CTRL+[C,D,Z]
 }
+
+/**
+ * Resets the project to its initial state.
+ * @param {Object} options - Options for resetting the project.
+ * @param {string[]} options.components - An array of component names to reset.
+ * @param {Object} options - Additional options.
+ * @returns {void}
+ */
 const repoReset = ({ components, options }) => {
     spawn('yarn', ['repo:reset'], { stdio: 'inherit' })
 }
+
+/**
+ * Stops Docker-compose-based applications.
+ * @param {Object} options - Options for stopping apps.
+ * @param {string[]} options.components - An array of component names to stop.
+ * @param {Object} options - Additional options.
+ * @param {string} options.component_root_dir - The root directory containing the components.
+ * @returns {void}
+ */
 
 const stopApps = async ({ components, options }) => {
     const {
@@ -640,12 +664,12 @@ const stopApps = async ({ components, options }) => {
 }
 
 /**
- * prunes docker artifacts.See docker system prune --help
- * @param {Object} options  
- * @param {boolean} options.volume If true this command targets docker volumes otherwise system  
- * @param {boolean} options.all If true this command prunes system & volume artifacts  
- * @param {boolean} options.force If true does not prompt for confirmation  
- * @returns void
+ * Prunes docker artifacts.Abstraction to docker [system,volume] prune --help
+ * @param {Object} options - Options for Docker pruning.
+ * @param {boolean} options.volume - If true, this command targets docker volumes; otherwise, system.
+ * @param {boolean} options.all - If true, this command prunes system & volume artifacts.
+ * @param {boolean} options.force - If true, does not prompt for confirmation.
+ * @returns {void}
  */
 const dockerPrune = ({ volume, all, force }) => {
     if (volume && all) {
@@ -695,14 +719,15 @@ const dockerPrune = ({ volume, all, force }) => {
 
 }
 
+
 /**
- * Adds initial minimal dependencies and installs at microservice workspace and shared workspace
- * @param {Object} options 
- * @param {Object} options.answers 
- * @param {string} options.answers.project_base 
- * @param {string} options.answers.repo_name 
- * @param {string} options.project_path
- * @returns void
+ * Adds initial minimal dependencies and installs at microservice workspace and shared workspace.
+ * @param {Object} options - Options for adding package.json.
+ * @param {Object} options.answers - Answers containing information for configuring the package.json.
+ * @param {string} options.answers.project_base - The base project directory.
+ * @param {string} options.answers.repo_name - The name of the repository.
+ * @param {string} options.project_root - The root directory of the project.
+ * @returns {void}
  */
 const addPackageJson = ({ project_path, answers }) => {
     // Add a package.json 
@@ -781,15 +806,16 @@ const addPackageJson = ({ project_path, answers }) => {
 }
 
 /**
- * Scaffolds a new project generating suite standard file structure with initial boiler plate
- * @param {Object} options 
- * @param {Object} options.answers 
- * @param {string} options.answers.webserver 
- * @param {string} options.answers.apis 
- * @param {string} options.answers.license 
- * @param {string} options.answers.project_base 
- * @param {string} options.answers.repo_name 
- * @returns void
+ * Adds initial minimal dependencies and installs at microservice workspace and shared workspace.
+ * @param {Object} options - Options for adding a microservice.
+ * @param {string} options.project_root - The root directory of the project.
+ * @param {Object} options.answers - Answers containing information for configuring the microservice.
+ * @param {string} options.answers.webserver - The web server to be used.
+ * @param {string} options.answers.apis - The APIs protocols to be used.
+ * @param {string} options.answers.license - The license for the microservice.
+ * @param {string} options.answers.project_base - The base project directory.
+ * @param {string} options.answers.repo_name - The name of the project.
+ * @returns {void}
  */
 const addMicroservice = ({ project_path, answers }) => {
     const directories = assets.fileStructureContent({ sep, answers })
@@ -899,12 +925,13 @@ const addMicroservice = ({ project_path, answers }) => {
 
 
 /**
- * Scaffolds a new project generating suite standard file structure with initial boiler plate
- * @param {Object} options 
- * @param {Object} options.answers 
- * @param {string} options.answers.service_name
- * @param {boolean} options.answers.private
- * @returns void
+ * Scaffolds a new project generating suite standard file structure with initial boiler plate.
+ * @async
+ * @param {Object} options - Options for scaffolding the project.
+ * @param {Object} options.answers - Answers containing information for configuring the project.
+ * @param {string} options.answers.service_name - The name of the initial sample service.
+ * @param {boolean} options.answers.private - Indicates whether the project is private.
+ * @returns {void}
  */
 const scaffoldNewRepo = async ({ answers }) => {
     const project_path = join(cwd(), answers.repo_name);
@@ -965,10 +992,11 @@ const generateMCSHelper = ({ project_path, answers }) => {
 }
 
 /**
- * makes package releases
- * @param {Object} options 
- * @param {Object} options.package 
- * @returns void
+ * Releases a package or generates a release for the workspace.
+ * @async
+ * @param {Object} options - Options for releasing the package.
+ * @param {string} options.package - The name of the package to release (optional).
+ * @returns {Promise<void>} A Promise that resolves when the release process is completed.
  */
 const releasePackage = async ({ package }) => {
     const package_json_path = join(cwd(), 'package.json');
@@ -986,10 +1014,11 @@ const releasePackage = async ({ package }) => {
 }
 
 /**
- * 
- * @param {Object} options 
- * @param {string} options.package_json_path Path to workspace
- * @returns workspace_name|undefined Returns workspace name or undefined if does not exist
+ * Retrieves the workspace name from the package.json file.
+ * @param {Object} options - Options for retrieving the workspace name.
+ * @param {string} options.package_json_path - The path to the package.json file.
+ * @returns {Object} An object containing the workspace name.
+ * @throws {Error} If there is an error parsing the package.json file.
  */
 const retrieveWorkSpaceName = ({ package_json_path }) => {
     // Read the package.json file
@@ -1007,11 +1036,12 @@ const retrieveWorkSpaceName = ({ package_json_path }) => {
 }
 
 /**
- * Scaffolds a new library workspace 
- * @param {Object} options 
- * @param {Object} options.answers additional options
- * @param {string} options.answers.library_name Name of the library to scaffold
- * @returns void
+ * Scaffold a new library within the project.
+ * @async
+ * @param {Object} options - Options for scaffolding the library.
+ * @param {Object} options.answers - Answers containing information about the library.
+ * @param {string} options.answers.library_name - The name of the library to scaffold.
+ * @returns {Promise<void>} A Promise that resolves when the library is scaffolded successfully.
  */
 const scaffoldNewLibrary = async ({ answers }) => {
     const project_path = join(cwd(), 'shared', answers.library_name);
