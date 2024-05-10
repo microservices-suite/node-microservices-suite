@@ -10,7 +10,7 @@ const { router } = require('./src/routes');
 // const app = require('./src/app');
 
 mongoose.connect(config.db).then(() => {
-logger.info(\`successfully connected to db: \${config.db}\`);
+logger.info(\`📀 successfully connected to db: \${config.db}\`);
 }).catch(err => {
 logger.error(\`failed to connect to db.exiting...\${err.message}\`);
 process.exit(0);
@@ -39,7 +39,7 @@ if (err.code === 'EADDRINUSE') {
 })
 
 server.listen(config.port, () => {
-    logger.info(\`${answers.project_base} service connected 🚀 here: http://localhost:\${config.port}\`);
+    logger.info(\`🚀 ${answers.project_base,sep,answers.service_name} listening at: http://localhost:\${config.port}\`);
 });
 
 app.use(morgan.errorHandler);
