@@ -373,7 +373,7 @@ const spinVanillaServices = async ({ serviceDirectories, microservicesDir, mode 
 
     try {
         // Simulate delay before starting services
-        await delay(1000);
+        await delay(500);
 
         await Promise.all(serviceDirectories.map(async (dir) => {
             const serviceSpinner = ora('Starting service concurrently in: ' + dir).start();
@@ -453,7 +453,7 @@ const runDockerizedApps = async ({ apps_dir, apps_directories, mode = 'dev', bui
             }
             setTimeout(() => {
 
-            }, 1000)
+            }, 500)
             // TODO: method 1. Has less control but works fine
             const composeCommand = 'docker';
             const composeFile = mode === 'prod' ? 'docker-compose.yml' : `docker-compose.${mode}.yml`;
@@ -601,16 +601,16 @@ const getComponentDirecotories = async ({ components, component_type }) => {
     const component_root_dir = join(project_root, `${component_type === 'app' ? `gateway${sep}apps` : 'microservices'}`)
 
     // Simulate delay before checking if the component directory exists
-    await delay(1000);
+    await delay(500);
     spinner.text = `Checking if ${component_root_dir} exists...`;
 
     // Simulate delay before checking if the component directory exists
-    await delay(2000);
+    await delay(500);
 
     // Check if the component directory exists
     if (!existsSync(component_root_dir) || !statSync(component_root_dir).isDirectory()) {
         // Simulate delay before displaying failure message
-        await delay(1000);
+        await delay(500);
         spinner.warn('This does not seem to be a suite monorepo project');
         spinner.info('If it is kindly open an issue here: https://github.com/microservices-suite/node-microservices-suite/issues');
         exit(1);
@@ -625,7 +625,7 @@ const getComponentDirecotories = async ({ components, component_type }) => {
             .filter(item => statSync(join(component_root_dir, item)).isDirectory());
     } else {
         spinner.text = 'Filtering directories...';
-        await delay(2000);
+        await delay(500);
         components_directories = readdirSync(component_root_dir)
             .filter(item => components.includes(item) && statSync(join(component_root_dir, item)).isDirectory());
 
@@ -810,12 +810,12 @@ const addPackageJson = async ({ project_root, answers }) => {
     spinner.text = 'Initializing git...';
 
     // Delay before updating spinner for next phase
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 500));
     spinner.color = 'yellow'; // Change spinner color
     spinner.text = 'Installing dependencies...';
 
     // Delay before executing yarn commands
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 500));
     const command = `yarn workspace ${answers.project_base}${sep}${answers.service_name} add ${depsCommand} && yarn workspace ${answers.project_base}${sep}${answers.service_name} add -D ${devDepsCommand} && yarn workspace ${answers.project_base}${sep}utilities add ${utilitiesDependencies} && yarn workspace ${answers.project_base}${sep}config add ${configDependencies.join(' ')}`;
 
     // Execute the command
@@ -1038,7 +1038,6 @@ const scaffoldNewService = async ({ answers }) => {
             throw new Error('Error code 10005.Kindly raise an issue at https://github.com/microservices-suite/node-microservices-suite/issues')
         }
     }
-    console.log({ project_root })
     const package_json_path = join(project_root, 'package.json');
     const { workspace_name } = retrieveWorkSpaceName({ package_json_path });
     await injectService({ project_root, answers, workspace_name })
@@ -1063,7 +1062,7 @@ const injectService = async ({ project_root, answers, workspace_name }) => {
     try {
         // Simulate a delay for the spinner
         //TODO: abstract timeout into a reusable function
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise(resolve => setTimeout(resolve, 500));
 
         // Generate mcs service using helper function
         generateMCSHelper({ project_root, answers: { ...answers, project_base: workspace_name } });
