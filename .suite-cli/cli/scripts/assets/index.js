@@ -42,3 +42,8 @@ module.exports.errorReadmeContent = require('./errorReadmeContent.asset')
 module.exports.fileStructureContent = require('./fileStructureContent.asset') 
 module.exports.gitignoreContent = require('./gitignoreContent.asset') 
 module.exports.debuggerConfigContent = require('./debuggerConfigContent.asset') 
+module.exports.suiteJSON = require('./suiteJSON.asset') 
+module.exports.suiteConfig = require('./suiteConfig.asset') 
+module.exports.suiteRC = require('./suiteRC.asset') 
+
+
