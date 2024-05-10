@@ -1,5 +1,5 @@
 const chalk = require('chalk')
-const { join, sep } = require('node:path')
+const { join, sep, resolve } = require('node:path')
 const os = require('os')
 const { mkdirSync, readFile } = require('fs')
 const { cwd, chdir, exit, platform } = require('node:process')
@@ -267,13 +267,18 @@ const addDepsAtWorkspace = ({ workspace_name, workspace_directory = 'microservic
     });
 };
 
+
 /**
- * Adds dependencies at given workspace and update package.json
- * @param {Object} options Options object containing workspace_name and workspace_directory
- * @param {string} [options.components]  Name of the workspace where to add dependencies
- * @param {string} [options.options] Directory where to look for the workspace. Defaults to 'microservices'
- * @returns {string}  Returns success message
- */const start = async ({ components, options }) => {
+* Starts components based on the provided options.
+* @param {Object} options - Options object containing workspace_name and workspace_directory.
+* @param {string[]} options.components - Names of the components to start.
+* @param {string} [options.options] - Directory where to look for the workspace. Defaults to 'microservices'.
+* @param {boolean} [options.app] - Indicates if the components are apps. Defaults to false.
+* @param {boolean} [options.kubectl] - If true, uses kubectl to start apps. Defaults to false.
+* @param {boolean} [options.vanilla] - If true, uses Nodemon to start services. Defaults to false.
+* @returns {string} - Success message indicating the start of components.
+*/
+const start = async ({ components, options }) => {
     const type = options.app ? 'app' : 'service';
     logInfo({ message: `Starting ${components.length || 'all'} ${type}${components.length === 1 ? '' : 's'}...` });
     const useDockerCompose = options.app && !options.kubectl;
@@ -364,42 +369,68 @@ const startAll = async ({ options }) => {
  * @returns {void} Starts the services and logs their startup status.
  */
 const spinVanillaServices = async ({ serviceDirectories, microservicesDir, mode = 'dev' }) => {
-    logInfo({ message: `Starting all services in ${mode} mode...` });
-    const package_json_path = join(microservicesDir.replace(`${sep}microservices`, ''), 'package.json')
-    await Promise.all(
-        serviceDirectories.map(async (dir) => {
-            logInfo({ message: `Starting service concurrently in: ${dir}` });
-            // pass the cwd as the workspace directory and run the script at package.son eg yarn prod
+    const spinner = ora('Starting all services in ' + mode + ' mode...').start();
+
+    try {
+        // Simulate delay before starting services
+        await delay(1000);
+
+        await Promise.all(serviceDirectories.map(async (dir) => {
+            const serviceSpinner = ora('Starting service concurrently in: ' + dir).start();
             const processes = await exec(`yarn ${mode}`, { cwd: join(microservicesDir, dir) }, async (error, stdout, stderr) => {
-                var error_message = ''
                 if (error) {
-                    const _ = error.message.split('\n')
-                    if (_[1] && _[1].startsWith('error Command') && _[1].endsWith('not found.')) {
-                        error_message = `Missing script at ${dir}${sep}package.json: ${_[1].match(/"(.*?)"/)[1]}`
-                    }
-                    if (_[1] && _[1].startsWith('error There are more than one workspace')) {
-                        logError({ error: _[1] && _[1].replace('error ', '') })
-                        logAdvise({ message: 'Run suite fix -n to auto-fix all workspace naming issues' })
-                        exit(1)
-                    }
-                    if (_[1] && _[1].includes('Unknown workspace')) {
-                        if (existsSync(`${microservicesDir}${sep}${dir}${sep}package.json`)) {
-                            logWarning({ message: 'Wrong workspace naming' })
-                            logAdvise({ message: 'Run suite fix -n to auto-fix all workspace naming issues' })
-                            logAdvise({ message: 'suite fix only changes the package.json. If any service depends on it you will need to update it manually' })
-                        } else {
-                            logError({ error: (`Missing package.json @microservices-suite${sep}${dir}`) })
-                        }
-                        exit(1)
-                    }
-                    logError({ error: error_message })
+                    const errorMessage = getErrorMessage(error, dir, microservicesDir);
+                    serviceSpinner.fail(errorMessage);
                 } else {
-                    logSuccess({ message: `Service in directory ${dir} started successfully` });
+                    serviceSpinner.succeed(`Service in directory ${dir} started successfully`);
                 }
             });
-            processes.stdout.pipe(process.stdout);
-        }))
-}
+            processes.stdout.on('data', data => {
+                const output = data.toString();
+                // Check if the output contains the "yarn run" message
+                if (!output.includes('yarn run')) {
+                    // Stop the spinner before printing the output
+                    serviceSpinner.stop();
+                    spinner.succeed(output);
+                    // Restart the spinner after printing the output
+                    // serviceSpinner.start();
+                }
+            });
+        }));
+
+        spinner.succeed(`service${serviceDirectories.length > 0 ? 's' : ''} started successfully: ${serviceDirectories}`);
+        console.log('')
+
+    } catch (error) {
+        spinner.fail('An error occurred while starting services');
+        console.error(error);
+        exit(1);
+    }
+};
+
+
+
+const getErrorMessage = (error, dir, microservicesDir) => {
+    const errorMessageParts = error.message.split('\n');
+    let errorMessage = '';
+    if (errorMessageParts[1]) {
+        if (errorMessageParts[1].startsWith('error Command') && errorMessageParts[1].endsWith('not found.')) {
+            errorMessage = `Missing script at ${dir}${sep}package.json: ${errorMessageParts[1].match(/"(.*?)"/)[1]}`;
+        } else if (errorMessageParts[1].startsWith('error There are more than one workspace')) {
+            errorMessage = errorMessageParts[1].replace('error ', '');
+        } else if (errorMessageParts[1].includes('Unknown workspace')) {
+            if (existsSync(`${microservicesDir}${sep}${dir}${sep}package.json`)) {
+                errorMessage = 'Wrong workspace naming';
+            } else {
+                errorMessage = `Missing package.json @microservices-suite${sep}${dir}`;
+            }
+        } else {
+            errorMessage = error.message;
+        }
+    }
+    return errorMessage;
+};
+
 
 /**
  * 
@@ -561,57 +592,72 @@ const startApps = async ({ apps, options }) => {
  * @returns {{component_root_dir: string, components_directories: string[]}} An object containing the root directory of the components and an array of directories for each component.
  */
 const getComponentDirecotories = async ({ components, component_type }) => {
-    const currentDir = cwd();
-    // Construct component directory path
-    const package_json_path = join(cwd(), 'package.json')
+    const spinner = ora('Searching for component directories').start();
+    const project_root = generatRootPath({ currentDir: cwd() })
+    const package_json_path = join(project_root, 'package.json')
+
     const { workspace_name } = retrieveWorkSpaceName({ package_json_path })
-    const component_root_dir = `${currentDir.split(sep).slice(0, currentDir.split(sep).indexOf(`${workspace_name.slice(1)}`) + 1).join(sep)}${sep}${component_type === 'app' ? `gateway${sep}apps` : 'microservices'}`
-    logInfo({ message: `cwd: ${component_root_dir}` });
+
+    const component_root_dir = join(project_root, `${component_type === 'app' ? `gateway${sep}apps` : 'microservices'}`)
+
+    // Simulate delay before checking if the component directory exists
+    await delay(1000);
+    spinner.text = `Checking if ${component_root_dir} exists...`;
+
+    // Simulate delay before checking if the component directory exists
+    await delay(2000);
 
     // Check if the component directory exists
     if (!existsSync(component_root_dir) || !statSync(component_root_dir).isDirectory()) {
-        logWarning({ message: `This does not seem to be a suite monorepo project` });
-        logWarning({ message: 'If it is kindly open an issue here: https://github.com/microservices-suite/node-microservices-suite/issues' })
+        // Simulate delay before displaying failure message
+        await delay(1000);
+        spinner.warn('This does not seem to be a suite monorepo project');
+        spinner.info('If it is kindly open an issue here: https://github.com/microservices-suite/node-microservices-suite/issues');
         exit(1);
     }
 
-    // Check if the component directory exists
-    if (!existsSync(component_root_dir) || !statSync(component_root_dir).isDirectory()) {
-        logError({ error: `This does not seem to be a suite monorepo project` });
-        return;
-    }
-
     // Get a list of directories in the component directory
-    let components_directories
+    let components_directories;
     if (!components.length) {
+        spinner.text = 'Getting list of directories...';
+        await delay(1500);
         components_directories = readdirSync(component_root_dir)
             .filter(item => statSync(join(component_root_dir, item)).isDirectory());
-    }
-    else {
+    } else {
+        spinner.text = 'Filtering directories...';
+        await delay(2000);
         components_directories = readdirSync(component_root_dir)
-            .filter(item => components.includes(item) && statSync(join(component_root_dir, item)).isDirectory()
-            );
+            .filter(item => components.includes(item) && statSync(join(component_root_dir, item)).isDirectory());
+
         components.forEach(service => {
-            const valid_dir = components_directories.includes(service) && statSync(join(component_root_dir, service)).isDirectory()
+            const valid_dir = components_directories.includes(service) && statSync(join(component_root_dir, service)).isDirectory();
             if (!valid_dir) {
-                logError({ error: `No such service under microservices workspace: ${service}` })
-                exit(1)
+                spinner.fail(`No such service under microservices workspace: ${service}`);
+                exit(1);
             }
         });
-        // .filter(item => {
-        // });
     }
-    return { component_root_dir, components_directories }
-}
+    spinner.succeed('Component directories found successfully');
+    console.log('------------------------------------------');
+    spinner.info(`Workspace: ${workspace_name}${sep}${components.join(' ')}`);
+    spinner.info(`Path: ${component_root_dir}`);
+    console.log('------------------------------------------');
+
+    return { component_root_dir, components_directories };
+};
+
+// Function to simulate delay
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 /**
-* 
-* @param {Object} options Environment to run the 
-* @param {boolean} [options.vanilla] If true runs the service nodemon
-* @param {boolean} [options.mode] App environment
-* @param {string[]} [options.services] If true the assumes components defined are apps 
-* @returns {void} Starts all components in the existing workspaces
-*/
+ * Starts all components in the existing workspaces.
+ * @param {Object} options - Environment configuration.
+ * @param {boolean} [options.vanilla] - If true, runs the services with nodemon.
+ * @param {boolean} [options.mode] - App environment.
+ * @param {string[]} [options.services] - An array of service names to start.
+ * @returns {void}
+ */
+
 const startServices = async ({ services, mode, vanilla }) => {
     const {
         component_root_dir: microservices_root_dir,
@@ -620,6 +666,7 @@ const startServices = async ({ services, mode, vanilla }) => {
         components: services,
         component_type: 'microsevice'
     })
+
     if (vanilla) {
         // TODO: run services with nodemon in dev mode otherwise PM2
         await spinVanillaServices({
@@ -729,10 +776,10 @@ const dockerPrune = ({ volume, all, force }) => {
  * @param {string} options.project_root - The root directory of the project.
  * @returns {void}
  */
-const addPackageJson = ({ project_path, answers }) => {
+const addPackageJson = async ({ project_root, answers }) => {
     // Add a package.json 
-    writeFileSync(join(project_path, 'package.json'), JSON.stringify(assets.rootPackageJsonContent({ answers, os, sep }), null, 2));
-    writeFileSync(join(project_path, 'package.json'), JSON.stringify(assets.rootPackageJsonContent({ answers, os, sep }), null, 2));
+    writeFileSync(join(project_root, 'package.json'), JSON.stringify(assets.rootPackageJsonContent({ answers, os, sep }), null, 2));
+    writeFileSync(join(project_root, 'package.json'), JSON.stringify(assets.rootPackageJsonContent({ answers, os, sep }), null, 2));
 
     const dependencies = [
         `${answers.project_base}/config@1.0.0`,
@@ -754,15 +801,26 @@ const addPackageJson = ({ project_path, answers }) => {
     const devDepsCommand = devDependencies.join(' ');
 
 
+
+    // Creating a spinner
+    // const spinner = ora(`Project ${answers.repo_name} created successfully!`).start();
+    const spinner = ora(`Initializing new suite project @ ${join(cwd(), answers.repo_name)}`).start();
+    await new Promise(resolve => setTimeout(resolve, 10000));
     exec(`cd ${answers.repo_name} && git init`)
-    const spinner = ora(`Project ${answers.repo_name} created successfully!`).start();
-    spinner.color
-    spinner.text = 'Installing dependencies...' 
+    spinner.text = 'Initializing git...';
+
+    // Delay before updating spinner for next phase
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    spinner.color = 'yellow'; // Change spinner color
+    spinner.text = 'Installing dependencies...';
+
+    // Delay before executing yarn commands
+    await new Promise(resolve => setTimeout(resolve, 1000));
     const command = `yarn workspace ${answers.project_base}${sep}${answers.service_name} add ${depsCommand} && yarn workspace ${answers.project_base}${sep}${answers.service_name} add -D ${devDepsCommand} && yarn workspace ${answers.project_base}${sep}utilities add ${utilitiesDependencies} && yarn workspace ${answers.project_base}${sep}config add ${configDependencies.join(' ')}`;
 
     // Execute the command
     const childProcess = spawn(command, {
-        cwd: project_path,
+        cwd: project_root,
         shell: true,
     });
 
@@ -817,10 +875,10 @@ const addPackageJson = ({ project_path, answers }) => {
  * @param {string} options.answers.repo_name - The name of the project.
  * @returns {void}
  */
-const addMicroservice = ({ project_path, answers }) => {
+const addMicroservice = ({ project_root, answers }) => {
     const directories = assets.fileStructureContent({ sep, answers })
     directories.forEach((dir) => {
-        const current_dir = `${project_path}${sep}${dir}`
+        const current_dir = `${project_root}${sep}${dir}`
         if (dir !== `REST${sep}app1`) mkdirSync(current_dir, { recursive: true });
         switch (dir) {
             case `shared${sep}config`:
@@ -902,25 +960,25 @@ const addMicroservice = ({ project_path, answers }) => {
         }
     });
 
-    generateMCSHelper({ project_path, answers })
-    writeFile(join(`${project_path}${sep}microservices${sep}${answers.service_name}`, 'index.js'), assets.serverContent({ answers, sep }));
-    writeFile(join(`${project_path}${sep}microservices${sep}${answers.service_name}`, '.env'), assets.envContent());
-    writeFile(join(`${project_path}${sep}microservices${sep}${answers.service_name}`, '.env.dev'), assets.envContent());
-    writeFile(join(`${project_path}${sep}microservices${sep}${answers.service_name}`, 'ecosystem.config.js'), assets.ecosystemContent());
-    mkdirSync(join(project_path, '.vscode'), { recursive: true })
-    writeFileSync(join(project_path, '.gitignore'), assets.gitignoreContent());
-    writeFileSync(join(project_path, '.vscode', 'launch.json'), JSON.stringify(assets.debuggerConfigContent(), null, 2));
-    writeFileSync(join(project_path, '.gitignore'), assets.gitignoreContent());
-    mkdirSync(join(project_path, '.vscode'), { recursive: true })
-    writeFileSync(join(project_path, '.vscode', 'launch.json'), JSON.stringify(assets.debuggerConfigContent(), null, 2));
-    writeFile(join(`${project_path}${sep}microservices${sep}${answers.service_name}`, 'package.json'), JSON.stringify(assets.genericPackageJsonContent({
+    generateMCSHelper({ project_root, answers })
+    writeFile(join(`${project_root}${sep}microservices${sep}${answers.service_name}`, 'index.js'), assets.serverContent({ answers, sep }));
+    writeFile(join(`${project_root}${sep}microservices${sep}${answers.service_name}`, '.env'), assets.envContent());
+    writeFile(join(`${project_root}${sep}microservices${sep}${answers.service_name}`, '.env.dev'), assets.envContent());
+    writeFile(join(`${project_root}${sep}microservices${sep}${answers.service_name}`, 'ecosystem.config.js'), assets.ecosystemContent());
+    mkdirSync(join(project_root, '.vscode'), { recursive: true })
+    writeFileSync(join(project_root, '.gitignore'), assets.gitignoreContent());
+    writeFileSync(join(project_root, '.vscode', 'launch.json'), JSON.stringify(assets.debuggerConfigContent(), null, 2));
+    writeFileSync(join(project_root, '.gitignore'), assets.gitignoreContent());
+    mkdirSync(join(project_root, '.vscode'), { recursive: true })
+    writeFileSync(join(project_root, '.vscode', 'launch.json'), JSON.stringify(assets.debuggerConfigContent(), null, 2));
+    writeFile(join(`${project_root}${sep}microservices${sep}${answers.service_name}`, 'package.json'), JSON.stringify(assets.genericPackageJsonContent({
         answers,
         suffix: `${answers.service_name}`,
         isMicroservice: true,
         os,
         description: `This is the ${answers.service_name} service listening at http://localhost:9001. TODO: update this description`
     }), null, 2));
-   
+
 }
 
 
@@ -934,10 +992,27 @@ const addMicroservice = ({ project_path, answers }) => {
  * @returns {void}
  */
 const scaffoldNewRepo = async ({ answers }) => {
-    const project_path = join(cwd(), answers.repo_name);
-    mkdirSync(project_path, { recursive: true });
-    addMicroservice({ project_path, answers: { ...answers, service_name: 'microservice1' } })
-    addPackageJson({ project_path, answers: { ...answers, private: true, service_name: 'microservice1' } })
+    let project_root;
+    try {
+        project_root = generatRootPath({ currentDir: cwd() });
+    } catch (error) {
+        // Not within a suite repo
+        if (error.message && error.message === 'suite.json not found') {
+            mkdirSync(join(cwd(), answers.repo_name), { recursive: true });
+            addProjectConfigs({ project_root: join(cwd(), answers.repo_name), answers })
+            addMicroservice({ project_root: join(cwd(), answers.repo_name), answers })
+            addPackageJson({ project_root: join(cwd(), answers.repo_name), answers })
+            return
+        }
+        else {
+            // rethrow the error
+            throw new Error('Error code 10005.Kindly raise an issue at https://github.com/microservices-suite/node-microservices-suite/issues')
+        }
+    }
+    ora('This looks like a suite repo. Do you want to reinitialize?').warn()
+    // TODO: suite init to check for existing errors and fix
+    ora().info('Run <suite init> to reinitialize this project')
+    exit(1)
 }
 
 /**
@@ -948,36 +1023,105 @@ const scaffoldNewRepo = async ({ answers }) => {
  * @returns void
  */
 const scaffoldNewService = async ({ answers }) => {
-    const project_path = cwd()
-    const package_json_path = join(cwd(), 'package.json')
-    const { workspace_name } = retrieveWorkSpaceName({ package_json_path })
-    generateMCSHelper({ project_path, answers: { ...answers, project_base: workspace_name } })
-    writeFile(join(`${project_path}`, 'package.json'), JSON.stringify(assets.genericPackageJsonContent({
-        answers: { ...answers, project_base: workspace_name },
-        suffix: `${answers.service_name}`,
-        isMicroservice: true,
-        os,
-        description: `This is the ${answers.service_name} service. TODO: update this description`
-    }), null, 2));
+    let project_root;
+    try {
+        project_root = generatRootPath({ currentDir: cwd() });
+    } catch (error) {
+        // Not within a suite repo
+        if (error.message && error.message === 'suite.json not found') {
+            ora('This does not look like a suite repo').warn()
+            ora().info('If it is run <suite init> from project root to reinitialize suite project and try again')
+            exit(1)
+        }
+        else {
+            // rethrow the error
+            throw new Error('Error code 10005.Kindly raise an issue at https://github.com/microservices-suite/node-microservices-suite/issues')
+        }
+    }
+    console.log({ project_root })
+    const package_json_path = join(project_root, 'package.json');
+    const { workspace_name } = retrieveWorkSpaceName({ package_json_path });
+    await injectService({ project_root, answers, workspace_name })
+
+
+};
+
+/**
+ * Injects a new service into the project directory.
+ * @async
+ * @param {Object} options - Options for injecting the service.
+ * @param {string} options.project_root - The root directory of the project.
+ * @param {Object} options.answers - Answers containing information about the service.
+ * @param {string} options.answers.service_name - The name of the service to inject.
+ * @param {string} options.workspace_name - The name of the workspace.
+ * @returns {Promise<void>} A Promise that resolves when the service is injected successfully.
+ * @throws {Error} If there is an error during the injection process.
+ */
+const injectService = async ({ project_root, answers, workspace_name }) => {
+    const spinner = ora(`Injecting service at: ${project_root}`).start();
+
+    try {
+        // Simulate a delay for the spinner
+        //TODO: abstract timeout into a reusable function
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // Generate mcs service using helper function
+        generateMCSHelper({ project_root, answers: { ...answers, project_base: workspace_name } });
+
+        // Create service directory
+        const service_path = join(project_root, 'microservices', answers.service_name);
+        await mkdirSync(service_path, { recursive: true });
+
+        // Create package.json for the service
+        const packageJsonContent = assets.genericPackageJsonContent({
+            answers: { ...answers, project_base: workspace_name },
+            suffix: `${answers.service_name}`,
+            isMicroservice: true,
+            os,
+            description: `This is the ${answers.service_name} service. TODO: update this description`
+        });
+
+        await writeFile(join(service_path, 'package.json'), JSON.stringify(packageJsonContent, null, 2));
+
+        spinner.succeed('Service injected successfully');
+    } catch (error) {
+        spinner.fail(`Failed to inject service: ${error.message}`);
+    }
 }
 
-const generatRootPath = () => {
-    const isSuiteRepo = cwd().split(sep).includes('microservices')
-    if (!cwd().split(sep).includes('microservices') || !cwd())
-        return
-}
+
 /**
- * Generates a service using MCS architecture with initial boiler plate 
- * @param {Object} options 
- * @param {string} options.project_path  Path to root directory or workspace
- * @param {Object} options.answers
- * @param {string} options.answers.project_base The project name usually a part of the root workspace name
- * @returns {void}
+ * Recursively searches for the root directory containing a 'suite.json' file.
+ * @param {Object} options - Options for finding the root directory.
+ * @param {string} options.currentDir - The current directory to start the search from.
+ * @param {number} [options.height=0] - The current recursion depth.
+ * @returns {string} The path to the root directory containing 'suite.json'.
+ * @throws {Error} If 'suite.json' is not found within 3 levels up from the current directory.
  */
-const generateMCSHelper = ({ project_path, answers }) => {
+const generatRootPath = ({ currentDir, height = 0 }) => {
+    if (existsSync(join(currentDir, 'suite.json'))) {
+        return currentDir; // Return the current directory if 'suite.json' is found
+    } else if (height < 3) {
+        const parentDir = resolve(currentDir, '..');
+        if (parentDir !== currentDir) { // Ensure we're not in the root directory
+            return generatRootPath({ currentDir: parentDir, height: height + 1 }); // Recur with the parent directory and increased height
+        }
+    }
+
+    throw new Error('suite.json not found');
+};
+
+/**
+ * Generates the necessary files for an mcs microservice.
+ * @param {Object} options - Options for generating microservice files.
+ * @param {string} options.project_root - The root directory of the project.
+ * @param {Object} options.answers - Answers containing information about the microservice.
+ * @param {string} options.answers.service_name - The name of the microservice.
+ */
+const generateMCSHelper = ({ project_root, answers }) => {
     ['models', 'controllers', 'routes', 'services'].forEach(mcs => {
         // Correct the file extension based on directory
-        const mcsPath = `${project_path}${sep}microservices${sep}${answers.service_name}${sep}src${sep}${mcs}`
+        const mcsPath = `${project_root}${sep}microservices${sep}${answers.service_name}${sep}src${sep}${mcs}`
         mkdirSync(mcsPath, { recursive: true })
         const fileExtension = mcs === 'models' ? 'model.js' : mcs === 'routes' ? 'routes.js' : 'controllers.js';
 
@@ -1044,11 +1188,11 @@ const retrieveWorkSpaceName = ({ package_json_path }) => {
  * @returns {Promise<void>} A Promise that resolves when the library is scaffolded successfully.
  */
 const scaffoldNewLibrary = async ({ answers }) => {
-    const project_path = join(cwd(), 'shared', answers.library_name);
+    const project_root = join(cwd(), 'shared', answers.library_name);
     const package_json_path = join(cwd(), 'package.json')
-    mkdirSync(project_path, { recursive: true });
+    mkdirSync(project_root, { recursive: true });
     const { workspace_name } = retrieveWorkSpaceName({ package_json_path })
-    writeFile(join(`${project_path}`, 'package.json'), JSON.stringify(assets.genericPackageJsonContent({
+    writeFile(join(`${project_root}`, 'package.json'), JSON.stringify(assets.genericPackageJsonContent({
         answers: { ...answers, project_base: workspace_name },
         suffix: `${answers.library_name}`,
         isMicroservice: false,
