@@ -1,5 +1,5 @@
-module.exports = ({ answers, os, sep }) => ({
-    name: `${answers.project_base}${sep}${answers.repo_name}`,
+module.exports = ({ answers, os }) => ({
+    name: `${answers.project_base}/${answers.repo_name}`,
     version: "1.0.0",
     description: "This is a microservices project",
     main: "index.js",
@@ -14,7 +14,7 @@ module.exports = ({ answers, os, sep }) => ({
     "license": answers.license,
     "private": answers.private,
     "scripts": {
-        "repo:reset": `find ..${sep}${answers.repo_name} -type d -name 'node_modules' -exec rm -rf {} + && find ..${sep}${answers.repo_name} -type f -name 'package-lock.json' -delete && find ..${sep}${answers.repo_name} -type f -name 'yarn.lock' -delete && find ..${sep}${answers.repo_name} -type d -name 'yarn-*' -exec rm -rf {} +`,
+        "repo:reset": `find ../${answers.repo_name} -type d -name 'node_modules' -exec rm -rf {} + && find ../${answers.repo_name} -type f -name 'package-lock.json' -delete && find ../${answers.repo_name} -type f -name 'yarn.lock' -delete && find ../${answers.repo_name} -type d -name 'yarn-*' -exec rm -rf {} +`,
         "repo:reset:1": "rm -rf node_modules",
         "generate:release": "npx changelogen@latest --release",
         "release:config": `yarn workspace ${answers.project_base}/config run release`,
@@ -25,14 +25,14 @@ module.exports = ({ answers, os, sep }) => ({
     },
     "workspaces": {
         "packages": [
-            `microservices${sep}*`,
-            `shared${sep}*`,
+            `microservices/*`,
+            `shared/*`,
         ],
         "nohoist": [
-            `**${sep}${answers.project_base}${sep}utilities`,
-            `**${sep}${answers.project_base}${sep}errors`,
-            `**${sep}${answers.project_base}${sep}config`,
-            `**${sep}${answers.project_base}${sep}middleware`
+            `**/${answers.project_base}/utilities`,
+            `**/${answers.project_base}/errors`,
+            `**/${answers.project_base}/config`,
+            `**/${answers.project_base}/middleware`
         ]
     },
 })
