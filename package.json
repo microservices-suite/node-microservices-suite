@@ -1,6 +1,6 @@
 {
   "name": "@microservices-suite/microservices",
-  "version": "1.6.2",
+  "version": "1.6.3",
   "description": "This is the central orchestration point for our microservices-based platform, encompassing user management, email communications, file upload handling, and role-based access control services. It serves as the backbone of our application's backend, facilitating seamless interaction, development, and scaling of individual microservices. The workspace is designed to streamline the development process, ensuring dependency consistency, and simplifying the build and deployment workflows across all services.\nThis root workspace enables our development teams to:\n- Manage dependencies for all services in a unified manner, reducing conflicts and easing updates.\n- Utilize shared configurations, such as ESLint rules, TypeScript configurations, and shared utility libraries, to maintain coding standards and reduce redundancy across services.\n- Implement global scripts for tasks like testing, linting, and deployment that can run across all services, ensuring consistency and efficiency in our development pipeline.\n- Leverage the workspace's structure for local development, allowing for easy testing of interactions between services without the need for deploying or configuring external environments.",
   "keywords": [],
   "author": "Gilbert Andanje",

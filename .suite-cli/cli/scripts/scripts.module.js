@@ -1216,19 +1216,39 @@ const generateMCSHelper = ({ project_root, answers }) => {
  * @returns {Promise<void>} A Promise that resolves when the release process is completed.
  */
 const releasePackage = async ({ package }) => {
-    const package_json_path = join(cwd(), 'package.json');
+    try {
+        const package_json_path = join(cwd(), 'package.json');
 
-    // Read the package.json file
-    const { workspace_name } = retrieveWorkSpaceName({ package_json_path });
-    package && logInfo({ message: `Looking for package: ${workspace_name}/${package}` });
-    package && spawn('yarn', ['workspace', `${workspace_name}/${package}`, 'release'], {
-        stdio: 'inherit'
-    })
-    !package && spawn('yarn', ['generate:release'], {
-        stdio: 'inherit',
-        cwd: cwd()
-    })
+        // Read the package.json file
+        console.log({ package_json_path })
+        const { workspace_name } = retrieveWorkSpaceName({ package_json_path });
+        if (package) {
+            logInfo({ message: `Looking for package: ${workspace_name}/${package}` });
+            await executeCommand('yarn', ['workspace', `${workspace_name}/${package}`, 'release']);
+        } else {
+            await executeCommand('yarn', ['generate:release'], { cwd: cwd() });
+        }
+    } catch (error) {
+        console.error('Error occurred:', error);
+    }
 }
+
+const executeCommand =(command, args, options) => {
+    return new Promise(async(resolve, reject) => {
+        const child = await spawn(command, args, options);
+        child.on('close', (code) => {
+            if (code !== 0) {
+                reject(new Error(`Command ${command} ${args.join(' ')} failed with code ${code}`));
+            } else {
+                resolve();
+            }
+        });
+        child.on('error', (err) => {
+            reject(err);
+        });
+    });
+}
+
 
 /**
  * Retrieves the workspace name from the package.json file.
