@@ -4,28 +4,6 @@ services:
     build: 
       dockerfile: DockerFile
       context: ../../../data-persistence/mongodb
-  # user-service:
-  #   build:
-  #     dockerfile: DockerFile.dev
-  #     context: ../../../microservices/user-service
-  #   ports:
-  #     - '9003:9003'
-  #   depends_on:
-  #     - mongodb
-  #   volumes:
-  #     - /app/node_modules
-  #     - ../../../microservices/user-service:/app
-  # upload-service:
-  #   build:
-  #     dockerfile: DockerFile.dev
-  #     context: ../../../microservices/upload-service
-  #   ports:
-  #     - '9004:9004'
-  #   depends_on:
-  #     - mongodb
-  #   volumes:
-  #     - /app/node_modules
-  #     - ../../../microservices/upload-service:/app
   rabbitmq:
     image: rabbitmq:3.8
     container_name: rabbitmq
@@ -37,23 +15,6 @@ services:
       interval: 30s
       retries: 5
     restart: unless-stopped
-  # shared:
-  #   build: 
-  #     context: ./shared
-  #     dockerfile: DockerFile.dev
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "sleep 1"]
-  nginx:
-    depends_on:
-      - customer-service
-      # - product-service
-      - supplier-service
-    restart: always
-    build:
-      context: ./nginx
-      dockerfile: DockerFile.dev
-    ports:
-      - '4000:80'
   customer-service:
     depends_on:
       rabbitmq:
@@ -86,6 +47,34 @@ services:
     volumes:
       - /app/node_modules
       - ../../../microservices/supplier-service:/app  
+  # user-service:
+  #   build:
+  #     dockerfile: DockerFile.dev
+  #     context: ../../../microservices/user-service
+  #   ports:
+  #     - '9003:9003'
+  #   depends_on:
+  #     - mongodb
+  #   volumes:
+  #     - /app/node_modules
+  #     - ../../../microservices/user-service:/app
+  # upload-service:
+  #   build:
+  #     dockerfile: DockerFile.dev
+  #     context: ../../../microservices/upload-service
+  #   ports:
+  #     - '9004:9004'
+  #   depends_on:
+  #     - mongodb
+  #   volumes:
+  #     - /app/node_modules
+  #     - ../../../microservices/upload-service:/app
+  # shared:
+  #   build: 
+  #     context: ./shared
+  #     dockerfile: DockerFile.dev
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "sleep 1"]
   # product-service:
   #   depends_on:
   #     - rabbitmq
@@ -112,3 +101,15 @@ services:
   #   environment:
   #     KEYCLOAK_ADMIN: admin
   #     KEYCLOAK_ADMIN_PASSWORD: admin
+
+  # nginx:
+  #   depends_on:
+  #     - customer-service
+  #     # - product-service
+  #     - supplier-service
+  #   restart: always
+  #   build:
+  #     context: ./nginx
+  #     dockerfile: DockerFile.dev
+  #   ports:
+  #     - '4000:80'

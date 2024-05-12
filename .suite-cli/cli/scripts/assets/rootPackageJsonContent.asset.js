@@ -14,7 +14,6 @@ module.exports = ({ answers, os }) => ({
     "license": answers.license,
     "private": answers.private,
     "scripts": {
-        "repo:reset": `find ../${answers.repo_name} -type d -name 'node_modules' -exec rm -rf {} + && find ../${answers.repo_name} -type f -name 'package-lock.json' -delete && find ../${answers.repo_name} -type f -name 'yarn.lock' -delete && find ../${answers.repo_name} -type d -name 'yarn-*' -exec rm -rf {} +`,
         "repo:reset:1": "rm -rf node_modules",
         "generate:release": "npx changelogen@latest --release",
         "release:config": `yarn workspace ${answers.project_base}/config run release`,
