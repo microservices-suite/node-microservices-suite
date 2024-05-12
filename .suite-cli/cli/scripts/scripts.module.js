@@ -1065,7 +1065,7 @@ const scaffoldNewRepo = async ({ answers }) => {
         project_root = generatRootPath({ currentDir: cwd() });
     } catch (error) {
         // Not within a suite repo
-        if (error.message && error.message === 'suite.json not found') {
+        if (error.message && error.message === 'suite.json and(or) .git not found') {
             mkdirSync(join(cwd(), answers.repo_name), { recursive: true });
             addProjectConfigs({ project_root: join(cwd(), answers.repo_name), answers })
             addMicroservice({ project_root: join(cwd(), answers.repo_name), answers })
@@ -1096,7 +1096,7 @@ const scaffoldNewService = async ({ answers }) => {
         project_root = generatRootPath({ currentDir: cwd() });
     } catch (error) {
         // Not within a suite repo
-        if (error.message && error.message === 'suite.json not found') {
+        if (error.message && error.message === 'suite.json and(or) .git not found') {
             ora('This does not look like a suite repo').warn()
             ora().info('If it is run <suite init> from project root to reinitialize suite project and try again')
             exit(1)
@@ -1166,16 +1166,22 @@ const injectService = async ({ project_root, answers, workspace_name }) => {
  * @throws {Error} If 'suite.json' is not found within 3 levels up from the current directory.
  */
 const generatRootPath = ({ currentDir, height = 0 }) => {
-    if (existsSync(join(currentDir, 'suite.json'))) {
+    if (existsSync(join(currentDir, 'suite.json')) && existsSync(join(currentDir, '.git'))) {
         return currentDir; // Return the current directory if 'suite.json' is found
-    } else if (height < 3) {
+
+    }
+    if (height < 3) {
         const parentDir = resolve(currentDir, '..');
-        if (parentDir !== currentDir) { // Ensure we're not in the root directory
-            return generatRootPath({ currentDir: parentDir, height: height + 1 }); // Recur with the parent directory and increased height
+        if (parentDir !== currentDir) {
+            // Ensure we're not in the root directory 
+            return generatRootPath({ currentDir: parentDir, height: height + 1 }); // Recur with the parent directory and increased height 
         }
     }
 
-    throw new Error('suite.json not found');
+    // ora().fail('This does not look like a suite project')
+
+    throw new Error('suite.json and(or) .git not found');
+    // exit(1)
 };
 
 /**
