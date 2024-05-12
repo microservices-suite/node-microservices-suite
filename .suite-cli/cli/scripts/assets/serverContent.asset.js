@@ -21,7 +21,7 @@ const app = express();
 app.use(express.json());
 
 app.get('/', (req, res) => {
-res.json({ messae: 'hello from ${answers.project_base}' });
+res.json({ messae: 'hello from ${answers.project_base}/${answers.service_name}' });
 });
 
 const server = http.createServer(app);
