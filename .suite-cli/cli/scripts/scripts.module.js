@@ -285,19 +285,19 @@ const start = async ({ components, options }) => {
 
     for (const component of components) {
         const [name] = component.split(':');
-\        logInfo({ message: `Starting ${type}: ${name}...` });
-if (options.vanilla) {
-    logError({ error: `-v flag is only used to run services. Apps only run with kubectl or docker compose` });
-    // Logic to start the component with Nodemon
-} else if (useDockerCompose) {
-    logInfo({ message: `Running ${type} ${name} with Docker Compose` });
-    // Logic to start the component with Docker Compose
-} else {
-    logInfo({ message: `Running ${type} ${name} with kubectl` });
-    logInfo({ message: `Running ${type} ${name} with kubectl` });
-    logInfo({ message: `Running ${type} ${name} with kubectl` });
-    // Logic to start the component with kubectl
-}
+        logInfo({ message: `Starting ${type}: ${name}...` });
+        if (options.vanilla) {
+            logError({ error: `-v flag is only used to run services. Apps only run with kubectl or docker compose` });
+            // Logic to start the component with Nodemon
+        } else if (useDockerCompose) {
+            logInfo({ message: `Running ${type} ${name} with Docker Compose` });
+            // Logic to start the component with Docker Compose
+        } else {
+            logInfo({ message: `Running ${type} ${name} with kubectl` });
+            logInfo({ message: `Running ${type} ${name} with kubectl` });
+            logInfo({ message: `Running ${type} ${name} with kubectl` });
+            // Logic to start the component with kubectl
+        }
     }
 }
 
