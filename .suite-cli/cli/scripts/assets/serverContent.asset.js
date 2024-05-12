@@ -1,10 +1,10 @@
-module.exports = ({ answers, sep }) => `
+module.exports = ({ answers }) => `
 const http = require('http');
 const express = require('express');
 const mongoose = require('mongoose');
-const { config, morgan, logger } = require('${answers.project_base}${sep}config');
-const { errorHandler } = require('${answers.project_base}${sep}errors');
-const { validate, APIError } = require('${answers.project_base}${sep}utilities');
+const { config, morgan, logger } = require('${answers.project_base}/config');
+const { errorHandler } = require('${answers.project_base}/errors');
+const { validate, APIError } = require('${answers.project_base}/utilities');
 const { getUsers } = require('./src/services');
 const { router } = require('./src/routes');
 // const app = require('./src/app');

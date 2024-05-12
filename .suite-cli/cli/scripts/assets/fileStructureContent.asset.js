@@ -1,16 +1,16 @@
-module.exports = ({ sep, answers }) => (
+module.exports = ({ answers }) => (
     [
-        `shared${sep}config`,
-        `shared${sep}errors`,
-        `shared${sep}utilities`,
-        `shared${sep}middlewares`,
-        `tests${sep}${answers.service_name}${sep}e2e`,
-        `tests${sep}${answers.service_name}${sep}integration`,
-        `tests${sep}${answers.service_name}${sep}unit`,
-        `tests${sep}${answers.service_name}${sep}snapshot`,
+        `shared/config`,
+        `shared/errors`,
+        `shared/utilities`,
+        `shared/middlewares`,
+        `tests/${answers.service_name}/e2e`,
+        `tests/${answers.service_name}/integration`,
+        `tests/${answers.service_name}/unit`,
+        `tests/${answers.service_name}/snapshot`,
         `microservices`,
-        `k8s${sep}${answers.service_name}`,
-        `gateways${sep}apps${sep}app1${sep}${answers.webserver}`,
-        ...(answers.apis.map((api) => `${api}${sep}app1`)),
+        `k8s/${answers.service_name}`,
+        `gateways/apps/app1/${answers.webserver}`,
+        ...(answers.apis.map((api) => `${api}/app1`)),
     ]
 )

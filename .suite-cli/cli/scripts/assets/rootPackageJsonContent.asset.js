@@ -1,5 +1,5 @@
-module.exports = ({ answers, os, sep }) => ({
-    name: `${answers.project_base}${sep}${answers.repo_name}`,
+module.exports = ({ answers, os }) => ({
+    name: `${answers.project_base}/${answers.repo_name}`,
     version: "1.0.0",
     description: "This is a microservices project",
     main: "index.js",
@@ -25,14 +25,14 @@ module.exports = ({ answers, os, sep }) => ({
     },
     "workspaces": {
         "packages": [
-            `microservices${sep}*`,
-            `shared${sep}*`,
+            `microservices/*`,
+            `shared/*`,
         ],
         "nohoist": [
-            `**${sep}${answers.project_base}${sep}utilities`,
-            `**${sep}${answers.project_base}${sep}errors`,
-            `**${sep}${answers.project_base}${sep}config`,
-            `**${sep}${answers.project_base}${sep}middleware`
+            `**/${answers.project_base}/utilities`,
+            `**/${answers.project_base}/errors`,
+            `**/${answers.project_base}/config`,
+            `**/${answers.project_base}/middleware`
         ]
     },
 })
