@@ -149,7 +149,7 @@ const checkDocker = () => {
  * @returns {Promise<string>} Starts docker in the background if successfull and a success message otherwise returns a failure message with more instructions if possible
  */
 const startDocker = () => {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         let command;
         switch (platform) {
             case 'darwin':
@@ -165,13 +165,13 @@ const startDocker = () => {
                 return reject('Unsupported platform');
         }
 
+        if (await checkDocker()) {
+            resolve('Docker is already running ...')
+        }
         // TODO: switch to spawnSync
         exec(command, async (error, stdout, stderr) => {
             if (error) {
                 reject(`⇣ Install Docker to run this command: ${chalk.blue('https://docs.docker.com/engine/install/')}`);
-            }
-            if (await checkDocker()) {
-                resolve('Docker is already running ...')
             }
             else {
                 resolve('⏳ Docker daemon is starting... Please check Docker status to ensure it is running.');
@@ -285,20 +285,19 @@ const start = async ({ components, options }) => {
 
     for (const component of components) {
         const [name] = component.split(':');
-        console.log({ component, options })
-        logInfo({ message: `Starting ${type}: ${name}...` });
-        if (options.vanilla) {
-            logError({ error: `-v flag is only used to run services. Apps only run with kubectl or docker compose` });
-            // Logic to start the component with Nodemon
-        } else if (useDockerCompose) {
-            logInfo({ message: `Running ${type} ${name} with Docker Compose` });
-            // Logic to start the component with Docker Compose
-        } else {
-            logInfo({ message: `Running ${type} ${name} with kubectl` });
-            logInfo({ message: `Running ${type} ${name} with kubectl` });
-            logInfo({ message: `Running ${type} ${name} with kubectl` });
-            // Logic to start the component with kubectl
-        }
+\        logInfo({ message: `Starting ${type}: ${name}...` });
+if (options.vanilla) {
+    logError({ error: `-v flag is only used to run services. Apps only run with kubectl or docker compose` });
+    // Logic to start the component with Nodemon
+} else if (useDockerCompose) {
+    logInfo({ message: `Running ${type} ${name} with Docker Compose` });
+    // Logic to start the component with Docker Compose
+} else {
+    logInfo({ message: `Running ${type} ${name} with kubectl` });
+    logInfo({ message: `Running ${type} ${name} with kubectl` });
+    logInfo({ message: `Running ${type} ${name} with kubectl` });
+    // Logic to start the component with kubectl
+}
     }
 }
 
@@ -377,7 +376,7 @@ const spinVanillaServices = async ({ serviceDirectories, microservicesDir, mode 
 
     try {
         // Simulate delay before starting services
-        await delay(1000);
+        await delay(1);
 
         await Promise.all(serviceDirectories.map(async (dir) => {
             const serviceSpinner = ora('Starting service concurrently in: ' + dir).start();
@@ -403,8 +402,6 @@ const spinVanillaServices = async ({ serviceDirectories, microservicesDir, mode 
         }));
 
         spinner.succeed(`service${serviceDirectories.length > 0 ? 's' : ''} started successfully: ${serviceDirectories}`);
-        console.log('')
-
     } catch (error) {
         spinner.fail('An error occurred while starting services');
         console.error(error);
@@ -457,7 +454,7 @@ const runDockerizedApps = async ({ apps_dir, apps_directories, mode = 'dev', bui
             }
             setTimeout(() => {
 
-            }, 1000)
+            }, 1)
             // TODO: method 1. Has less control but works fine
             const composeCommand = 'docker';
             const composeFile = mode === 'prod' ? 'docker-compose.yml' : `docker-compose.${mode}.yml`;
@@ -576,6 +573,7 @@ const startApps = async ({ apps, options }) => {
         component_type: 'app'
     })
     // case -k (--kubectl)
+    logInfo({ message: `Starting all apps in ${options.mode} mode...` })
     if (options.kubectl) {
         //TODO: spin app with kubectl pods
         spinKubectlPods({ apps_dir, apps_directories, mode: options.mode })
@@ -633,12 +631,12 @@ const getComponentDirecotories = async ({ components, component_type }) => {
     let components_directories;
     if (!components.length) {
         spinner.text = 'Getting list of directories...';
-        await delay(1500);
+        await delay(1);
         components_directories = readdirSync(component_root_dir)
             .filter(item => statSync(join(component_root_dir, item)).isDirectory());
     } else {
         spinner.text = 'Filtering directories...';
-        await delay(2000);
+        await delay(2);
         components_directories = readdirSync(component_root_dir)
             .filter(item => components.includes(item) && statSync(join(component_root_dir, item)).isDirectory());
 
@@ -679,7 +677,6 @@ const startServices = async ({ services, mode, vanilla }) => {
         components: services,
         component_type: 'microsevice'
     })
-
     if (vanilla) {
         // TODO: run services with nodemon in dev mode otherwise PM2
         await spinVanillaServices({
@@ -1050,7 +1047,6 @@ const scaffoldNewService = async ({ answers }) => {
             throw new Error('Error code 10005.Kindly raise an issue at https://github.com/microservices-suite/node-microservices-suite/issues')
         }
     }
-    console.log({ project_root })
     const package_json_path = join(project_root, 'package.json');
     const { workspace_name } = retrieveWorkSpaceName({ package_json_path });
     await injectService({ project_root, answers, workspace_name })
@@ -1075,7 +1071,7 @@ const injectService = async ({ project_root, answers, workspace_name }) => {
     try {
         // Simulate a delay for the spinner
         //TODO: abstract timeout into a reusable function
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise(resolve => setTimeout(resolve, 2));
 
         // Generate mcs service using helper function
         generateMCSHelper({ project_root, answers: { ...answers, project_base: workspace_name } });
