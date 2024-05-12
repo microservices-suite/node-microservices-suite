@@ -60,7 +60,6 @@ program
   .action(async (components, options) => {
     if (options.app) {
       // running apps
-      logInfo({ message: `Starting all apps in ${options.mode} mode...` })
       await actionHandlers.startApps({ components, options });
     }
     else {

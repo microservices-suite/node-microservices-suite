@@ -13,7 +13,7 @@ module.exports = ({ answers, suffix, isMicroservice, description, os }) => (
         scripts: {
             release: "npx bumpp-version@latest && npm publish",
             ...(isMicroservice ? {
-                dev: "NODE_ENV=dev nodemon -q index.js",
+                dev: os.platform()==='win32'?'set NODE_ENV=dev && nodemon --legacy-watch -q index.js':"NODE_ENV=dev nodemon --legacy-watch -q index.js",
                 start: "pm2-runtime start ecosystem.config.js --env production",
                 stoprod: "pm2 stop ecosystem.config.js",
                 deletprod: "pm2 delete ecosystem.config.js",

@@ -1,10 +1,10 @@
-module.exports = ({ answers, sep }) => `
+module.exports = ({ answers }) => `
 const http = require('http');
 const express = require('express');
 const mongoose = require('mongoose');
-const { config, morgan, logger } = require('${answers.project_base}${sep}config');
-const { errorHandler } = require('${answers.project_base}${sep}errors');
-const { validate, APIError } = require('${answers.project_base}${sep}utilities');
+const { config, morgan, logger } = require('${answers.project_base}/config');
+const { errorHandler } = require('${answers.project_base}/errors');
+const { validate, APIError } = require('${answers.project_base}/utilities');
 const { getUsers } = require('./src/services');
 const { router } = require('./src/routes');
 // const app = require('./src/app');
@@ -21,7 +21,7 @@ const app = express();
 app.use(express.json());
 
 app.get('/', (req, res) => {
-res.json({ messae: 'hello from ${answers.project_base}' });
+res.json({ messae: 'hello from ${answers.project_base}/${answers.service_name}' });
 });
 
 const server = http.createServer(app);
@@ -39,7 +39,7 @@ if (err.code === 'EADDRINUSE') {
 })
 
 server.listen(config.port, () => {
-    logger.info(\`🚀 ${answers.project_base,sep,answers.service_name} listening at: http://localhost:\${config.port}\`);
+    logger.info(\`🚀 ${answers.project_base}/${answers.service_name} listening at: http://localhost:\${config.port}\`);
 });
 
 app.use(morgan.errorHandler);
