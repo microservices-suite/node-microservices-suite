@@ -149,7 +149,7 @@ const checkDocker = () => {
  * @returns {Promise<string>} Starts docker in the background if successfull and a success message otherwise returns a failure message with more instructions if possible
  */
 const startDocker = () => {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         let command;
         switch (platform) {
             case 'darwin':
@@ -165,13 +165,13 @@ const startDocker = () => {
                 return reject('Unsupported platform');
         }
 
+        if (await checkDocker()) {
+            resolve('Docker is already running ...')
+        }
         // TODO: switch to spawnSync
         exec(command, async (error, stdout, stderr) => {
             if (error) {
                 reject(`⇣ Install Docker to run this command: ${chalk.blue('https://docs.docker.com/engine/install/')}`);
-            }
-            if (await checkDocker()) {
-                resolve('Docker is already running ...')
             }
             else {
                 resolve('⏳ Docker daemon is starting... Please check Docker status to ensure it is running.');
@@ -285,20 +285,19 @@ const start = async ({ components, options }) => {
 
     for (const component of components) {
         const [name] = component.split(':');
-        console.log({ component, options })
-        logInfo({ message: `Starting ${type}: ${name}...` });
-        if (options.vanilla) {
-            logError({ error: `-v flag is only used to run services. Apps only run with kubectl or docker compose` });
-            // Logic to start the component with Nodemon
-        } else if (useDockerCompose) {
-            logInfo({ message: `Running ${type} ${name} with Docker Compose` });
-            // Logic to start the component with Docker Compose
-        } else {
-            logInfo({ message: `Running ${type} ${name} with kubectl` });
-            logInfo({ message: `Running ${type} ${name} with kubectl` });
-            logInfo({ message: `Running ${type} ${name} with kubectl` });
-            // Logic to start the component with kubectl
-        }
+\        logInfo({ message: `Starting ${type}: ${name}...` });
+if (options.vanilla) {
+    logError({ error: `-v flag is only used to run services. Apps only run with kubectl or docker compose` });
+    // Logic to start the component with Nodemon
+} else if (useDockerCompose) {
+    logInfo({ message: `Running ${type} ${name} with Docker Compose` });
+    // Logic to start the component with Docker Compose
+} else {
+    logInfo({ message: `Running ${type} ${name} with kubectl` });
+    logInfo({ message: `Running ${type} ${name} with kubectl` });
+    logInfo({ message: `Running ${type} ${name} with kubectl` });
+    // Logic to start the component with kubectl
+}
     }
 }
 
@@ -377,7 +376,7 @@ const spinVanillaServices = async ({ serviceDirectories, microservicesDir, mode 
 
     try {
         // Simulate delay before starting services
-        await delay(1000);
+        await delay(1);
 
         await Promise.all(serviceDirectories.map(async (dir) => {
             const serviceSpinner = ora('Starting service concurrently in: ' + dir).start();
@@ -403,8 +402,6 @@ const spinVanillaServices = async ({ serviceDirectories, microservicesDir, mode 
         }));
 
         spinner.succeed(`service${serviceDirectories.length > 0 ? 's' : ''} started successfully: ${serviceDirectories}`);
-        console.log('')
-
     } catch (error) {
         spinner.fail('An error occurred while starting services');
         console.error(error);
@@ -457,7 +454,7 @@ const runDockerizedApps = async ({ apps_dir, apps_directories, mode = 'dev', bui
             }
             setTimeout(() => {
 
-            }, 1000)
+            }, 1)
             // TODO: method 1. Has less control but works fine
             const composeCommand = 'docker';
             const composeFile = mode === 'prod' ? 'docker-compose.yml' : `docker-compose.${mode}.yml`;
@@ -576,6 +573,7 @@ const startApps = async ({ apps, options }) => {
         component_type: 'app'
     })
     // case -k (--kubectl)
+    logInfo({ message: `Starting all apps in ${options.mode} mode...` })
     if (options.kubectl) {
         //TODO: spin app with kubectl pods
         spinKubectlPods({ apps_dir, apps_directories, mode: options.mode })
@@ -597,24 +595,33 @@ const startApps = async ({ apps, options }) => {
  */
 const getComponentDirecotories = async ({ components, component_type }) => {
     const spinner = ora('Searching for component directories').start();
-    const project_root = generatRootPath({ currentDir: cwd() })
+    let project_root;
+    try {
+        project_root = generatRootPath({ currentDir: cwd() })
+    } catch (error) {
+        if (error.message && error.message === 'suite.json and(or) .git not found') {
+            spinner.warn('This does not look like a git repo.')
+            spinner.info('Try git init and(or suite init)')
+            exit(1)
+        }
+    }
     const package_json_path = join(project_root, 'package.json')
 
     const { workspace_name } = retrieveWorkSpaceName({ package_json_path })
 
-    const component_root_dir = join(project_root, `${component_type === 'app' ? `gateway${sep}apps` : 'microservices'}`)
+    const component_root_dir = join(project_root, `${component_type === 'app' ? `gateway/apps` : 'microservices'}`)
 
     // Simulate delay before checking if the component directory exists
-    await delay(1000);
+    await delay(1);
     spinner.text = `Checking if ${component_root_dir} exists...`;
 
     // Simulate delay before checking if the component directory exists
-    await delay(2000);
+    await delay(2);
 
     // Check if the component directory exists
     if (!existsSync(component_root_dir) || !statSync(component_root_dir).isDirectory()) {
         // Simulate delay before displaying failure message
-        await delay(1000);
+        await delay(1);
         spinner.warn('This does not seem to be a suite monorepo project');
         spinner.info('If it is kindly open an issue here: https://github.com/microservices-suite/node-microservices-suite/issues');
         exit(1);
@@ -624,12 +631,12 @@ const getComponentDirecotories = async ({ components, component_type }) => {
     let components_directories;
     if (!components.length) {
         spinner.text = 'Getting list of directories...';
-        await delay(1500);
+        await delay(1);
         components_directories = readdirSync(component_root_dir)
             .filter(item => statSync(join(component_root_dir, item)).isDirectory());
     } else {
         spinner.text = 'Filtering directories...';
-        await delay(2000);
+        await delay(2);
         components_directories = readdirSync(component_root_dir)
             .filter(item => components.includes(item) && statSync(join(component_root_dir, item)).isDirectory());
 
@@ -670,7 +677,6 @@ const startServices = async ({ services, mode, vanilla }) => {
         components: services,
         component_type: 'microsevice'
     })
-
     if (vanilla) {
         // TODO: run services with nodemon in dev mode otherwise PM2
         await spinVanillaServices({
@@ -691,8 +697,67 @@ const startServices = async ({ services, mode, vanilla }) => {
  * @returns {void}
  */
 const repoReset = ({ components, options }) => {
-    spawn('yarn', ['repo:reset'], { stdio: 'inherit' })
-}
+    let targetDir;
+
+    if (components.length > 0) {
+        // TODO: fix this not working yet
+        const { component_root_dir } = getComponentDirecotories({ components, component_type: 'microservices' });
+        targetDir = component_root_dir;
+    } else {
+        targetDir = cwd();
+    }
+
+    resetRepo({ targetDir });
+};
+
+
+const resetRepo = ({ targetDir }) => {
+    try {
+        let commands;
+
+        if (process.platform === 'win32') {
+            // Windows commands
+            commands = [
+                `for /d /r "${targetDir}" %i in (node_modules) do rd /s /q "%i"`,
+                `for /r "${targetDir}" %i in (package-lock.json) do del "%i"`,
+                `for /r "${targetDir}" %i in (yarn.lock) do del "%i"`,
+                `for /d /r "${targetDir}" %i in (yarn-*) do rd /s /q "%i"`
+            ];
+        } else {
+            // Unix-like commands
+            commands = [
+                `find ${targetDir} -type d -name 'node_modules' -exec rm -rf {} +`,
+                `find ${targetDir} -type f -name 'package-lock.json' -delete`,
+                `find ${targetDir} -type f -name 'yarn.lock' -delete`,
+                `find ${targetDir} -type d -name 'yarn-*' -exec rm -rf {} +`
+            ];
+        }
+
+        // Create spinner
+        const spinner = ora('Resetting repository').start();
+
+        // Execute each command
+        commands.forEach(command => {
+            const child = spawn(command, { shell: true });
+
+            // Handle command exit
+            child.on('close', (code, signal) => {
+                if (code !== 0) {
+                    //TODO: Define standard inhouse error codes
+                    spinner.info(`Command exited with code E0000${code}`);
+                    // report any codes other than 2
+                    code !== 2 && spinner.warn('Kindly raise an issue at https://github.com/microservices-suite/node-microservices-suite/issues')
+                }
+            });
+        });
+
+        // Stop spinner
+        spinner.succeed('Repository reset successfully');
+    } catch (error) {
+        console.error('Error occurred while resetting repository:', error);
+        process.exit(1);
+    }
+};
 
 /**
  * Stops Docker-compose-based applications.
@@ -1000,7 +1065,7 @@ const scaffoldNewRepo = async ({ answers }) => {
         project_root = generatRootPath({ currentDir: cwd() });
     } catch (error) {
         // Not within a suite repo
-        if (error.message && error.message === 'suite.json not found') {
+        if (error.message && error.message === 'suite.json and(or) .git not found') {
             mkdirSync(join(cwd(), answers.repo_name), { recursive: true });
             addProjectConfigs({ project_root: join(cwd(), answers.repo_name), answers })
             addMicroservice({ project_root: join(cwd(), answers.repo_name), answers })
@@ -1031,7 +1096,7 @@ const scaffoldNewService = async ({ answers }) => {
         project_root = generatRootPath({ currentDir: cwd() });
     } catch (error) {
         // Not within a suite repo
-        if (error.message && error.message === 'suite.json not found') {
+        if (error.message && error.message === 'suite.json and(or) .git not found') {
             ora('This does not look like a suite repo').warn()
             ora().info('If it is run <suite init> from project root to reinitialize suite project and try again')
             exit(1)
@@ -1041,7 +1106,6 @@ const scaffoldNewService = async ({ answers }) => {
             throw new Error('Error code 10005.Kindly raise an issue at https://github.com/microservices-suite/node-microservices-suite/issues')
         }
     }
-    console.log({ project_root })
     const package_json_path = join(project_root, 'package.json');
     const { workspace_name } = retrieveWorkSpaceName({ package_json_path });
     await injectService({ project_root, answers, workspace_name })
@@ -1066,7 +1130,7 @@ const injectService = async ({ project_root, answers, workspace_name }) => {
     try {
         // Simulate a delay for the spinner
         //TODO: abstract timeout into a reusable function
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise(resolve => setTimeout(resolve, 2));
 
         // Generate mcs service using helper function
         generateMCSHelper({ project_root, answers: { ...answers, project_base: workspace_name } });
@@ -1102,16 +1166,22 @@ const injectService = async ({ project_root, answers, workspace_name }) => {
  * @throws {Error} If 'suite.json' is not found within 3 levels up from the current directory.
  */
 const generatRootPath = ({ currentDir, height = 0 }) => {
-    if (existsSync(join(currentDir, 'suite.json'))) {
+    if (existsSync(join(currentDir, 'suite.json')) && existsSync(join(currentDir, '.git'))) {
         return currentDir; // Return the current directory if 'suite.json' is found
-    } else if (height < 3) {
+
+    }
+    if (height < 3) {
         const parentDir = resolve(currentDir, '..');
-        if (parentDir !== currentDir) { // Ensure we're not in the root directory
-            return generatRootPath({ currentDir: parentDir, height: height + 1 }); // Recur with the parent directory and increased height
+        if (parentDir !== currentDir) {
+            // Ensure we're not in the root directory 
+            return generatRootPath({ currentDir: parentDir, height: height + 1 }); // Recur with the parent directory and increased height 
         }
     }
 
-    throw new Error('suite.json not found');
+    // ora().fail('This does not look like a suite project')
+
+    throw new Error('suite.json and(or) .git not found');
+    // exit(1)
 };
 
 /**

@@ -21,7 +21,7 @@ const app = express();
 app.use(express.json());
 
 app.get('/', (req, res) => {
-res.json({ messae: 'hello from ${answers.project_base}' });
+res.json({ messae: 'hello from ${answers.project_base}/${answers.service_name}' });
 });
 
 const server = http.createServer(app);
@@ -39,7 +39,7 @@ if (err.code === 'EADDRINUSE') {
 })
 
 server.listen(config.port, () => {
-    logger.info(\`🚀 ${answers.project_base,sep,answers.service_name} listening at: http://localhost:\${config.port}\`);
+    logger.info(\`🚀 ${answers.project_base}/${answers.service_name} listening at: http://localhost:\${config.port}\`);
 });
 
 app.use(morgan.errorHandler);

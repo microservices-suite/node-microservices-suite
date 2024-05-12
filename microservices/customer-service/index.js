@@ -7,7 +7,6 @@ const { rabbitMQMiddleware } = require('./middlewares/rabbitmq')
 
 app.use(express.json())
 
-
 async function startServer() {
     try {
         const channel = await createRMQChannel()
