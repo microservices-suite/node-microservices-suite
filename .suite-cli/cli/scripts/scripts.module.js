@@ -697,8 +697,67 @@ const startServices = async ({ services, mode, vanilla }) => {
  * @returns {void}
  */
 const repoReset = ({ components, options }) => {
-    spawn('yarn', ['repo:reset'], { stdio: 'inherit' })
-}
+    let targetDir;
+
+    if (components.length > 0) {
+        // TODO: fix this not working yet
+        const { component_root_dir } = getComponentDirecotories({ components, component_type: 'microservices' });
+        targetDir = component_root_dir;
+    } else {
+        targetDir = cwd();
+    }
+
+    resetRepo({ targetDir });
+};
+
+
+const resetRepo = ({ targetDir }) => {
+    try {
+        let commands;
+
+        if (process.platform === 'win32') {
+            // Windows commands
+            commands = [
+                `for /d /r "${targetDir}" %i in (node_modules) do rd /s /q "%i"`,
+                `for /r "${targetDir}" %i in (package-lock.json) do del "%i"`,
+                `for /r "${targetDir}" %i in (yarn.lock) do del "%i"`,
+                `for /d /r "${targetDir}" %i in (yarn-*) do rd /s /q "%i"`
+            ];
+        } else {
+            // Unix-like commands
+            commands = [
+                `find ${targetDir} -type d -name 'node_modules' -exec rm -rf {} +`,
+                `find ${targetDir} -type f -name 'package-lock.json' -delete`,
+                `find ${targetDir} -type f -name 'yarn.lock' -delete`,
+                `find ${targetDir} -type d -name 'yarn-*' -exec rm -rf {} +`
+            ];
+        }
+
+        // Create spinner
+        const spinner = ora('Resetting repository').start();
+
+        // Execute each command
+        commands.forEach(command => {
+            const child = spawn(command, { shell: true });
+
+            // Handle command exit
+            child.on('close', (code, signal) => {
+                if (code !== 0) {
+                    //TODO: Define standard inhouse error codes
+                    spinner.info(`Command exited with code E0000${code}`);
+                    // report any codes other than 2
+                    code !== 2 && spinner.warn('Kindly raise an issue at https://github.com/microservices-suite/node-microservices-suite/issues')
+                }
+            });
+        });
+
+        // Stop spinner
+        spinner.succeed('Repository reset successfully');
+    } catch (error) {
+        console.error('Error occurred while resetting repository:', error);
+        process.exit(1);
+    }
+};
 
 /**
  * Stops Docker-compose-based applications.
