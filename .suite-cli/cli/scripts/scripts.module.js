@@ -18,7 +18,7 @@ const ora = require('ora')
  * @returns {string} A full path to the workspace
  */
 const generateDirectoryPath = ({ workspace_name, workspace_directory = 'microservice' }) => {
-    return join(cwd(), `${workspace_directory}${sep}${workspace_name}`);
+    return join(cwd(), `${workspace_directory}/${workspace_name}`);
 }
 /**
  * The function cds into given directory_path
@@ -328,13 +328,17 @@ const startAll = async ({ options }) => {
     const currentDir = cwd();
 
     // Check if 'microservices' directory exists
-    const is_component_dir = currentDir.split(sep).includes('microservices');
+    const is_component_dir = currentDir.split('/').includes('microservices');
 
     // Construct microservices directory path
     const microservicesDir = is_component_dir ?
-        currentDir.split(sep).slice(0, currentDir.split(sep).indexOf('microservices') + 1).join(sep) :
-        `${currentDir}${sep}microservices`;
-    logInfo({ message: `cwd: ${microservicesDir}` });
+        currentDir.split('/').slice(0, currentDir.split('/').indexOf('microservices') + 1).join('/') :
+        `${currentDir}/microservices`;
+    logInfo({
+        message: `cwd: ${is_component_dir ?
+            currentDir.split(sep).slice(0, currentDir.split(sep).indexOf('microservices') + 1).join(sep) :
+            `${currentDir}${sep}microservices`}`
+    });
 
     // Check if the microservices directory exists
     // TODO: Find a smart way to detect non-suite compliant repos
@@ -419,7 +423,7 @@ const getErrorMessage = (error, dir, microservicesDir) => {
         } else if (errorMessageParts[1].startsWith('error There are more than one workspace')) {
             errorMessage = errorMessageParts[1].replace('error ', '');
         } else if (errorMessageParts[1].includes('Unknown workspace')) {
-            if (existsSync(`${microservicesDir}${sep}${dir}${sep}package.json`)) {
+            if (existsSync(`${microservicesDir}/${dir}/package.json`)) {
                 errorMessage = 'Wrong workspace naming';
             } else {
                 errorMessage = `Missing package.json @microservices-suite${sep}${dir}`;
@@ -461,7 +465,7 @@ const runDockerizedApps = async ({ apps_dir, apps_directories, mode = 'dev', bui
             const args = [
                 'compose',
                 '-f',
-                `${apps_dir}${sep}${dir}${sep}${composeFile}`,
+                `${apps_dir}/${dir}/${composeFile}`,
                 'up',
                 ...(build ? ['--build'] : [])
             ];
@@ -483,7 +487,7 @@ const runDockerizedApps = async ({ apps_dir, apps_directories, mode = 'dev', bui
             // TODO: Method2 with more control has a child_process.stdout.on(...) errror
             // const composeFile = mode === 'prod' ? 'docker-compose.yml' : `docker-compose.${mode}.yml`;
 
-            // const spawn_child = await spawn('docker-compose', ['-f', `${apps_dir}${sep}${dir}${sep}${composeFile}`, 'up', ...(build ? ['--build'] : [])], options);
+            // const spawn_child = await spawn('docker-compose', ['-f', `${apps_dir}/${dir}/${composeFile}`, 'up', ...(build ? ['--build'] : [])], options);
 
             // spawn_child.stdout.on('data', (data) => {
             //     const message = data.toString().trim();
@@ -528,7 +532,7 @@ const runDockerizedApps = async ({ apps_dir, apps_directories, mode = 'dev', bui
  */
 
 const spinKubectlPods = ({ apps_dir, apps_directories, mode }) => {
-    exec(`yarn workspace @microservices-suite${sep}${dir} ${mode}`, { cwd: join(microservicesDir, dir) }, async (error, stdout, stderr) => {
+    exec(`yarn workspace @microservices-suite/${dir} ${mode}`, { cwd: join(microservicesDir, dir) }, async (error, stdout, stderr) => {
         var error_message = ''
         if (error) {
             const _ = error.message.split('\n')
@@ -536,7 +540,7 @@ const spinKubectlPods = ({ apps_dir, apps_directories, mode }) => {
                 error_message = `Missing script at ${dir}${sep}package.json: ${_[1].match(/"(.*?)"/)[1]}`
             }
             if (_[1] && _[1].includes('Unknown workspace')) {
-                if (existsSync(`${microservicesDir}${sep}${dir}${sep}package.json`)) {
+                if (existsSync(`${microservicesDir}/${dir}/package.json`)) {
                     logWarning({ message: 'Wrong workspace naming' })
                     logAdvise({ message: 'Run suite fix -n to auto-fix all workspace naming issues' })
                     logAdvise({ message: 'suite fix only changes the package.json. If any service depends on it you will need to update it manually' })
@@ -593,24 +597,33 @@ const startApps = async ({ apps, options }) => {
  */
 const getComponentDirecotories = async ({ components, component_type }) => {
     const spinner = ora('Searching for component directories').start();
-    const project_root = generatRootPath({ currentDir: cwd() })
+    let project_root;
+    try {
+        project_root = generatRootPath({ currentDir: cwd() })
+    } catch (error) {
+        if (error.message && error.message === 'suite.json and(or) .git not found') {
+            spinner.warn('This does not look like a git repo.')
+            spinner.info('Try git init and(or suite init)')
+            exit(1)
+        }
+    }
     const package_json_path = join(project_root, 'package.json')
 
     const { workspace_name } = retrieveWorkSpaceName({ package_json_path })
 
-    const component_root_dir = join(project_root, `${component_type === 'app' ? `gateway${sep}apps` : 'microservices'}`)
+    const component_root_dir = join(project_root, `${component_type === 'app' ? `gateway/apps` : 'microservices'}`)
 
     // Simulate delay before checking if the component directory exists
-    await delay(1000);
+    await delay(1);
     spinner.text = `Checking if ${component_root_dir} exists...`;
 
     // Simulate delay before checking if the component directory exists
-    await delay(2000);
+    await delay(2);
 
     // Check if the component directory exists
     if (!existsSync(component_root_dir) || !statSync(component_root_dir).isDirectory()) {
         // Simulate delay before displaying failure message
-        await delay(1000);
+        await delay(1);
         spinner.warn('This does not seem to be a suite monorepo project');
         spinner.info('If it is kindly open an issue here: https://github.com/microservices-suite/node-microservices-suite/issues');
         exit(1);
@@ -707,7 +720,7 @@ const stopApps = async ({ components, options }) => {
         component_type: 'app'
     })
     // TODO: handle case where no app is specified. component.length === 0 and if -k or --kill command is passed
-    spawn('docker', ['compose', '-f', `${apps_dir}${sep}${components}${sep}docker-compose.dev.yml`, 'down'], { stdio: 'inherit' })
+    spawn('docker', ['compose', '-f', `${apps_dir}/${components}/docker-compose.dev.yml`, 'down'], { stdio: 'inherit' })
 }
 
 /**
@@ -778,8 +791,7 @@ const dockerPrune = ({ volume, all, force }) => {
  */
 const addPackageJson = async ({ project_root, answers }) => {
     // Add a package.json 
-    writeFileSync(join(project_root, 'package.json'), JSON.stringify(assets.rootPackageJsonContent({ answers, os, sep }), null, 2));
-    writeFileSync(join(project_root, 'package.json'), JSON.stringify(assets.rootPackageJsonContent({ answers, os, sep }), null, 2));
+    writeFileSync(join(project_root, 'package.json'), JSON.stringify(assets.rootPackageJsonContent({ answers, os }), null, 2));
 
     const dependencies = [
         `${answers.project_base}/config@1.0.0`,
@@ -805,18 +817,18 @@ const addPackageJson = async ({ project_root, answers }) => {
     // Creating a spinner
     // const spinner = ora(`Project ${answers.repo_name} created successfully!`).start();
     const spinner = ora(`Initializing new suite project @ ${join(cwd(), answers.repo_name)}`).start();
-    await new Promise(resolve => setTimeout(resolve, 10000));
+    await new Promise(resolve => setTimeout(resolve, 10));
     exec(`cd ${answers.repo_name} && git init`)
     spinner.text = 'Initializing git...';
 
     // Delay before updating spinner for next phase
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 1));
     spinner.color = 'yellow'; // Change spinner color
     spinner.text = 'Installing dependencies...';
 
     // Delay before executing yarn commands
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    const command = `yarn workspace ${answers.project_base}${sep}${answers.service_name} add ${depsCommand} && yarn workspace ${answers.project_base}${sep}${answers.service_name} add -D ${devDepsCommand} && yarn workspace ${answers.project_base}${sep}utilities add ${utilitiesDependencies} && yarn workspace ${answers.project_base}${sep}config add ${configDependencies.join(' ')}`;
+    await new Promise(resolve => setTimeout(resolve, 1));
+    const command = `yarn workspace ${answers.project_base}/${answers.service_name} add ${depsCommand} && yarn workspace ${answers.project_base}/${answers.service_name} add -D ${devDepsCommand} && yarn workspace ${answers.project_base}/utilities add ${utilitiesDependencies} && yarn workspace ${answers.project_base}/config add ${configDependencies.join(' ')}`;
 
     // Execute the command
     const childProcess = spawn(command, {
@@ -876,12 +888,12 @@ const addPackageJson = async ({ project_root, answers }) => {
  * @returns {void}
  */
 const addMicroservice = ({ project_root, answers }) => {
-    const directories = assets.fileStructureContent({ sep, answers })
+    const directories = assets.fileStructureContent({ answers })
     directories.forEach((dir) => {
-        const current_dir = `${project_root}${sep}${dir}`
-        if (dir !== `REST${sep}app1`) mkdirSync(current_dir, { recursive: true });
+        const current_dir = `${project_root}/${dir}`
+        if (dir !== `REST/app1`) mkdirSync(current_dir, { recursive: true });
         switch (dir) {
-            case `shared${sep}config`:
+            case `shared/config`:
                 writeFile(join(current_dir, 'config.js'), assets.configConfigContent());
                 writeFile(join(current_dir, 'index.js'), assets.configIndexContent());
                 writeFile(join(current_dir, 'logger.js'), assets.configLoggerContent());
@@ -895,7 +907,7 @@ const addMicroservice = ({ project_root, answers }) => {
                 }), null, 2));
                 writeFile(join(current_dir, 'README.md'), assets.configReadmeContent({ answers }));
                 break;
-            case `shared${sep}errors`:
+            case `shared/errors`:
                 writeFile(join(current_dir, 'errors.handler.js'), assets.errorHandlerContent());
                 writeFile(join(current_dir, 'index.js'), assets.errorIndexContent());
                 writeFile(join(current_dir, 'package.json'), JSON.stringify(assets.genericPackageJsonContent({
@@ -907,7 +919,7 @@ const addMicroservice = ({ project_root, answers }) => {
                 }), null, 2));
                 writeFile(join(current_dir, 'README.md'), assets.errorReadmeContent({ answers }));
                 break;
-            case `shared${sep}utilities`:
+            case `shared/utilities`:
                 writeFile(join(current_dir, 'APIError.js'), assets.apiErrorContent());
                 writeFile(join(current_dir, 'index.js'), assets.utilitiesIndexContent());
                 writeFile(join(current_dir, 'package.json'), JSON.stringify(assets.genericPackageJsonContent({
@@ -922,7 +934,7 @@ const addMicroservice = ({ project_root, answers }) => {
                 writeFile(join(current_dir, 'validate.js'), assets.utilitiesValidateContent());
                 writeFile(join(current_dir, 'asyncErrorHandler.js'), assets.utilitiesAsyncErrorHandlerContent());
                 break;
-            case `shared${sep}middlewares`:
+            case `shared/middlewares`:
                 writeFile(join(current_dir, 'index.js'), assets.middlewaresIndexContent());
                 writeFile(join(current_dir, 'package.json'), JSON.stringify(assets.genericPackageJsonContent({
                     answers,
@@ -933,22 +945,22 @@ const addMicroservice = ({ project_root, answers }) => {
                 }), null, 2));
                 writeFile(join(current_dir, 'README.md'), assets.middlewaresReadmeContent({ answers }));
                 break;
-            case `tests${sep}${answers.service_name}${sep}e2e`:
+            case `tests/${answers.service_name}/e2e`:
                 writeFile(join(current_dir, 'test1.js'), assets.e2eTestContent({ answers }));
                 break;
-            case `tests${sep}${answers.service_name}${sep}integration`:
+            case `tests/${answers.service_name}/integration`:
                 writeFile(join(current_dir, 'test1.js'), assets.integrationTestContent());
                 break;
-            case `tests${sep}${answers.service_name}${sep}unit`:
+            case `tests/${answers.service_name}/unit`:
                 writeFile(join(current_dir, 'test1.js'), assets.unitTestContent());
                 break;
-            case `tests${sep}${answers.service_name}${sep}snapshot`:
+            case `tests/${answers.service_name}/snapshot`:
                 writeFile(join(current_dir, 'test1.js'), assets.snapshotTestContent());
                 break;
-            case `GraphQL${sep}app1`:
+            case `GraphQL/app1`:
                 writeFile(join(current_dir, 'appollo-server.js'), assets.apolloServerContent());
                 break;
-            case `k8s${sep}${answers.service_name}`:
+            case `k8s/${answers.service_name}`:
                 // TODO: move k8s into a function
                 writeFile(join(current_dir, 'client-node-port.yaml'), assets.k8sClientNodeContent());
                 writeFile(join(current_dir, 'client-pod.yaml'), assets.k8sClientPodContent());
@@ -961,17 +973,17 @@ const addMicroservice = ({ project_root, answers }) => {
     });
 
     generateMCSHelper({ project_root, answers })
-    writeFile(join(`${project_root}${sep}microservices${sep}${answers.service_name}`, 'index.js'), assets.serverContent({ answers, sep }));
-    writeFile(join(`${project_root}${sep}microservices${sep}${answers.service_name}`, '.env'), assets.envContent());
-    writeFile(join(`${project_root}${sep}microservices${sep}${answers.service_name}`, '.env.dev'), assets.envContent());
-    writeFile(join(`${project_root}${sep}microservices${sep}${answers.service_name}`, 'ecosystem.config.js'), assets.ecosystemContent());
+    writeFile(join(`${project_root}/microservices/${answers.service_name}`, 'index.js'), assets.serverContent({ answers }));
+    writeFile(join(`${project_root}/microservices/${answers.service_name}`, '.env'), assets.envContent());
+    writeFile(join(`${project_root}/microservices/${answers.service_name}`, '.env.dev'), assets.envContent());
+    writeFile(join(`${project_root}/microservices/${answers.service_name}`, 'ecosystem.config.js'), assets.ecosystemContent());
     mkdirSync(join(project_root, '.vscode'), { recursive: true })
     writeFileSync(join(project_root, '.gitignore'), assets.gitignoreContent());
     writeFileSync(join(project_root, '.vscode', 'launch.json'), JSON.stringify(assets.debuggerConfigContent(), null, 2));
     writeFileSync(join(project_root, '.gitignore'), assets.gitignoreContent());
     mkdirSync(join(project_root, '.vscode'), { recursive: true })
     writeFileSync(join(project_root, '.vscode', 'launch.json'), JSON.stringify(assets.debuggerConfigContent(), null, 2));
-    writeFile(join(`${project_root}${sep}microservices${sep}${answers.service_name}`, 'package.json'), JSON.stringify(assets.genericPackageJsonContent({
+    writeFile(join(`${project_root}/microservices/${answers.service_name}`, 'package.json'), JSON.stringify(assets.genericPackageJsonContent({
         answers,
         suffix: `${answers.service_name}`,
         isMicroservice: true,
@@ -1121,7 +1133,7 @@ const generatRootPath = ({ currentDir, height = 0 }) => {
 const generateMCSHelper = ({ project_root, answers }) => {
     ['models', 'controllers', 'routes', 'services'].forEach(mcs => {
         // Correct the file extension based on directory
-        const mcsPath = `${project_root}${sep}microservices${sep}${answers.service_name}${sep}src${sep}${mcs}`
+        const mcsPath = `${project_root}/microservices/${answers.service_name}/src/${mcs}`
         mkdirSync(mcsPath, { recursive: true })
         const fileExtension = mcs === 'models' ? 'model.js' : mcs === 'routes' ? 'routes.js' : 'controllers.js';
 
