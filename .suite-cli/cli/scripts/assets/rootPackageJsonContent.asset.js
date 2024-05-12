@@ -5,7 +5,7 @@ module.exports = ({ answers, os }) => ({
     main: "index.js",
     scripts: {
         "test": "jest",
-        "dev": "NODE_ENV=dev nodemon -q index.js",
+        "dev": "NODE_ENV=dev nodemon --legacy-watch -q index.js",
         "start": "pm2-runtime start ecosystem.config.js --env production",
         "stop:prod": "pm2 stop ecosystem.config.js",
         "delete:prod": "pm2 delete ecosystem.config.js"
