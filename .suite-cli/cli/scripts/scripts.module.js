@@ -1061,7 +1061,6 @@ const addMicroservice = ({ project_root, answers }) => {
  * @returns {void}
  */
 const scaffoldNewRepo = async ({ answers }) => {
-    let project_root;
     try {
         project_root = generatRootPath({ currentDir: cwd() });
     } catch (error) {
