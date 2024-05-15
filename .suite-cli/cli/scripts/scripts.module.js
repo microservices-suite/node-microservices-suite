@@ -1221,16 +1221,15 @@ const releasePackage = async ({ package }) => {
         const package_json_path = join(cwd(), 'package.json');
 
         // Read the package.json file
-        console.log({ package_json_path })
         const { workspace_name } = retrieveWorkSpaceName({ package_json_path });
         if (package) {
             logInfo({ message: `Looking for package: ${workspace_name}/${package}` });
-            await executeCommand('yarn', ['workspace', `${workspace_name}/${package}`, 'release']);
+            await executeCommand('yarn', ['workspace', `${workspace_name}/${package}`, 'release'],{stdio:'inherit',shell:true});
         } else {
-            await executeCommand('yarn', ['generate:release'], { cwd: cwd() });
+            await executeCommand('yarn', ['generate:release'], { cwd: cwd(),stdio:'inherit',shell:true });
         }
     } catch (error) {
-        console.error('Error occurred:', error);
+       ora().fail('Command failed to run');
     }
 }
 
