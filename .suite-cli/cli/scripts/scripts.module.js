@@ -849,6 +849,7 @@ const addPackageJson = async ({ project_root, answers }) => {
     // Add a package.json 
     writeFileSync(join(project_root, 'package.json'), JSON.stringify(assets.rootPackageJsonContent({ answers, os }), null, 2));
 
+    // TODO: move these dependencies to assets
     const dependencies = [
         `${answers.project_base}/config@1.0.0`,
         `${answers.project_base}/errors@1.0.0`,
@@ -861,7 +862,7 @@ const addPackageJson = async ({ project_root, answers }) => {
         "winston",
         "mongoose"
     ];
-    const devDependencies = ["nodemon"];
+    const devDependencies = ["nodemon","jest"];
     const configDependencies = ['dotenv', 'joi', 'morgan', 'winston']
     const utilitiesDependencies = ['joi']
     // Join dependencies into a single string for the command
