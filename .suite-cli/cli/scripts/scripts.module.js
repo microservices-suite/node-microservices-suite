@@ -920,14 +920,14 @@ const addPackageJson = async ({ project_root, answers }) => {
     childProcess.on('error', error => {
         spinner.fail('Failed to execute command');
     });
-
+    // TODO: check if yarn is installed first
     childProcess.on('exit', (code, signal) => {
         if (code !== 0) {
             spinner.fail('Command failed to complete successfully');
             return;
         }
         spinner.succeed('Dependencies installed successfully');
-        spinner.info(`To start the project, run 'cd ${answers.repo_name} && yarn dev'`)
+        spinner.info(`To start the project, run 'cd ${answers.repo_name} && suite start -v ${answers.service_name}'`)
     });
 }
 
