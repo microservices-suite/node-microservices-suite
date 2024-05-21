@@ -726,10 +726,10 @@ const resetRepo = ({ targetDir }) => {
         } else {
             // Unix-like commands
             commands = [
-                `find ${targetDir} -type d -name 'node_modules' -exec rm -rf {} +`,
-                `find ${targetDir} -type f -name 'package-lock.json' -delete`,
-                `find ${targetDir} -type f -name 'yarn.lock' -delete`,
-                `find ${targetDir} -type d -name 'yarn-*' -exec rm -rf {} +`
+                `find ${targetDir} -maxdepth 3 -type d -name 'node_modules' -exec rm -rf {} +`,
+                `find ${targetDir} -maxdepth 3 -type f -name 'package-lock.json' -delete`,
+                `find ${targetDir} -maxdepth 3 -type f -name 'yarn.lock' -delete`,
+                `find ${targetDir} -maxdepth 3 -type d -name 'yarn-*' -exec rm -rf {} +`
             ];
         }
 
