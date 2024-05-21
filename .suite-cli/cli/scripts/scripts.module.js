@@ -726,10 +726,10 @@ const resetRepo = ({ targetDir }) => {
         } else {
             // Unix-like commands
             commands = [
-                `find ${targetDir} -type d -name 'node_modules' -exec rm -rf {} +`,
-                `find ${targetDir} -type f -name 'package-lock.json' -delete`,
-                `find ${targetDir} -type f -name 'yarn.lock' -delete`,
-                `find ${targetDir} -type d -name 'yarn-*' -exec rm -rf {} +`
+                `find ${targetDir} -maxdepth 3 -type d -name 'node_modules' -exec rm -rf {} +`,
+                `find ${targetDir} -maxdepth 3 -type f -name 'package-lock.json' -delete`,
+                `find ${targetDir} -maxdepth 3 -type f -name 'yarn.lock' -delete`,
+                `find ${targetDir} -maxdepth 3 -type d -name 'yarn-*' -exec rm -rf {} +`
             ];
         }
 
@@ -849,6 +849,7 @@ const addPackageJson = async ({ project_root, answers }) => {
     // Add a package.json 
     writeFileSync(join(project_root, 'package.json'), JSON.stringify(assets.rootPackageJsonContent({ answers, os }), null, 2));
 
+    // TODO: move these dependencies to assets
     const dependencies = [
         `${answers.project_base}/config@1.0.0`,
         `${answers.project_base}/errors@1.0.0`,
@@ -861,7 +862,7 @@ const addPackageJson = async ({ project_root, answers }) => {
         "winston",
         "mongoose"
     ];
-    const devDependencies = ["nodemon"];
+    const devDependencies = ["nodemon","jest"];
     const configDependencies = ['dotenv', 'joi', 'morgan', 'winston']
     const utilitiesDependencies = ['joi']
     // Join dependencies into a single string for the command
@@ -920,14 +921,14 @@ const addPackageJson = async ({ project_root, answers }) => {
     childProcess.on('error', error => {
         spinner.fail('Failed to execute command');
     });
-
+    // TODO: check if yarn is installed first
     childProcess.on('exit', (code, signal) => {
         if (code !== 0) {
             spinner.fail('Command failed to complete successfully');
             return;
         }
         spinner.succeed('Dependencies installed successfully');
-        spinner.info(`To start the project, run 'cd ${answers.repo_name} && yarn dev'`)
+        spinner.info(`To start the project, run 'cd ${answers.repo_name} && suite start -v ${answers.service_name}'`)
     });
 }
 
@@ -1060,7 +1061,6 @@ const addMicroservice = ({ project_root, answers }) => {
  * @returns {void}
  */
 const scaffoldNewRepo = async ({ answers }) => {
-    let project_root;
     try {
         project_root = generatRootPath({ currentDir: cwd() });
     } catch (error) {
@@ -1220,16 +1220,15 @@ const releasePackage = async ({ package }) => {
         const package_json_path = join(cwd(), 'package.json');
 
         // Read the package.json file
-        console.log({ package_json_path })
         const { workspace_name } = retrieveWorkSpaceName({ package_json_path });
         if (package) {
             logInfo({ message: `Looking for package: ${workspace_name}/${package}` });
-            await executeCommand('yarn', ['workspace', `${workspace_name}/${package}`, 'release']);
+            await executeCommand('yarn', ['workspace', `${workspace_name}/${package}`, 'release'],{stdio:'inherit',shell:true});
         } else {
-            await executeCommand('yarn', ['generate:release'], { cwd: cwd() });
+            await executeCommand('yarn', ['generate:release'], { cwd: cwd(),stdio:'inherit',shell:true });
         }
     } catch (error) {
-        console.error('Error occurred:', error);
+       ora().fail('Command failed to run');
     }
 }
 

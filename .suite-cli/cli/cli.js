@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
+const ora = require('ora')
 const { Command } = require('commander');
 const { createPromptModule } = require('inquirer');
-const figlet = require('figlet');
+const { execSync } = require('node:child_process')
 const actionHandlers = require('./scripts')
 const { logInfo } = require('./scripts/scripts.module');
 const program = new Command()
@@ -78,7 +79,36 @@ program
 program
   .command('generate')
   .description('Generate a new monorepo resource')
-  .action(() => {
+  .action(async () => {
+    try {
+      // Check if Yarn is installed
+      execSync('yarn --version', { stdio: 'ignore' });
+    } catch (error) {
+      const spinner = ora().fail('Yarn is not installed.');
+
+      const { installYarn } = await prompt([
+        {
+          type: 'confirm',
+          name: 'installYarn',
+          message: 'Would you like to install it now?',
+          default: true
+        }
+      ]);
+
+      if (installYarn) {
+        try {
+          spinner.start('Installing Yarn...');
+          execSync('npm install -g yarn', { stdio: 'inherit' });
+          spinner.succeed('Yarn installed successfully.');
+        } catch (installError) {
+          spinner.fail('Failed to install Yarn. Please install it manually and try again.');
+          process.exit(1);
+        }
+      } else {
+        spinner.fail('Yarn is required to proceed. Exiting.');
+        process.exit(1);
+      }
+    }
     prompt([
       {
         type: 'list',
@@ -120,13 +150,13 @@ program
                 message: 'Select license:',
                 choices: ['ISC', 'MIT'],
                 default: 'ISC'
-              },{
+              }, {
                 type: 'input',
                 name: 'service_name',
                 message: 'Initial service:',
                 default: 'microservice1'
               }
-              
+
             ])
               .then(answers => {
                 //   find out if this separater works on windows
