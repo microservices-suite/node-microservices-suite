@@ -14,7 +14,7 @@
   "author": "Gilbert Andanje",
   "license": "ISC",
   "dependencies": {
-    "@microservices-suite/config": "1.0.3",
+    "@microservices-suite/config": "1.0.9",
     "@microservices-suite/errors": "1.1.6",
     "@microservices-suite/utilities": "1.0.6",
     "@microservices-suite/validations": "1.0.9",
