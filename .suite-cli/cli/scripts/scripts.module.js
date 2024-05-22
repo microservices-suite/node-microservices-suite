@@ -363,6 +363,53 @@ const startAll = async ({ options }) => {
 
 }
 
+// /**
+//  * Starts services with nodemon in development mode by default, otherwise with PM2.
+//  * @param {Object} options - Environment settings for running the services.
+//  * @param {string[]} options.serviceDirectories - List of service directories under `options.microservicesDir`.
+//  * @param {string} options.microservicesDir - The root directory of the services.
+//  * @param {string} [options.mode='dev'] - The environment mode for running the services. Defaults to 'dev'.
+//  * @returns {void} Starts the services and logs their startup status.
+//  */
+// const spinVanillaServices = async ({ serviceDirectories, microservicesDir, mode = 'dev' }) => {
+//     const spinner = ora('Starting all services in ' + mode + ' mode...').start();
+
+//     try {
+//         // Simulate delay before starting services
+//         await delay(1);
+
+//         await Promise.all(serviceDirectories.map(async (dir) => {
+//             const serviceSpinner = ora('Starting service concurrently in: ' + dir).start();
+//             const processes = await exec(`yarn ${mode}`, { cwd: join(microservicesDir, dir) }, async (error, stdout, stderr) => {
+//                 if (error) {
+//                     const errorMessage = getErrorMessage(error, dir, microservicesDir);
+//                     serviceSpinner.fail(errorMessage);
+//                 } else {
+//                     serviceSpinner.succeed(`Service in directory ${dir} started successfully`);
+//                 }
+//             });
+//             processes.stdout.on('data', data => {
+//                 const output = data.toString();
+//                 // Check if the output contains the "yarn run" message
+//                 if (!output.includes('yarn run')) {
+//                     // Stop the spinner before printing the output
+//                     serviceSpinner.stop();
+//                     spinner.succeed(output);
+//                     // Restart the spinner after printing the output
+//                     // serviceSpinner.start();
+//                 }
+//             });
+//         }));
+
+//         spinner.succeed(`service${serviceDirectories.length > 0 ? 's' : ''} started successfully: ${serviceDirectories}`);
+//     } catch (error) {
+//         spinner.fail('An error occurred while starting services');
+//         console.error(error);
+//         exit(1);
+//     }
+// };
+
+
 /**
  * Starts services with nodemon in development mode by default, otherwise with PM2.
  * @param {Object} options - Environment settings for running the services.
@@ -375,41 +422,48 @@ const spinVanillaServices = async ({ serviceDirectories, microservicesDir, mode 
     const spinner = ora('Starting all services in ' + mode + ' mode...').start();
 
     try {
-        // Simulate delay before starting services
-        await delay(1);
-
         await Promise.all(serviceDirectories.map(async (dir) => {
-            const serviceSpinner = ora('Starting service concurrently in: ' + dir).start();
-            const processes = await exec(`yarn ${mode}`, { cwd: join(microservicesDir, dir) }, async (error, stdout, stderr) => {
-                if (error) {
-                    const errorMessage = getErrorMessage(error, dir, microservicesDir);
-                    serviceSpinner.fail(errorMessage);
-                } else {
-                    serviceSpinner.succeed(`Service in directory ${dir} started successfully`);
-                }
-            });
-            processes.stdout.on('data', data => {
+            const servicePath = join(microservicesDir, dir);
+            // TODO: check if the yarn.cmd works in windows really
+            const command = process.platform === 'win32' ? 'yarn.cmd' : 'yarn';
+            const args = [mode];
+
+            const child = spawn(command, args, { cwd: servicePath, shell: true });
+
+            child.stdout.on('data', (data) => {
                 const output = data.toString();
                 // Check if the output contains the "yarn run" message
-                if (!output.includes('yarn run')) {
+                if (!output.includes('yarn run') && !output.includes('NODE_ENV')) {
                     // Stop the spinner before printing the output
-                    serviceSpinner.stop();
-                    spinner.succeed(output);
+                    console.log(output.trim());
                     // Restart the spinner after printing the output
-                    // serviceSpinner.start();
+                }
+            });
+
+            child.stderr.on('data', (data) => {
+                const output = data.toString();
+                // Handle stderr output
+                spinner.fail(`Error in service ${dir}: ${output.trim()}`);
+            });
+
+            child.on('close', (code) => {
+                if (code !== 0) {
+                    spinner.fail(`Service in directory ${dir} exited with code ${code}`);
+                } else {
+                    spinner.succeed(`Service in directory ${dir} started successfully`);
+                    
                 }
             });
         }));
 
-        spinner.succeed(`service${serviceDirectories.length > 0 ? 's' : ''} started successfully: ${serviceDirectories}`);
+        spinner.succeed(`Service${serviceDirectories.length > 1 ? 's' : ''} started successfully: ${serviceDirectories.join(', ')}`);
+        console.log('\n')
     } catch (error) {
         spinner.fail('An error occurred while starting services');
         console.error(error);
-        exit(1);
+        process.exit(1);
     }
 };
-
-
 
 const getErrorMessage = (error, dir, microservicesDir) => {
     const errorMessageParts = error.message.split('\n');
@@ -862,7 +916,7 @@ const addPackageJson = async ({ project_root, answers }) => {
         "winston",
         "mongoose"
     ];
-    const devDependencies = ["nodemon","jest"];
+    const devDependencies = ["nodemon", "jest"];
     const configDependencies = ['dotenv', 'joi', 'morgan', 'winston']
     const utilitiesDependencies = ['joi']
     // Join dependencies into a single string for the command
@@ -1196,12 +1250,11 @@ const generateMCSHelper = ({ project_root, answers }) => {
         // Correct the file extension based on directory
         const mcsPath = `${project_root}/microservices/${answers.service_name}/src/${mcs}`
         mkdirSync(mcsPath, { recursive: true })
-        const fileExtension = mcs === 'models' ? 'model.js' : mcs === 'routes' ? 'routes.js' : 'controllers.js';
+        const fileExtension = `${mcs}.js`;
 
         // Write main file content
-        const mainContent = mcs === 'models' ? assets.modelContent() : mcs === 'routes' ? assets.routesContent() : mcs === 'controllers' ? assets.controllersContent({ answers }) : assets.servicesContent();
+        const mainContent = mcs === 'models' ? assets.modelContent({ answers }) : mcs === 'routes' ? assets.routesContent({ answers }) : mcs === 'controllers' ? assets.controllersContent({ answers }) : assets.servicesContent({ answers });
         writeFileSync(join(mcsPath, `${fileExtension}`), mainContent);
-
         // Write index file content
         const indexContent = mcs === 'models' ? assets.modelIndexContent() : mcs === 'routes' ? assets.routesIndexContent() : mcs === 'controllers' ? assets.controllersIndexContent() : assets.servicesIndexContent();
         writeFileSync(join(mcsPath, 'index.js'), indexContent);
@@ -1223,17 +1276,17 @@ const releasePackage = async ({ package }) => {
         const { workspace_name } = retrieveWorkSpaceName({ package_json_path });
         if (package) {
             logInfo({ message: `Looking for package: ${workspace_name}/${package}` });
-            await executeCommand('yarn', ['workspace', `${workspace_name}/${package}`, 'release'],{stdio:'inherit',shell:true});
+            await executeCommand('yarn', ['workspace', `${workspace_name}/${package}`, 'release'], { stdio: 'inherit', shell: true });
         } else {
-            await executeCommand('yarn', ['generate:release'], { cwd: cwd(),stdio:'inherit',shell:true });
+            await executeCommand('yarn', ['generate:release'], { cwd: cwd(), stdio: 'inherit', shell: true });
         }
     } catch (error) {
-       ora().fail('Command failed to run');
+        ora().fail('Command failed to run');
     }
 }
 
-const executeCommand =(command, args, options) => {
-    return new Promise(async(resolve, reject) => {
+const executeCommand = (command, args, options) => {
+    return new Promise(async (resolve, reject) => {
         const child = await spawn(command, args, options);
         child.on('close', (code) => {
             if (code !== 0) {
