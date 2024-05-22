@@ -916,7 +916,7 @@ const addPackageJson = async ({ project_root, answers }) => {
         "winston",
         "mongoose"
     ];
-    const devDependencies = ["nodemon","jest"];
+    const devDependencies = ["nodemon", "jest"];
     const configDependencies = ['dotenv', 'joi', 'morgan', 'winston']
     const utilitiesDependencies = ['joi']
     // Join dependencies into a single string for the command
@@ -1250,12 +1250,11 @@ const generateMCSHelper = ({ project_root, answers }) => {
         // Correct the file extension based on directory
         const mcsPath = `${project_root}/microservices/${answers.service_name}/src/${mcs}`
         mkdirSync(mcsPath, { recursive: true })
-        const fileExtension = mcs === 'models' ? 'model.js' : mcs === 'routes' ? 'routes.js' : 'controllers.js';
+        const fileExtension = `${mcs}.js`;
 
         // Write main file content
-        const mainContent = mcs === 'models' ? assets.modelContent() : mcs === 'routes' ? assets.routesContent() : mcs === 'controllers' ? assets.controllersContent({ answers }) : assets.servicesContent();
+        const mainContent = mcs === 'models' ? assets.modelContent({ answers }) : mcs === 'routes' ? assets.routesContent({ answers }) : mcs === 'controllers' ? assets.controllersContent({ answers }) : assets.servicesContent({ answers });
         writeFileSync(join(mcsPath, `${fileExtension}`), mainContent);
-
         // Write index file content
         const indexContent = mcs === 'models' ? assets.modelIndexContent() : mcs === 'routes' ? assets.routesIndexContent() : mcs === 'controllers' ? assets.controllersIndexContent() : assets.servicesIndexContent();
         writeFileSync(join(mcsPath, 'index.js'), indexContent);
@@ -1277,17 +1276,17 @@ const releasePackage = async ({ package }) => {
         const { workspace_name } = retrieveWorkSpaceName({ package_json_path });
         if (package) {
             logInfo({ message: `Looking for package: ${workspace_name}/${package}` });
-            await executeCommand('yarn', ['workspace', `${workspace_name}/${package}`, 'release'],{stdio:'inherit',shell:true});
+            await executeCommand('yarn', ['workspace', `${workspace_name}/${package}`, 'release'], { stdio: 'inherit', shell: true });
         } else {
-            await executeCommand('yarn', ['generate:release'], { cwd: cwd(),stdio:'inherit',shell:true });
+            await executeCommand('yarn', ['generate:release'], { cwd: cwd(), stdio: 'inherit', shell: true });
         }
     } catch (error) {
-       ora().fail('Command failed to run');
+        ora().fail('Command failed to run');
     }
 }
 
-const executeCommand =(command, args, options) => {
-    return new Promise(async(resolve, reject) => {
+const executeCommand = (command, args, options) => {
+    return new Promise(async (resolve, reject) => {
         const child = await spawn(command, args, options);
         child.on('close', (code) => {
             if (code !== 0) {
