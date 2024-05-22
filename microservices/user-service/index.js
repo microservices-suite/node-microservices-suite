@@ -20,9 +20,20 @@ const app = express();
 app.set('trust proxy', 1);
 
 app.use(express.json());
+app.use((req, res, next) => {
+  const clientIp = req.headers['x-forwarded-for'] ||req.socket.remoteAddress || req.ip || req.connection.remoteAddress;
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url} - IP: ${clientIp}`);
+  next();
+});
 
 app.get('/', (req, res) => {
-  res.json({ messae: 'hello from @microservices-suite/user-service' });
+  res.json({ 
+    messae: 'hello from @microservices-suite/user-service', 
+    socket:req.socket.remoteAddress,
+    connection:req.connection.remoteAddress,
+    ip:req.ip,
+  forwarded: req.headers['x-forwarded-for']||'not fwd'
+});
 });
 
 const server = http.createServer(app);
