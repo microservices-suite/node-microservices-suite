@@ -17,6 +17,7 @@ mongoose.connect(config.db).then(() => {
 });
 
 const app = express();
+app.set('trust proxy', 1);
 
 app.use(express.json());
 
