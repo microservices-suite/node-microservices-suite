@@ -1,1 +1,1 @@
-module.exports = () => 'const { router } = require(\'./routes\');\nmodule.exports = { router };';
+module.exports = () => 'const router = require(\'./routes\');\nmodule.exports = { router };';
