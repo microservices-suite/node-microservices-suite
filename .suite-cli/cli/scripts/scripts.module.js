@@ -451,7 +451,7 @@ const spinVanillaServices = async ({ serviceDirectories, microservicesDir, mode 
                     spinner.fail(`Service in directory ${dir} exited with code ${code}`);
                 } else {
                     spinner.succeed(`Service in directory ${dir} started successfully`);
-                    
+
                 }
             });
         }));
@@ -967,9 +967,15 @@ const addPackageJson = async ({ project_root, answers }) => {
             }
         }
     });
-
+    let warningMessage
     childProcess.stderr.on('data', data => {
-        spinner.text = 'Encountered an issue, check logs for more info.';
+        const output = data.toString();
+
+        if (output.toLowerCase().includes('warning')) {
+            warningMessage = output.split('\n').find(line => line.toLowerCase().includes('warning'));
+        } else {
+            spinner.text = 'Encountered an issue, check logs for more info.';
+        }
     });
 
     childProcess.on('error', error => {
@@ -980,6 +986,12 @@ const addPackageJson = async ({ project_root, answers }) => {
         if (code !== 0) {
             spinner.fail('Command failed to complete successfully');
             return;
+        }
+        spinner.stop()
+        if (warningMessage) {
+            console.log('============================')
+            console.warn(warningMessage)
+            console.log('============================')
         }
         spinner.succeed('Dependencies installed successfully');
         spinner.info(`To start the project, run 'cd ${answers.repo_name} && suite start -v ${answers.service_name}'`)
