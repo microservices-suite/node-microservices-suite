@@ -4,71 +4,71 @@ services:
     build: 
       dockerfile: DockerFile
       context: ../../../data-persistence/mongodb
-  rabbitmq:
-    image: rabbitmq:3.8
-    container_name: rabbitmq
-    ports:
-      - '5672:5672'
-      - '15672:15672'
-    healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "ping"]
-      interval: 30s
-      retries: 5
-    restart: unless-stopped
-  customer-service:
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-      # shared:
-      #   condition: service_healthy
-    container_name: customer
-    restart: always
-    build:
-      context: ../../../microservices/customer-service
-      dockerfile: DockerFile.dev
-    ports:
-      - 9000:9000
-    volumes:
-      - /app/node_modules
-      - ../../../microservices/customer-service:/app
-  supplier-service:
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-      # shared:
-      #   condition: service_healthy
-    container_name: supplier
-    restart: always
-    build:
-      context: ../../../microservices/supplier-service
-      dockerfile: DockerFile.dev
-    ports:
-      - 9001:9001
-    volumes:
-      - /app/node_modules
-      - ../../../microservices/supplier-service:/app  
-  # user-service:
-  #   build:
-  #     dockerfile: DockerFile.dev
-  #     context: ../../../microservices/user-service
+  # rabbitmq:
+  #   image: rabbitmq:3.8
+  #   container_name: rabbitmq
   #   ports:
-  #     - '9003:9003'
+  #     - '5672:5672'
+  #     - '15672:15672'
+  #   healthcheck:
+  #     test: ["CMD", "rabbitmq-diagnostics", "ping"]
+  #     interval: 30s
+  #     retries: 5
+  #   restart: unless-stopped
+  # customer-service:
   #   depends_on:
-  #     - mongodb
+  #     rabbitmq:
+  #       condition: service_healthy
+  #     # shared:
+  #     #   condition: service_healthy
+  #   container_name: customer
+  #   restart: always
+  #   build:
+  #     context: ../../../microservices/customer-service
+  #     dockerfile: DockerFile.dev
+  #   ports:
+  #     - 9000:9000
   #   volumes:
   #     - /app/node_modules
-  #     - ../../../microservices/user-service:/app
-  # upload-service:
-  #   build:
-  #     dockerfile: DockerFile.dev
-  #     context: ../../../microservices/upload-service
-  #   ports:
-  #     - '9004:9004'
+  #     - ../../../microservices/customer-service:/app
+  # supplier-service:
   #   depends_on:
-  #     - mongodb
+  #     rabbitmq:
+  #       condition: service_healthy
+  #     # shared:
+  #     #   condition: service_healthy
+  #   container_name: supplier
+  #   restart: always
+  #   build:
+  #     context: ../../../microservices/supplier-service
+  #     dockerfile: DockerFile.dev
+  #   ports:
+  #     - 9001:9001
   #   volumes:
   #     - /app/node_modules
-  #     - ../../../microservices/upload-service:/app
+  #     - ../../../microservices/supplier-service:/app  
+  user-service:
+    build:
+      dockerfile: DockerFile.dev
+      context: ../../../microservices/user-service
+    ports:
+      - '9003:9003'
+    depends_on:
+      - mongodb
+    volumes:
+      - /app/node_modules
+      - ../../../microservices/user-service:/app
+  upload-service:
+    build:
+      dockerfile: DockerFile.dev
+      context: ../../../microservices/upload-service
+    ports:
+      - '9004:9004'
+    depends_on:
+      - mongodb
+    volumes:
+      - /app/node_modules
+      - ../../../microservices/upload-service:/app
   # shared:
   #   build: 
   #     context: ./shared
