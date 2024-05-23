@@ -1,7 +1,7 @@
-module.exports = () => `
+module.exports = ({ answers }) => `
 module.exports = {
     apps : [{
-      name   : "upload_service",
+      name   : ${answers.service_name},
       autorestart: true,
       watch: true,
       time: true,
@@ -9,13 +9,13 @@ module.exports = {
       instances:4,
       env_production: {
         NODE_ENV: "prod",
-        DATABASE_URL:"mongodb://mongodb:27017/supplier_service_db_dev",
-        PORT:9001
+        DATABASE_URL:"mongodb://mongodb:27017/${answers.service_name}",
+        PORT:${answers.port}
      },
      env_development: {
       NODE_ENV: "dev",
-      DATABASE_URL:"mongodb://mongodb:27017/supplier_service_db_dev",
-      PORT:9001
+      DATABASE_URL:"mongodb://mongodb:27017/${answers.service_name}",
+      PORT:${answers.port}
    }
     }]
   }

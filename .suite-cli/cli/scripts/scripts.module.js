@@ -1069,7 +1069,7 @@ const addMicroservice = ({ project_root, answers }) => {
                 writeFile(join(current_dir, 'test1.js'), assets.snapshotTestContent());
                 break;
             case `GraphQL/app1`:
-                writeFile(join(current_dir, 'appollo-server.js'), assets.apolloServerContent());
+                writeFile(join(current_dir, 'appollo-server.js'), assets.apolloServerContent({ answers }));
                 break;
             case `k8s/${answers.service_name}`:
                 // TODO: move k8s into a function
@@ -1084,10 +1084,6 @@ const addMicroservice = ({ project_root, answers }) => {
     });
 
     generateMCSHelper({ project_root, answers })
-    writeFile(join(`${project_root}/microservices/${answers.service_name}`, 'index.js'), assets.serverContent({ answers }));
-    writeFile(join(`${project_root}/microservices/${answers.service_name}`, '.env'), assets.envContent());
-    writeFile(join(`${project_root}/microservices/${answers.service_name}`, '.env.dev'), assets.envContent());
-    writeFile(join(`${project_root}/microservices/${answers.service_name}`, 'ecosystem.config.js'), assets.ecosystemContent());
     mkdirSync(join(project_root, '.vscode'), { recursive: true })
     writeFileSync(join(project_root, '.gitignore'), assets.gitignoreContent());
     writeFileSync(join(project_root, '.vscode', 'launch.json'), JSON.stringify(assets.debuggerConfigContent(), null, 2));
@@ -1259,6 +1255,10 @@ const generateMCSHelper = ({ project_root, answers }) => {
         const indexContent = mcs === 'models' ? assets.modelIndexContent() : mcs === 'routes' ? assets.routesIndexContent() : mcs === 'controllers' ? assets.controllersIndexContent() : assets.servicesIndexContent();
         writeFileSync(join(mcsPath, 'index.js'), indexContent);
     });
+    writeFile(join(`${project_root}/microservices/${answers.service_name}`, 'index.js'), assets.serverContent({ answers }));
+    writeFile(join(`${project_root}/microservices/${answers.service_name}`, '.env'), assets.envContent({ answers }));
+    writeFile(join(`${project_root}/microservices/${answers.service_name}`, '.env.dev'), assets.envContent({ answers }));
+    writeFile(join(`${project_root}/microservices/${answers.service_name}`, 'ecosystem.config.js'), assets.ecosystemContent({ answers }));
 }
 
 /**

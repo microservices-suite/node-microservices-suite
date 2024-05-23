@@ -5,7 +5,8 @@ const { Command } = require('commander');
 const { createPromptModule } = require('inquirer');
 const { execSync } = require('node:child_process')
 const actionHandlers = require('./scripts')
-const { logInfo } = require('./scripts/scripts.module');
+const { logInfo, getExistingServices, getNextAvailablePort } = require('./scripts/scripts.module');
+const { cwd } = require('node:process');
 const program = new Command()
 const prompt = createPromptModule()
 program
@@ -155,6 +156,12 @@ program
                 name: 'service_name',
                 message: 'Initial service:',
                 default: 'microservice1'
+              }, {
+                type: 'input',
+                name: 'port',
+                message: 'Enter port (optional):',
+                default: 9001,
+                validate: input => input === '' || !isNaN(input) ? true : 'Port must be a number.'
               }
 
             ])
@@ -166,6 +173,7 @@ program
               });
             break;
           case 'service':
+            const existing_services = getExistingServices({ currentDir: cwd() })
             prompt([
               {
                 type: 'input',
@@ -173,6 +181,12 @@ program
                 message: 'Enter service name:',
                 // TODO: validate workspace compliant name using regex
                 validate: input => input ? true : 'Name cannot be empty',
+              }, {
+                type: 'input',
+                name: 'port',
+                message: 'Enter port (optional):',
+                default: getNextAvailablePort({ services: existing_services }),
+                validate: input => input === '' || !isNaN(input) ? true : 'Port must be a number.'
               }
             ]).then((answers) => actionHandlers.scaffoldNewService({ answers: { ...answers, private: true } }))
             break;

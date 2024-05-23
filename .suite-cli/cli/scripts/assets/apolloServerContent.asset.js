@@ -1,4 +1,4 @@
-module.exports = () => `
+module.exports = ({ answers }) => `
 const { ApolloServer, gql } = require('apollo-server-express');
 const express = require('express');
 
@@ -19,7 +19,7 @@ const server = new ApolloServer({ typeDefs, resolvers });
 const app = express();
 server.applyMiddleware({ app });
 
-app.listen({ port: 4000 }, () =>
-  console.log(\`🚀 Server ready at http://localhost:\${config.port}\${server.graphqlPath}\`)
+app.listen({ port: ${(answers.port + 1000) < 5000 ? 4001 : 8001} }, () =>
+  console.log(\`🚀 Server ready at http://localhost:${(answers.port + 1000) < 5000 ? 4001 : 8001}\${server.graphqlPath}\`)
 );
 `;
