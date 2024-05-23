@@ -451,7 +451,7 @@ const spinVanillaServices = async ({ serviceDirectories, microservicesDir, mode 
                     spinner.fail(`Service in directory ${dir} exited with code ${code}`);
                 } else {
                     spinner.succeed(`Service in directory ${dir} started successfully`);
-                    
+
                 }
             });
         }));
@@ -967,9 +967,15 @@ const addPackageJson = async ({ project_root, answers }) => {
             }
         }
     });
-
+    let warningMessage
     childProcess.stderr.on('data', data => {
-        spinner.text = 'Encountered an issue, check logs for more info.';
+        const output = data.toString();
+
+        if (output.toLowerCase().includes('warning')) {
+            warningMessage = output.split('\n').find(line => line.toLowerCase().includes('warning'));
+        } else {
+            spinner.text = 'Encountered an issue, check logs for more info.';
+        }
     });
 
     childProcess.on('error', error => {
@@ -980,6 +986,12 @@ const addPackageJson = async ({ project_root, answers }) => {
         if (code !== 0) {
             spinner.fail('Command failed to complete successfully');
             return;
+        }
+        spinner.stop()
+        if (warningMessage) {
+            console.log('============================')
+            console.warn(warningMessage)
+            console.log('============================')
         }
         spinner.succeed('Dependencies installed successfully');
         spinner.info(`To start the project, run 'cd ${answers.repo_name} && suite start -v ${answers.service_name}'`)
@@ -1069,7 +1081,7 @@ const addMicroservice = ({ project_root, answers }) => {
                 writeFile(join(current_dir, 'test1.js'), assets.snapshotTestContent());
                 break;
             case `GraphQL/app1`:
-                writeFile(join(current_dir, 'appollo-server.js'), assets.apolloServerContent());
+                writeFile(join(current_dir, 'appollo-server.js'), assets.apolloServerContent({ answers }));
                 break;
             case `k8s/${answers.service_name}`:
                 // TODO: move k8s into a function
@@ -1084,10 +1096,6 @@ const addMicroservice = ({ project_root, answers }) => {
     });
 
     generateMCSHelper({ project_root, answers })
-    writeFile(join(`${project_root}/microservices/${answers.service_name}`, 'index.js'), assets.serverContent({ answers }));
-    writeFile(join(`${project_root}/microservices/${answers.service_name}`, '.env'), assets.envContent());
-    writeFile(join(`${project_root}/microservices/${answers.service_name}`, '.env.dev'), assets.envContent());
-    writeFile(join(`${project_root}/microservices/${answers.service_name}`, 'ecosystem.config.js'), assets.ecosystemContent());
     mkdirSync(join(project_root, '.vscode'), { recursive: true })
     writeFileSync(join(project_root, '.gitignore'), assets.gitignoreContent());
     writeFileSync(join(project_root, '.vscode', 'launch.json'), JSON.stringify(assets.debuggerConfigContent(), null, 2));
@@ -1203,7 +1211,7 @@ const injectService = async ({ project_root, answers, workspace_name }) => {
         });
 
         await writeFile(join(service_path, 'package.json'), JSON.stringify(packageJsonContent, null, 2));
-
+        registerServiceWithSuiteJson({ root_dir: project_root, name: answers.service_name, port: answers.port })
         spinner.succeed('Service injected successfully');
     } catch (error) {
         spinner.fail(`Failed to inject service: ${error.message}`);
@@ -1259,6 +1267,10 @@ const generateMCSHelper = ({ project_root, answers }) => {
         const indexContent = mcs === 'models' ? assets.modelIndexContent() : mcs === 'routes' ? assets.routesIndexContent() : mcs === 'controllers' ? assets.controllersIndexContent() : assets.servicesIndexContent();
         writeFileSync(join(mcsPath, 'index.js'), indexContent);
     });
+    writeFile(join(`${project_root}/microservices/${answers.service_name}`, 'index.js'), assets.serverContent({ answers }));
+    writeFile(join(`${project_root}/microservices/${answers.service_name}`, '.env'), assets.envContent({ answers }));
+    writeFile(join(`${project_root}/microservices/${answers.service_name}`, '.env.dev'), assets.envContent({ answers }));
+    writeFile(join(`${project_root}/microservices/${answers.service_name}`, 'ecosystem.config.js'), assets.ecosystemContent({ answers }));
 }
 
 /**
@@ -1356,11 +1368,52 @@ const scaffoldNewLibrary = async ({ answers }) => {
  * @returns {void}
  */
 const addProjectConfigs = ({ project_root, answers }) => {
-    writeFile(join(project_root, 'suite.json'), JSON.stringify(assets.suiteJSON({ answers }), null, 2));
+    const { service_name, port, ...suite_json } = answers
+    suite_json['services'] = [
+        {
+            name: service_name,
+            port: answers.port
+        }
+    ]
+    answers.apis.includes('GraphQL') && (suite_json['apollo_servers'] = [{
+        name: 'app1',
+        port: (answers.port + 1000) < 5000 ? 4001 : 8001
+    }])
+    writeFile(join(project_root, 'suite.json'), JSON.stringify(assets.suiteJSON({ answers: suite_json }), null, 2));
     writeFile(join(project_root, 'suite.config'), assets.suiteConfig({ answers }));
     writeFile(join(project_root, '.suiterc'), assets.suiteRC({ answers }));
 
 }
+
+// Function to get the next available port
+const getNextAvailablePort = ({ services }) => {
+    const usedPorts = services.map(service => service.port);
+    let port = 9001;
+    while (usedPorts.includes(port)) {
+        port++;
+    }
+    return port;
+};
+
+const getExistingServices = ({ currentDir }) => {
+    const root_dir = generatRootPath({ currentDir, height: 5 })
+    // Read the project configuration file
+    const configPath = resolve(root_dir, 'suite.json');
+    const config = JSON.parse(readFileSync(configPath, 'utf8'));
+    const existingServices = config.services || [];
+    return existingServices
+}
+const registerServiceWithSuiteJson = ({ root_dir, name, port }) => {
+    // Read the project configuration file
+    const configPath = resolve(root_dir, 'suite.json');
+    const config = JSON.parse(readFileSync(configPath, 'utf8'));
+    if (!config.services) {
+        config.services = [];
+    }
+    config.services.push({ name, port });
+    writeFile(configPath, JSON.stringify(config, null, 2), 'utf8');
+}
+const readFileContent = ({ path }) => { }
 module.exports = {
     generateDirectoryPath,
     changeDirectory,
@@ -1386,5 +1439,7 @@ module.exports = {
     scaffoldNewRepo,
     releasePackage,
     scaffoldNewService,
-    scaffoldNewLibrary
+    scaffoldNewLibrary,
+    getNextAvailablePort,
+    getExistingServices
 }
