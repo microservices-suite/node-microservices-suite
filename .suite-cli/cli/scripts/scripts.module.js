@@ -383,20 +383,27 @@ const spinVanillaServices = async ({ serviceDirectories, microservicesDir, mode 
             const child = spawn(command, args, { cwd: servicePath, shell: true });
 
             child.stdout.on('data', (data) => {
-                const output = data.toString();
+                let output = data.toString();
                 // Check if the output contains the "yarn run" message
                 if (!output.includes('yarn run') && !output.includes('NODE_ENV')) {
                     // Stop the spinner before printing the output
-                    console.log(output.trim());
+                    if (output.includes('info')) {
+                        const parts = output.trim().split(':');
+                        const formattedOutput = formatLog(parts[0], dir, parts.slice(1).join(':').trim());
+                        console.log(formattedOutput);
+                    } else {
+                        console.log(output.trim());
+                    }
                     // Restart the spinner after printing the output
                 }
             });
 
             child.stderr.on('data', (data) => {
                 let output = data.toString();
-                output = output.split(':')
+                const parts = output.trim().split(':');
+                const formattedOutput = formatLog(parts[0], dir, parts.slice(1).join(':').trim());
                 // Handle stderr output
-                console.log(`${output[0]}: ${dir}: ${output[1]}`);
+                console.log(formattedOutput);
             });
 
             child.on('close', (code) => {
@@ -416,6 +423,15 @@ const spinVanillaServices = async ({ serviceDirectories, microservicesDir, mode 
         console.error(error);
         process.exit(1);
     }
+};
+
+const padString = (str, length) => str.padEnd(length, ' ');
+
+// Function to format the log messages
+const formatLog = (level, dir, message) => {
+    const paddedLevel = padString(level, 5);
+    const paddedDir = padString(dir, 8);
+    return `${paddedLevel}: ${paddedDir}: ${message}`;
 };
 
 /**
