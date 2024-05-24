@@ -10,10 +10,10 @@ const { router } = require('./src/routes');
 // const app = require('./src/app');
 
 mongoose.connect(config.db).then(() => {
-logger.info(\`📀 successfully connected to db: \${config.db}\`);
+    logger.info(\`📀 successfully connected to db: \${config.db}\`);
 }).catch(err => {
-logger.error(\`failed to connect to db.exiting...\${err.message}\`);
-process.exit(0);
+    logger.error(\`failed to connect to db. Exiting... \${err.message}\`);
+    process.exit(0);
 });
 
 const app = express();
@@ -21,22 +21,22 @@ const app = express();
 app.use(express.json());
 
 app.get('/', (req, res) => {
-res.json({ message: 'hello from ${answers.project_base}/${answers.service_name}' });
+    res.json({ message: 'hello from ${answers.project_base}/${answers.service_name}' });
 });
 
 const server = http.createServer(app);
 
 server.on('error', (err) => {
-logger.error(err);
-if (err.code === 'EADDRINUSE') {
-    logger.error('Address already in use, retrying...');
-    setTimeout(() => {
-    server.close();
-    server.listen(config.port, 'localhost');
-    }, 1000);
-    errorHandler(err);
-}
-})
+    logger.error(err);
+    if (err.code === 'EADDRINUSE') {
+        logger.error('Address already in use, retrying...');
+        setTimeout(() => {
+            server.close();
+            server.listen(config.port, 'localhost');
+        }, 1000);
+        errorHandler(err);
+    }
+});
 
 server.listen(config.port, () => {
     logger.info(\`🚀 ${answers.project_base}/${answers.service_name} listening at: http://localhost:\${config.port}\`);
@@ -48,10 +48,10 @@ app.use(morgan.successHandler);
 
 app.use('/api/v1', router);
 
-// global error handler should come after all other middlewares
+// Global error handler should come after all other middlewares
 app.all('*', (req, res, next) => {
-const err = new APIError(404, \`requested resource not found on server: \${req.originalUrl}\`);
-next(err);
+    const err = new APIError(404, \`requested resource not found on server: \${req.originalUrl}\`);
+    next(err);
 });
 
 app.use(errorHandler);
