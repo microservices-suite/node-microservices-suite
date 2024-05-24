@@ -1318,12 +1318,9 @@ const addProjectConfigs = ({ project_root, answers }) => {
 
 // Function to get the next available port
 const getNextAvailablePort = ({ services }) => {
-    const usedPorts = services.map(service => service.port);
-    let port = 9001;
-    while (usedPorts.includes(port)) {
-        port++;
-    }
-    return port;
+    const usedPorts = services.map(service => service.port).sort((a, b) => a - b);
+    let last_port = usedPorts[usedPorts.length - 1] || 9000
+    return last_port + 1;
 };
 
 const getExistingServices = ({ currentDir }) => {
@@ -1342,6 +1339,9 @@ const registerServiceWithSuiteJson = ({ root_dir, name, port }) => {
         config.services = [];
     }
     config.services.push({ name, port });
+
+    // keep the services ordered by port
+    config.services.sort((a, b) => a.port - b.port);
     writeFile(configPath, JSON.stringify(config, null, 2), 'utf8');
 }
 
