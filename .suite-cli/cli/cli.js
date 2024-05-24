@@ -173,7 +173,14 @@ program
                 //   find out if this separater works on windows
                 // const project_base = `@${answers.repo_name}-${Date.now()}`
                 const project_base = `@${answers.repo_name}`
-                actionHandlers.scaffoldNewRepo({ answers: { ...answers, project_base, private: true } });
+                actionHandlers.scaffoldNewRepo({
+                  answers: {
+                    ...answers,
+                    project_base,
+                    private: true,
+                    port: parseFloat(answers.port)
+                  }
+                });
               });
             break;
           case 'service':
@@ -192,7 +199,13 @@ program
                 default: getNextAvailablePort({ services: existing_services }),
                 validate: input => input === '' || !isNaN(input) ? true : 'Port must be a number.'
               }
-            ]).then((answers) => actionHandlers.scaffoldNewService({ answers: { ...answers, private: true } }))
+            ]).then((answers) => actionHandlers.scaffoldNewService({
+              answers: {
+                ...answers,
+                private: true,
+                port: parseFloat(answers.port)
+              }
+            }))
             break;
           case 'library':
             prompt([

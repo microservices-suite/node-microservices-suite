@@ -360,55 +360,7 @@ const startAll = async ({ options }) => {
     // case -v(--vanilla)
     // TODO: run services with nodemon in dev mode otherwise PM2
     // runVanillaServices({ services: [], mode: options.mode })
-
 }
-
-// /**
-//  * Starts services with nodemon in development mode by default, otherwise with PM2.
-//  * @param {Object} options - Environment settings for running the services.
-//  * @param {string[]} options.serviceDirectories - List of service directories under `options.microservicesDir`.
-//  * @param {string} options.microservicesDir - The root directory of the services.
-//  * @param {string} [options.mode='dev'] - The environment mode for running the services. Defaults to 'dev'.
-//  * @returns {void} Starts the services and logs their startup status.
-//  */
-// const spinVanillaServices = async ({ serviceDirectories, microservicesDir, mode = 'dev' }) => {
-//     const spinner = ora('Starting all services in ' + mode + ' mode...').start();
-
-//     try {
-//         // Simulate delay before starting services
-//         await delay(1);
-
-//         await Promise.all(serviceDirectories.map(async (dir) => {
-//             const serviceSpinner = ora('Starting service concurrently in: ' + dir).start();
-//             const processes = await exec(`yarn ${mode}`, { cwd: join(microservicesDir, dir) }, async (error, stdout, stderr) => {
-//                 if (error) {
-//                     const errorMessage = getErrorMessage(error, dir, microservicesDir);
-//                     serviceSpinner.fail(errorMessage);
-//                 } else {
-//                     serviceSpinner.succeed(`Service in directory ${dir} started successfully`);
-//                 }
-//             });
-//             processes.stdout.on('data', data => {
-//                 const output = data.toString();
-//                 // Check if the output contains the "yarn run" message
-//                 if (!output.includes('yarn run')) {
-//                     // Stop the spinner before printing the output
-//                     serviceSpinner.stop();
-//                     spinner.succeed(output);
-//                     // Restart the spinner after printing the output
-//                     // serviceSpinner.start();
-//                 }
-//             });
-//         }));
-
-//         spinner.succeed(`service${serviceDirectories.length > 0 ? 's' : ''} started successfully: ${serviceDirectories}`);
-//     } catch (error) {
-//         spinner.fail('An error occurred while starting services');
-//         console.error(error);
-//         exit(1);
-//     }
-// };
-
 
 /**
  * Starts services with nodemon in development mode by default, otherwise with PM2.
@@ -441,9 +393,10 @@ const spinVanillaServices = async ({ serviceDirectories, microservicesDir, mode 
             });
 
             child.stderr.on('data', (data) => {
-                const output = data.toString();
+                let output = data.toString();
+                output = output.split(':')
                 // Handle stderr output
-                spinner.fail(`Error in service ${dir}: ${output.trim()}`);
+                console.log(`${output[0]}: ${dir}: ${output[1]}`);
             });
 
             child.on('close', (code) => {
@@ -464,28 +417,6 @@ const spinVanillaServices = async ({ serviceDirectories, microservicesDir, mode 
         process.exit(1);
     }
 };
-
-const getErrorMessage = (error, dir, microservicesDir) => {
-    const errorMessageParts = error.message.split('\n');
-    let errorMessage = '';
-    if (errorMessageParts[1]) {
-        if (errorMessageParts[1].startsWith('error Command') && errorMessageParts[1].endsWith('not found.')) {
-            errorMessage = `Missing script at ${dir}${sep}package.json: ${errorMessageParts[1].match(/"(.*?)"/)[1]}`;
-        } else if (errorMessageParts[1].startsWith('error There are more than one workspace')) {
-            errorMessage = errorMessageParts[1].replace('error ', '');
-        } else if (errorMessageParts[1].includes('Unknown workspace')) {
-            if (existsSync(`${microservicesDir}/${dir}/package.json`)) {
-                errorMessage = 'Wrong workspace naming';
-            } else {
-                errorMessage = `Missing package.json @microservices-suite${sep}${dir}`;
-            }
-        } else {
-            errorMessage = error.message;
-        }
-    }
-    return errorMessage;
-};
-
 
 /**
  * 
