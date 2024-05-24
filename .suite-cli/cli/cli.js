@@ -52,6 +52,10 @@ program
   .description('make a package release and publish simultaneously to npm.If no package is passed then generate:release for changelog is run')
   .action(async (package) => await actionHandlers.releasePackage({ package }));
 program
+  .command('test [package]')
+  .description('run tests')
+  .action(async (package) => await actionHandlers.test({ package }));
+program
   .command('start [components...]')
   .description('Starts specified components (services or apps), or all services in dev mode if -m is not specified')
   .option('-a, --app', 'Indicates that the components specified are apps. Defaults to Docker Compose')
@@ -169,7 +173,14 @@ program
                 //   find out if this separater works on windows
                 // const project_base = `@${answers.repo_name}-${Date.now()}`
                 const project_base = `@${answers.repo_name}`
-                actionHandlers.scaffoldNewRepo({ answers: { ...answers, project_base, private: true } });
+                actionHandlers.scaffoldNewRepo({
+                  answers: {
+                    ...answers,
+                    project_base,
+                    private: true,
+                    port: parseFloat(answers.port)
+                  }
+                });
               });
             break;
           case 'service':
@@ -188,7 +199,13 @@ program
                 default: getNextAvailablePort({ services: existing_services }),
                 validate: input => input === '' || !isNaN(input) ? true : 'Port must be a number.'
               }
-            ]).then((answers) => actionHandlers.scaffoldNewService({ answers: { ...answers, private: true } }))
+            ]).then((answers) => actionHandlers.scaffoldNewService({
+              answers: {
+                ...answers,
+                private: true,
+                port: parseFloat(answers.port)
+              }
+            }))
             break;
           case 'library':
             prompt([
