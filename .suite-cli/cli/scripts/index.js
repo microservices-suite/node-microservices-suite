@@ -22,3 +22,4 @@ module.exports.scaffoldNewRepo = require('./commands/scaffoldNewRepo.cmd');
 module.exports.releasePackage = require('./commands/releasePackage.cmd');
 module.exports.scaffoldNewService = require('./commands/scaffoldNewService.cmd');
 module.exports.scaffoldNewLibrary = require('./commands/scaffoldNewLibrary.cmd');
+module.exports.test = require('./commands/test.cmd');

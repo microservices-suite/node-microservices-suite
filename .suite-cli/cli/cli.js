@@ -52,6 +52,10 @@ program
   .description('make a package release and publish simultaneously to npm.If no package is passed then generate:release for changelog is run')
   .action(async (package) => await actionHandlers.releasePackage({ package }));
 program
+  .command('test [package]')
+  .description('run tests')
+  .action(async (package) => await actionHandlers.test({ package }));
+program
   .command('start [components...]')
   .description('Starts specified components (services or apps), or all services in dev mode if -m is not specified')
   .option('-a, --app', 'Indicates that the components specified are apps. Defaults to Docker Compose')

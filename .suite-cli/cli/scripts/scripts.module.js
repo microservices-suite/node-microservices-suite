@@ -1413,6 +1413,35 @@ const registerServiceWithSuiteJson = ({ root_dir, name, port }) => {
     config.services.push({ name, port });
     writeFile(configPath, JSON.stringify(config, null, 2), 'utf8');
 }
+
+/**
+ * Releases a package or generates a release for the workspace.
+ * @async
+ * @param {Object} options - Options for releasing the package.
+ * @param {string} options.package - The name of the package to release (optional).
+ * @returns {Promise<void>} A Promise that resolves when the release process is completed.
+ */
+const test = async ({ package }) => {
+    let rootDir = cwd();
+    if (!package) {
+        rootDir = generatRootPath({ currentDir: cwd() });
+    }
+    try {
+        const package_json_path = join(rootDir, 'package.json');
+
+        // Read the package.json file
+        const { workspace_name } = retrieveWorkSpaceName({ package_json_path });
+        if (package) {
+            logInfo({ message: `Looking for package: ${workspace_name}/${package}` });
+            await executeCommand('yarn', ['workspace', `${workspace_name}/${package}`, 'test'], { stdio: 'inherit', shell: true });
+        } else {
+            await executeCommand('yarn', ['test'], { cwd: rootDir, stdio: 'inherit', shell: true });
+        }
+    } catch (error) {
+        ora().fail('Command failed to run');
+    }
+}
+
 const readFileContent = ({ path }) => { }
 module.exports = {
     generateDirectoryPath,
@@ -1441,5 +1470,6 @@ module.exports = {
     scaffoldNewService,
     scaffoldNewLibrary,
     getNextAvailablePort,
-    getExistingServices
+    getExistingServices,
+    test
 }
