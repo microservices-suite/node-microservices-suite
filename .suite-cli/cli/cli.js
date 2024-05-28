@@ -5,7 +5,7 @@ const { Command } = require('commander');
 const { createPromptModule } = require('inquirer');
 const { execSync } = require('node:child_process')
 const actionHandlers = require('./scripts')
-const { logInfo, getExistingServices, getNextAvailablePort } = require('./scripts/scripts.module');
+const { logInfo, getExistingServices, getNextAvailablePort, scaffoldApp } = require('./scripts/scripts.module');
 const { cwd } = require('node:process');
 const program = new Command()
 const prompt = createPromptModule()
@@ -218,6 +218,30 @@ program
               }
             ]).then((answers) => actionHandlers.scaffoldNewLibrary({ answers: { ...answers, private: false } }))
             break
+          case 'app':
+            const all_services = getExistingServices({ currentDir: cwd() })
+            const formatServiceName = (service) => `${service.name}: ${service.port}`;
+
+            prompt([
+              {
+                type: 'input',
+                name: 'app_name',
+                message: 'Enter the application name:',
+              },
+              {
+                type: 'checkbox',
+                name: 'services',
+                message: 'Select services',
+                choices: all_services.map(service => ({
+                  name: formatServiceName(service),
+                  value: service,
+                  checked: true, // Default all services to be selected
+                })),
+              },
+            ]).then(answers => {
+              scaffoldApp({ answers })
+            })
+            break;
           default:
             console.log('Handling other resources, not yet implemented.');
           // Handle other cases or provide feedback that other options are not yet implemented

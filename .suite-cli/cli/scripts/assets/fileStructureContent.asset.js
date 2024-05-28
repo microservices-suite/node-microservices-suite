@@ -10,7 +10,7 @@ module.exports = ({ answers }) => (
         `tests/${answers.service_name}/snapshot`,
         `microservices`,
         `k8s/${answers.service_name}`,
-        `gateways/apps/app1/${answers.webserver}`,
+        `gateways/apps`,
         ...(answers.apis.map((api) => `${api}/app1`)),
     ]
 )
