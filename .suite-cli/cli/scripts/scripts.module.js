@@ -444,10 +444,8 @@ const formatLog = (level, dir, message) => {
  * @returns {void} Starts apps with nodemon in devmode otherwise PM2
  */
 const runDockerizedApps = async ({ apps_dir, apps_directories, mode = 'dev', build }) => {
-    logInfo({ message: `Starting all apps in ${mode} mode...` });
     await Promise.all(
         apps_directories.map(async (dir) => {
-            logInfo({ message: `Starting app concurrently in: ${dir}` });
             const dockerIsRunning = await checkDocker()
             if (!dockerIsRunning) {
 
@@ -456,8 +454,6 @@ const runDockerizedApps = async ({ apps_dir, apps_directories, mode = 'dev', bui
             setTimeout(() => {
 
             }, 1)
-            // TODO: method 1. Has less control but works fine
-            const composeCommand = 'docker';
             const composeFile = mode === 'prod' ? 'docker-compose.yml' : `docker-compose.${mode}.yml`;
 
             const args = [
@@ -467,56 +463,28 @@ const runDockerizedApps = async ({ apps_dir, apps_directories, mode = 'dev', bui
                 'up',
                 ...(build ? ['--build'] : [])
             ];
-
             const options = {
                 cwd: join(apps_dir, dir),
-                stdio: 'inherit' // to redirect child's stdout/stderr to process's stdout/stderr
+                stdio: 'inherit', // Redirects stdout/stderr to parent process
+                shell: true, // Run command in a shell
             };
 
-            const processes = spawn(composeCommand, args, options);
+            const composeProcessControlled = spawn('docker', args, options);
 
-            processes.on('exit', (code) => {
+            composeProcessControlled.on('error', (error) => {
+                console.error(`Failed to start Docker process in ${dir}`);
+                console.error(error.message);
+            });
+
+            composeProcessControlled.on('exit', (code, signal) => {
                 if (code !== 0) {
-                    logError({ error: `Docker process exited with code ${code}` });
+                    console.warn(`Docker process in ${dir} exited with code: ${code}, signal: ${signal}`);
+                } else {
+                    console.log(`Docker process in ${dir} exited successfully`);
                 }
             });
 
             // TODO: handle docker errors
-            // TODO: Method2 with more control has a child_process.stdout.on(...) errror
-            // const composeFile = mode === 'prod' ? 'docker-compose.yml' : `docker-compose.${mode}.yml`;
-
-            // const spawn_child = await spawn('docker-compose', ['-f', `${apps_dir}/${dir}/${composeFile}`, 'up', ...(build ? ['--build'] : [])], options);
-
-            // spawn_child.stdout.on('data', (data) => {
-            //     const message = data.toString().trim();
-            //     logInfo({ message });
-            // });
-
-            // spawn_child.stderr.on('data', (data) => {
-            //     const message = data.toString().trim();
-            //     logSuccess({ message });
-            //     // logError({ error }); // Uncomment this line if you prefer logging errors
-            // });
-            // spawn_child.stderr.on('error', (data) => {
-            //     const error = data.toString().trim();
-            //     logError({ error });
-            //     // logError({ error }); // Uncomment this line if you prefer logging errors
-            // });
-            // spawn_child.on('error', (error) => {
-            //     logError({ error: 'Failed to start child process.' });
-            //     logError({ error });
-            //     // logError({ error }); // Uncomment this line if you prefer logging errors
-            // });
-
-            // spawn_child.on('exit', (code, signal) => {
-            //     if (code !== 0) {
-            //         logWarning({ message: `Process exited with code: ${code}, signal: ${signal}` });
-            //         // logWarning({ message: `exited with code: ${code} signal: ${signal}` }); // Uncomment this line if you prefer logging warnings
-            //     } else {
-            //         logInfo({ message: 'Process exited successfully' });
-            //     }
-            // });
-            //TODO: handle docker errors
         }))
 }
 
