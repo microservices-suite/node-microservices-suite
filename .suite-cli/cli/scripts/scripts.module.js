@@ -937,6 +937,7 @@ const addMicroservice = ({ project_root, answers }) => {
                 writeFile(join(current_dir, 'logger.js'), assets.configLoggerContent());
                 writeFile(join(current_dir, 'morgan.js'), assets.configMorganContent());
                 writeFile(join(current_dir, 'package.json'), JSON.stringify(assets.genericPackageJsonContent({
+                    addDeps: false,
                     answers,
                     suffix: 'config',
                     isMicroservice: false,
@@ -949,6 +950,7 @@ const addMicroservice = ({ project_root, answers }) => {
                 writeFile(join(current_dir, 'errors.handler.js'), assets.errorHandlerContent());
                 writeFile(join(current_dir, 'index.js'), assets.errorIndexContent());
                 writeFile(join(current_dir, 'package.json'), JSON.stringify(assets.genericPackageJsonContent({
+                    addDeps: false,
                     answers,
                     suffix: 'errors',
                     isMicroservice: false,
@@ -961,6 +963,7 @@ const addMicroservice = ({ project_root, answers }) => {
                 writeFile(join(current_dir, 'APIError.js'), assets.apiErrorContent());
                 writeFile(join(current_dir, 'index.js'), assets.utilitiesIndexContent());
                 writeFile(join(current_dir, 'package.json'), JSON.stringify(assets.genericPackageJsonContent({
+                    addDeps: false,
                     answers,
                     suffix: 'utilities',
                     isMicroservice: false,
@@ -975,6 +978,7 @@ const addMicroservice = ({ project_root, answers }) => {
             case `shared/middlewares`:
                 writeFile(join(current_dir, 'index.js'), assets.middlewaresIndexContent());
                 writeFile(join(current_dir, 'package.json'), JSON.stringify(assets.genericPackageJsonContent({
+                    addDeps: false,
                     answers,
                     suffix: 'middlewares',
                     isMicroservice: false,
@@ -1018,6 +1022,7 @@ const addMicroservice = ({ project_root, answers }) => {
     mkdirSync(join(project_root, '.vscode'), { recursive: true })
     writeFileSync(join(project_root, '.vscode', 'launch.json'), JSON.stringify(assets.debuggerConfigContent(), null, 2));
     writeFile(join(`${project_root}/microservices/${answers.service_name}`, 'package.json'), JSON.stringify(assets.genericPackageJsonContent({
+        addDeps: false,
         answers,
         suffix: `${answers.service_name}`,
         isMicroservice: true,
@@ -1118,6 +1123,7 @@ const injectService = async ({ project_root, answers, workspace_name }) => {
 
         // Create package.json for the service
         const packageJsonContent = assets.genericPackageJsonContent({
+            addDeps: true,
             answers: { ...answers, project_base: workspace_name },
             suffix: `${answers.service_name}`,
             isMicroservice: true,
@@ -1127,7 +1133,7 @@ const injectService = async ({ project_root, answers, workspace_name }) => {
 
         await writeFile(join(service_path, 'package.json'), JSON.stringify(packageJsonContent, null, 2));
         registerServiceWithSuiteJson({ root_dir: project_root, name: answers.service_name, port: answers.port })
-        spinner.succeed('Service injected successfully');
+        spinner.succeed('Service injected successfully. To install dependencies run "suite install"');
     } catch (error) {
         spinner.fail(`Failed to inject service: ${error.message}`);
     }
@@ -1185,6 +1191,7 @@ const generateMCSHelper = ({ project_root, answers }) => {
     writeFile(join(`${project_root}/microservices/${answers.service_name}`, 'index.js'), assets.serverContent({ answers }));
     writeFile(join(`${project_root}/microservices/${answers.service_name}`, '.env'), assets.envContent({ answers }));
     writeFile(join(`${project_root}/microservices/${answers.service_name}`, '.env.dev'), assets.envContent({ answers }));
+    writeFile(join(`${project_root}/microservices/${answers.service_name}`, 'Dockerfile.dev'), assets.dockerfileContent());
     writeFile(join(`${project_root}/microservices/${answers.service_name}`, 'ecosystem.config.js'), assets.ecosystemContent({ answers }));
 }
 
@@ -1265,6 +1272,7 @@ const scaffoldNewLibrary = async ({ answers }) => {
     mkdirSync(project_root, { recursive: true });
     const { workspace_name } = retrieveWorkSpaceName({ package_json_path })
     writeFile(join(`${project_root}`, 'package.json'), JSON.stringify(assets.genericPackageJsonContent({
+        addDeps: false,
         answers: { ...answers, project_base: workspace_name },
         suffix: `${answers.library_name}`,
         isMicroservice: false,
@@ -1308,12 +1316,8 @@ const getNextAvailablePort = ({ services }) => {
 };
 
 const getExistingServices = ({ currentDir }) => {
-    const root_dir = generatRootPath({ currentDir, height: 5 })
-    // Read the project configuration file
-    const configPath = resolve(root_dir, 'suite.json');
-    const config = JSON.parse(readFileSync(configPath, 'utf8'));
-    const existingServices = config.services || [];
-    return existingServices
+    const { services } = readFileContent({ currentDir })
+    return services
 }
 const registerServiceWithSuiteJson = ({ root_dir, name, port }) => {
     // Read the project configuration file

@@ -45,5 +45,8 @@ module.exports.debuggerConfigContent = require('./debuggerConfigContent.asset')
 module.exports.suiteJSON = require('./suiteJSON.asset') 
 module.exports.suiteConfig = require('./suiteConfig.asset') 
 module.exports.suiteRC = require('./suiteRC.asset') 
+module.exports.nginxContent = require('./nginxContent.asset') 
+module.exports.dockerComposeContent = require('./dockerComposeContent.asset') 
+module.exports.dockerfileContent = require('./dockerfileContent.asset') 
 
 
