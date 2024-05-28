@@ -444,10 +444,8 @@ const formatLog = (level, dir, message) => {
  * @returns {void} Starts apps with nodemon in devmode otherwise PM2
  */
 const runDockerizedApps = async ({ apps_dir, apps_directories, mode = 'dev', build }) => {
-    logInfo({ message: `Starting all apps in ${mode} mode...` });
     await Promise.all(
         apps_directories.map(async (dir) => {
-            logInfo({ message: `Starting app concurrently in: ${dir}` });
             const dockerIsRunning = await checkDocker()
             if (!dockerIsRunning) {
 
@@ -456,8 +454,6 @@ const runDockerizedApps = async ({ apps_dir, apps_directories, mode = 'dev', bui
             setTimeout(() => {
 
             }, 1)
-            // TODO: method 1. Has less control but works fine
-            const composeCommand = 'docker';
             const composeFile = mode === 'prod' ? 'docker-compose.yml' : `docker-compose.${mode}.yml`;
 
             const args = [
@@ -467,56 +463,28 @@ const runDockerizedApps = async ({ apps_dir, apps_directories, mode = 'dev', bui
                 'up',
                 ...(build ? ['--build'] : [])
             ];
-
             const options = {
                 cwd: join(apps_dir, dir),
-                stdio: 'inherit' // to redirect child's stdout/stderr to process's stdout/stderr
+                stdio: 'inherit', // Redirects stdout/stderr to parent process
+                shell: true, // Run command in a shell
             };
 
-            const processes = spawn(composeCommand, args, options);
+            const composeProcessControlled = spawn('docker', args, options);
 
-            processes.on('exit', (code) => {
+            composeProcessControlled.on('error', (error) => {
+                console.error(`Failed to start Docker process in ${dir}`);
+                console.error(error.message);
+            });
+
+            composeProcessControlled.on('exit', (code, signal) => {
                 if (code !== 0) {
-                    logError({ error: `Docker process exited with code ${code}` });
+                    console.warn(`Docker process in ${dir} exited with code: ${code}, signal: ${signal}`);
+                } else {
+                    console.log(`Docker process in ${dir} exited successfully`);
                 }
             });
 
             // TODO: handle docker errors
-            // TODO: Method2 with more control has a child_process.stdout.on(...) errror
-            // const composeFile = mode === 'prod' ? 'docker-compose.yml' : `docker-compose.${mode}.yml`;
-
-            // const spawn_child = await spawn('docker-compose', ['-f', `${apps_dir}/${dir}/${composeFile}`, 'up', ...(build ? ['--build'] : [])], options);
-
-            // spawn_child.stdout.on('data', (data) => {
-            //     const message = data.toString().trim();
-            //     logInfo({ message });
-            // });
-
-            // spawn_child.stderr.on('data', (data) => {
-            //     const message = data.toString().trim();
-            //     logSuccess({ message });
-            //     // logError({ error }); // Uncomment this line if you prefer logging errors
-            // });
-            // spawn_child.stderr.on('error', (data) => {
-            //     const error = data.toString().trim();
-            //     logError({ error });
-            //     // logError({ error }); // Uncomment this line if you prefer logging errors
-            // });
-            // spawn_child.on('error', (error) => {
-            //     logError({ error: 'Failed to start child process.' });
-            //     logError({ error });
-            //     // logError({ error }); // Uncomment this line if you prefer logging errors
-            // });
-
-            // spawn_child.on('exit', (code, signal) => {
-            //     if (code !== 0) {
-            //         logWarning({ message: `Process exited with code: ${code}, signal: ${signal}` });
-            //         // logWarning({ message: `exited with code: ${code} signal: ${signal}` }); // Uncomment this line if you prefer logging warnings
-            //     } else {
-            //         logInfo({ message: 'Process exited successfully' });
-            //     }
-            // });
-            //TODO: handle docker errors
         }))
 }
 
@@ -969,6 +937,7 @@ const addMicroservice = ({ project_root, answers }) => {
                 writeFile(join(current_dir, 'logger.js'), assets.configLoggerContent());
                 writeFile(join(current_dir, 'morgan.js'), assets.configMorganContent());
                 writeFile(join(current_dir, 'package.json'), JSON.stringify(assets.genericPackageJsonContent({
+                    addDeps: false,
                     answers,
                     suffix: 'config',
                     isMicroservice: false,
@@ -981,6 +950,7 @@ const addMicroservice = ({ project_root, answers }) => {
                 writeFile(join(current_dir, 'errors.handler.js'), assets.errorHandlerContent());
                 writeFile(join(current_dir, 'index.js'), assets.errorIndexContent());
                 writeFile(join(current_dir, 'package.json'), JSON.stringify(assets.genericPackageJsonContent({
+                    addDeps: false,
                     answers,
                     suffix: 'errors',
                     isMicroservice: false,
@@ -993,6 +963,7 @@ const addMicroservice = ({ project_root, answers }) => {
                 writeFile(join(current_dir, 'APIError.js'), assets.apiErrorContent());
                 writeFile(join(current_dir, 'index.js'), assets.utilitiesIndexContent());
                 writeFile(join(current_dir, 'package.json'), JSON.stringify(assets.genericPackageJsonContent({
+                    addDeps: false,
                     answers,
                     suffix: 'utilities',
                     isMicroservice: false,
@@ -1007,6 +978,7 @@ const addMicroservice = ({ project_root, answers }) => {
             case `shared/middlewares`:
                 writeFile(join(current_dir, 'index.js'), assets.middlewaresIndexContent());
                 writeFile(join(current_dir, 'package.json'), JSON.stringify(assets.genericPackageJsonContent({
+                    addDeps: false,
                     answers,
                     suffix: 'middlewares',
                     isMicroservice: false,
@@ -1050,6 +1022,7 @@ const addMicroservice = ({ project_root, answers }) => {
     mkdirSync(join(project_root, '.vscode'), { recursive: true })
     writeFileSync(join(project_root, '.vscode', 'launch.json'), JSON.stringify(assets.debuggerConfigContent(), null, 2));
     writeFile(join(`${project_root}/microservices/${answers.service_name}`, 'package.json'), JSON.stringify(assets.genericPackageJsonContent({
+        addDeps: false,
         answers,
         suffix: `${answers.service_name}`,
         isMicroservice: true,
@@ -1150,6 +1123,7 @@ const injectService = async ({ project_root, answers, workspace_name }) => {
 
         // Create package.json for the service
         const packageJsonContent = assets.genericPackageJsonContent({
+            addDeps: true,
             answers: { ...answers, project_base: workspace_name },
             suffix: `${answers.service_name}`,
             isMicroservice: true,
@@ -1159,7 +1133,7 @@ const injectService = async ({ project_root, answers, workspace_name }) => {
 
         await writeFile(join(service_path, 'package.json'), JSON.stringify(packageJsonContent, null, 2));
         registerServiceWithSuiteJson({ root_dir: project_root, name: answers.service_name, port: answers.port })
-        spinner.succeed('Service injected successfully');
+        spinner.succeed('Service injected successfully. To install dependencies run "suite install"');
     } catch (error) {
         spinner.fail(`Failed to inject service: ${error.message}`);
     }
@@ -1217,6 +1191,7 @@ const generateMCSHelper = ({ project_root, answers }) => {
     writeFile(join(`${project_root}/microservices/${answers.service_name}`, 'index.js'), assets.serverContent({ answers }));
     writeFile(join(`${project_root}/microservices/${answers.service_name}`, '.env'), assets.envContent({ answers }));
     writeFile(join(`${project_root}/microservices/${answers.service_name}`, '.env.dev'), assets.envContent({ answers }));
+    writeFile(join(`${project_root}/microservices/${answers.service_name}`, 'Dockerfile.dev'), assets.dockerfileContent());
     writeFile(join(`${project_root}/microservices/${answers.service_name}`, 'ecosystem.config.js'), assets.ecosystemContent({ answers }));
 }
 
@@ -1297,6 +1272,7 @@ const scaffoldNewLibrary = async ({ answers }) => {
     mkdirSync(project_root, { recursive: true });
     const { workspace_name } = retrieveWorkSpaceName({ package_json_path })
     writeFile(join(`${project_root}`, 'package.json'), JSON.stringify(assets.genericPackageJsonContent({
+        addDeps: false,
         answers: { ...answers, project_base: workspace_name },
         suffix: `${answers.library_name}`,
         isMicroservice: false,
@@ -1340,12 +1316,8 @@ const getNextAvailablePort = ({ services }) => {
 };
 
 const getExistingServices = ({ currentDir }) => {
-    const root_dir = generatRootPath({ currentDir, height: 5 })
-    // Read the project configuration file
-    const configPath = resolve(root_dir, 'suite.json');
-    const config = JSON.parse(readFileSync(configPath, 'utf8'));
-    const existingServices = config.services || [];
-    return existingServices
+    const { services } = readFileContent({ currentDir })
+    return services
 }
 const registerServiceWithSuiteJson = ({ root_dir, name, port }) => {
     // Read the project configuration file
@@ -1389,7 +1361,153 @@ const test = async ({ package }) => {
     }
 }
 
-const readFileContent = ({ path }) => { }
+const scaffoldApp = ({ answers }) => {
+
+    const project_root = generatRootPath({ currentDir: cwd() })
+    const app_directory = join(project_root, 'gateway/apps', answers.app_name)
+    const { webserver } = readFileContent({ currentDir: cwd() })
+
+    mkdirSync(app_directory, { recursive: true })
+    writeFileSync(join(app_directory, 'docker-compose.dev.yml'), assets.dockerComposeContent({ services: answers.services, app_name: answers.app_name }));
+    writeFileSync(join(app_directory, 'docker-compose.yml'), assets.dockerComposeContent({ services: answers.services, app_name: answers.app_name }));
+    ora().succeed(`Generated docker-compose configs at: ${app_directory}`)
+    switch (webserver) {
+        case 'nginx':
+            generateNginxConfiguration({ services: answers.services, app_directory });
+            break
+        default:
+
+            ora().info('Handling other webservers');
+    }
+}
+const readFileContent = ({ currentDir }) => {
+    const root_dir = generatRootPath({ currentDir, height: 5 })
+    // Read the project configuration file
+    const configPath = resolve(root_dir, 'suite.json');
+    const project_config = JSON.parse(readFileSync(configPath, 'utf8'));
+    return project_config
+}
+
+const generateNginxConfiguration = ({ services, app_directory }) => {
+    writeFileSync(join(app_directory, 'nginx.conf'), assets.nginxContent({ services }));
+    ora().succeed(`Generated nginx.conf at: ${app_directory}`)
+}
+const installDependencies = async ({ project_base, workspace, spinner, deps, flags }) => {
+
+
+
+    // Delay before updating spinner for next phase
+    await new Promise(resolve => setTimeout(resolve, 1));
+    spinner.color = 'yellow'; // Change spinner color
+    spinner.text = 'Installing dependencies...';
+
+    // Delay before executing yarn commands
+    await new Promise(resolve => setTimeout(resolve, 1));
+    const command = `yarn workspace ${project_base}/${workspace} add ${depsCommand} ${flags.join(' ')}`
+
+    // Execute the command
+    const childProcess = spawn(command, {
+        cwd: project_root,
+        shell: true,
+    });
+
+    childProcess.stdout.on('data', data => {
+        const output = data.toString();
+        // Check for different stages
+        if (output.includes('[1/4] Resolving packages...')) {
+            spinner.text = 'Resolving packages...';
+        } else if (output.includes('[2/4] Fetching packages...')) {
+            spinner.text = 'Fetching packages...';
+        } else if (output.includes('[3/4] Linking dependencies...')) {
+            spinner.text = 'Linking dependencies...';
+        } else if (output.includes('[4/4] Building fresh packages...')) {
+            spinner.text = 'Building packages...';
+        } else {
+            const match = output.match(/├─ ([\w@/.-]+)\s/);
+            if (match) {
+                spinner.text = `Installed ${match[1]}`;
+            }
+        }
+    });
+    let warningMessage
+    childProcess.stderr.on('data', data => {
+        const output = data.toString();
+
+        if (output.toLowerCase().includes('warning')) {
+            warningMessage = output.split('\n').find(line => line.toLowerCase().includes('warning'));
+        } else {
+            console.log(data.toString())
+            spinner.text = 'Encountered an issue, check logs for more info.';
+        }
+    });
+
+    childProcess.on('error', error => {
+        spinner.fail('Failed to execute command');
+    });
+    childProcess.on('exit', (code, signal) => {
+        if (code !== 0) {
+            spinner.fail('Command failed to complete successfully');
+            return;
+        }
+        spinner.stop()
+        if (warningMessage) {
+            console.log('============================')
+            console.warn(warningMessage)
+            console.log('============================')
+        }
+        spinner.succeed('Dependencies installed successfully');
+    });
+}
+const getDependencies = ({ type, workspace }) => {
+    // Join dependencies into a single string for the command
+    switch (type) {
+        case 'deps':
+            const dependencies = [
+                `${project_base} /config@1.0.0`,
+                `${project_base}/errors@1.0.0`,
+                `${project_base}/utilities@1.0.0`,
+                `${project_base}/middlewares@1.0.0`,
+                "dotenv",
+                "express",
+                "helmet",
+                "morgan",
+                "winston",
+                "mongoose"
+            ];
+            const deps = dependencies.join(' ');
+            return {
+                deps,
+                workspace,
+                flags: []
+            }
+            break
+        case 'dev_deps':
+            const dev_deps = devDependencies.join(' ');
+            const devDependencies = ["nodemon", "jest"];
+            return {
+                deps: dev_deps,
+                workspace,
+                flags: ['-D']
+            }
+            break
+        case 'utils':
+            const utilDependencies = ['joi']
+            return {
+                deps: utilDependencies,
+                workspace: 'utilities',
+                flags: []
+            }
+            break
+        case 'config':
+            const configDependencies = ['dotenv', 'joi', 'morgan', 'winston']
+            return {
+                deps: configDependencies,
+                workspace: 'config',
+                flags: []
+            }
+            break
+    }
+}
 module.exports = {
     generateDirectoryPath,
     changeDirectory,
@@ -1418,5 +1536,6 @@ module.exports = {
     scaffoldNewLibrary,
     getNextAvailablePort,
     getExistingServices,
-    test
+    test,
+    scaffoldApp
 }
