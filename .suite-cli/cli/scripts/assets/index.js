@@ -48,5 +48,6 @@ module.exports.suiteRC = require('./suiteRC.asset')
 module.exports.nginxContent = require('./nginxContent.asset') 
 module.exports.dockerComposeContent = require('./dockerComposeContent.asset') 
 module.exports.dockerfileContent = require('./dockerfileContent.asset') 
+module.exports.nginxDockerfileContent = require('./nginxDockerfileContent.asset') 
 
 
