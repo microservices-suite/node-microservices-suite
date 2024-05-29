@@ -578,7 +578,7 @@ const getComponentDirecotories = async ({ components, component_type }) => {
 
     const { workspace_name } = retrieveWorkSpaceName({ package_json_path })
 
-    const component_root_dir = join(project_root, `${component_type === 'app' ? `gateway/apps` : 'microservices'}`)
+    const component_root_dir = join(project_root, `${component_type === 'app' ? `gateways/apps` : 'microservices'}`)
 
     // Simulate delay before checking if the component directory exists
     await delay(1);
@@ -1363,17 +1363,18 @@ const test = async ({ package }) => {
 
 const scaffoldApp = ({ answers }) => {
 
-    const project_root = generatRootPath({ currentDir: cwd() })
-    const app_directory = join(project_root, 'gateway/apps', answers.app_name)
     const { webserver } = readFileContent({ currentDir: cwd() })
+    const project_root = generatRootPath({ currentDir: cwd() })
+    const app_directory = join(project_root, 'gateways/apps', answers.app_name)
+    const webserver_dir = join(app_directory, webserver)
 
-    mkdirSync(app_directory, { recursive: true })
-    writeFileSync(join(app_directory, 'docker-compose.dev.yml'), assets.dockerComposeContent({ services: answers.services, app_name: answers.app_name }));
-    writeFileSync(join(app_directory, 'docker-compose.yml'), assets.dockerComposeContent({ services: answers.services, app_name: answers.app_name }));
+    mkdirSync(webserver_dir, { recursive: true })
+    writeFileSync(join(app_directory, 'docker-compose.dev.yml'), assets.dockerComposeContent({ services: answers.services, app_name: answers.app_name, webserver }));
+    writeFileSync(join(app_directory, 'docker-compose.yml'), assets.dockerComposeContent({ services: answers.services, app_name: answers.app_name, webserver }));
     ora().succeed(`Generated docker-compose configs at: ${app_directory}`)
     switch (webserver) {
         case 'nginx':
-            generateNginxConfiguration({ services: answers.services, app_directory });
+            generateNginxConfiguration({ services: answers.services, webserver_dir });
             break
         default:
 
@@ -1388,9 +1389,11 @@ const readFileContent = ({ currentDir }) => {
     return project_config
 }
 
-const generateNginxConfiguration = ({ services, app_directory }) => {
-    writeFileSync(join(app_directory, 'nginx.conf'), assets.nginxContent({ services }));
-    ora().succeed(`Generated nginx.conf at: ${app_directory}`)
+const generateNginxConfiguration = ({ services, webserver_dir }) => {
+    writeFileSync(join(webserver_dir, 'nginx.conf'), assets.nginxContent({ services }));
+    writeFile(join(webserver_dir, 'Dockerfile'), assets.nginxDockerfileContent());
+    writeFile(join(webserver_dir, 'Dockerfile.dev'), assets.nginxDockerfileContent());
+    ora().succeed(`Generated webserver configs at: ${webserver_dir}`)
 }
 const installDependencies = async ({ project_base, workspace, spinner, deps, flags }) => {
 

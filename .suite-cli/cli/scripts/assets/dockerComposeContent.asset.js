@@ -1,4 +1,4 @@
-module.exports = ({ services }) => {
+module.exports = ({ services, webserver }) => {
   const servicesConfig = services.map(service => `
   ${service.name.toLowerCase().replace(/\s+/g, '-')}:
     build:
@@ -10,37 +10,21 @@ module.exports = ({ services }) => {
       - /app/node_modules
       - ../../../microservices/${service.name}:/app`).join('');
 
-  return `version: '3.8'
-services:${servicesConfig}`;
+  // Collect all service names for the 'depends_on' section of the web server
+  const serviceNames = services.map(service => service.name.toLowerCase().replace(/\s+/g, '-'));
+
+  return `
+version: '3.8'
+services:
+${servicesConfig}
+  ${webserver.toLowerCase().replace(/\s+/g, '-') || 'webserver'}:
+    depends_on:
+${serviceNames.map(service => `      - ${service}`).join('\n')}
+    restart: always
+    build:
+      context: ./${webserver}
+      dockerfile: Dockerfile.dev
+    ports:
+      - '4000:80'
+  `;
 };
-
-
-// module.exports = ({ services }) => `
-// version: '3.8'
-// services:
-//   mongodb:
-//     image: mongo:latest
-//     container_name: mongodb
-//     ports:
-//       - '27017:27017'
-//   rabbitmq:
-//     image: rabbitmq:3.8
-//     container_name: rabbitmq
-//     ports:
-//       - '5672:5672'
-//       - '15672:15672'
-// ${services.map(({ service, ports, prerequisites }) => `
-//   ${service}:
-//     depends_on:
-// ${prerequisites.map((prerequisite) => `      - ${prerequisite}`).join('\n')}
-//     container_name: ${service}
-//     restart: always
-//     build:
-//       context: ../../../microservices/${service}
-//       dockerfile: DockerFile.dev
-//     ports:
-// ${ports.map((p) => `      - '${p}:${p}'`).join('\n')}
-//     volumes:
-//       - /app/node_modules
-//       - ../../../microservices/${service}:/app`).join('\n')}
-// `.trim();
