@@ -14,11 +14,16 @@ To easily work with a `@microservices-suite monorepo` you need to install [Suite
 |  │  │  ├─ cli.js
 |  │  │  ├─ package.json
 |  │  │  ├─ README.md
-│  ├─ api-gateways/
-|  │  ├─ app-1/
-|  │  │  ├─ nginx
-|  │  │  ├─ apache
-|  │  │  ├─ README.md
+│  ├─ gateways/
+|  │  ├─ apps/
+|  │  |   ├─app-1/
+|  │  │   | ├─ webserver/
+|  │  │   | |  ├─Dockerfile
+|  │  │   | |  ├─Dockerfile.dev
+|  │  │   | |  ├─webserver.conf
+|  │  │   | ├─ docker-compose.yml
+|  │  │   | ├─ docker-compose.dev.yml
+|  │  │   | ├─ README.md
 │  ├─ graphql/
 |  │  ├─ app-1/
 |  │  │  ├─ apollo-server
