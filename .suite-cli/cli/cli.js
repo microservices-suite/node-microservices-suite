@@ -40,7 +40,7 @@ program
   .command('install')
   .description('Installs dependencies at given workspace. If not specified workspace defaults to "microservices"')
   .requiredOption('-n, --workspace-name <name>', 'Name of the workspace where to install dependencies')
-  .option('-d, --workspace-directory <directory>', 'Name of the workspace where to install dependencies', 'microservices')
+  .option('-d, --workspace-directory <directory>', 'Name of the directory where to install dependencies', 'microservices')
   .argument('<packages...>', 'Space-separated list of packages to install')
   .action(async (packages, options) => await actionHandlers.installDepsAtWorkspace({ packages, options }));
 program
