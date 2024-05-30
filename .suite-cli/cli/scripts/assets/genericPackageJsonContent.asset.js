@@ -34,10 +34,13 @@ module.exports = ({ answers, suffix, isMicroservice, description, os, addDeps })
             ]
         },
     }),
-    publishConfig: {
-        access: "public",
-        registry: "http://registry.npmjs.org"
-    },
+    // add publishConfig if is library
+    ...(!(isMicroservice || addDeps) ? {
+        publishConfig: {
+            access: "public",
+            registry: "https://registry.npmjs.org"
+        },
+    } : {}),
     scripts: {
         release: "npx bumpp-version@latest && npm publish",
         ...(isMicroservice && {
