@@ -1117,6 +1117,9 @@ const injectService = async ({ project_root, answers, workspace_name }) => {
         // Generate mcs service using helper function
         generateMCSHelper({ project_root, answers: { ...answers, project_base: workspace_name } });
 
+        // add license to package.json
+        const { license } = readFileContent({ currentDir: cwd() })
+
         // Create service directory
         const service_path = join(project_root, 'microservices', answers.service_name);
         await mkdirSync(service_path, { recursive: true });
@@ -1124,7 +1127,7 @@ const injectService = async ({ project_root, answers, workspace_name }) => {
         // Create package.json for the service
         const packageJsonContent = assets.genericPackageJsonContent({
             addDeps: true,
-            answers: { ...answers, project_base: workspace_name },
+            answers: { ...answers, project_base: workspace_name, license },
             suffix: `${answers.service_name}`,
             isMicroservice: true,
             os,
@@ -1269,11 +1272,13 @@ const retrieveWorkSpaceName = ({ package_json_path }) => {
 const scaffoldNewLibrary = async ({ answers }) => {
     const project_root = join(cwd(), 'shared', answers.library_name);
     const package_json_path = join(cwd(), 'package.json')
+    // add license to package.json
+    const { license } = readFileContent({ currentDir: cwd() })
     mkdirSync(project_root, { recursive: true });
     const { workspace_name } = retrieveWorkSpaceName({ package_json_path })
     writeFile(join(`${project_root}`, 'package.json'), JSON.stringify(assets.genericPackageJsonContent({
         addDeps: false,
-        answers: { ...answers, project_base: workspace_name },
+        answers: { ...answers, project_base: workspace_name, license },
         suffix: `${answers.library_name}`,
         isMicroservice: false,
         os,
