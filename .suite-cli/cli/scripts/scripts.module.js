@@ -3,7 +3,7 @@ const { join, sep, resolve } = require('node:path')
 const os = require('os')
 const { mkdirSync, readFile } = require('fs')
 const { cwd, chdir, exit, platform } = require('node:process')
-const { existsSync, statSync, readdirSync, writeFileSync, readFileSync } = require('node:fs');
+const { existsSync, statSync, readdirSync, writeFileSync, readFileSync, rmSync } = require('node:fs');
 let { exec, spawn } = require('node:child_process');
 const { writeFile } = require('node:fs/promises');
 const assets = require('./assets')
@@ -1373,6 +1373,10 @@ const scaffoldApp = ({ answers }) => {
     const app_directory = join(project_root, 'gateways/apps', answers.app_name)
     const webserver_dir = join(app_directory, webserver)
 
+    // Remove the directory if it already exists
+    if (existsSync(app_directory)) {
+        rmSync(app_directory, { recursive: true });
+    }
     mkdirSync(webserver_dir, { recursive: true })
     writeFileSync(join(app_directory, 'docker-compose.dev.yml'), assets.dockerComposeContent({ services: answers.services, app_name: answers.app_name, webserver }));
     writeFileSync(join(app_directory, 'docker-compose.yml'), assets.dockerComposeContent({ services: answers.services, app_name: answers.app_name, webserver }));
