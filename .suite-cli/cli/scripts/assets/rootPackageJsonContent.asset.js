@@ -20,6 +20,7 @@ module.exports = ({ answers, os }) => ({
         "release:errors": `yarn workspace ${answers.project_base}/errors run release`,
         "release:middlewares": `yarn workspace ${answers.project_base}/middlewares run release`,
         "release:utilities": `yarn workspace ${answers.project_base}/utilities run release`,
+        "release:broker": `yarn workspace ${answers.project_base}/broker run release`,
         "test": "jest"
     },
     "workspaces": {
@@ -31,7 +32,8 @@ module.exports = ({ answers, os }) => ({
             `**/${answers.project_base}/utilities`,
             `**/${answers.project_base}/errors`,
             `**/${answers.project_base}/config`,
-            `**/${answers.project_base}/middleware`
+            `**/${answers.project_base}/middleware`,
+            `**/${answers.project_base}/broker`
         ]
     },
 })

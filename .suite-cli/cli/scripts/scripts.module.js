@@ -3,7 +3,7 @@ const { join, sep, resolve } = require('node:path')
 const os = require('os')
 const { mkdirSync, readFile } = require('fs')
 const { cwd, chdir, exit, platform } = require('node:process')
-const { existsSync, statSync, readdirSync, writeFileSync, readFileSync } = require('node:fs');
+const { existsSync, statSync, readdirSync, writeFileSync, readFileSync, rmSync } = require('node:fs');
 let { exec, spawn } = require('node:child_process');
 const { writeFile } = require('node:fs/promises');
 const assets = require('./assets')
@@ -1117,6 +1117,9 @@ const injectService = async ({ project_root, answers, workspace_name }) => {
         // Generate mcs service using helper function
         generateMCSHelper({ project_root, answers: { ...answers, project_base: workspace_name } });
 
+        // add license to package.json
+        const { license } = readFileContent({ currentDir: cwd() })
+
         // Create service directory
         const service_path = join(project_root, 'microservices', answers.service_name);
         await mkdirSync(service_path, { recursive: true });
@@ -1124,7 +1127,7 @@ const injectService = async ({ project_root, answers, workspace_name }) => {
         // Create package.json for the service
         const packageJsonContent = assets.genericPackageJsonContent({
             addDeps: true,
-            answers: { ...answers, project_base: workspace_name },
+            answers: { ...answers, project_base: workspace_name, license },
             suffix: `${answers.service_name}`,
             isMicroservice: true,
             os,
@@ -1190,6 +1193,7 @@ const generateMCSHelper = ({ project_root, answers }) => {
     });
     writeFile(join(`${project_root}/microservices/${answers.service_name}`, 'index.js'), assets.serverContent({ answers }));
     writeFile(join(`${project_root}/microservices/${answers.service_name}`, '.env'), assets.envContent({ answers }));
+    writeFile(join(`${project_root}/microservices/${answers.service_name}`, '.dockerignore'), assets.dockerIgnoreContent());
     writeFile(join(`${project_root}/microservices/${answers.service_name}`, '.env.dev'), assets.envContent({ answers }));
     writeFile(join(`${project_root}/microservices/${answers.service_name}`, 'Dockerfile.dev'), assets.dockerfileContent());
     writeFile(join(`${project_root}/microservices/${answers.service_name}`, 'ecosystem.config.js'), assets.ecosystemContent({ answers }));
@@ -1269,11 +1273,13 @@ const retrieveWorkSpaceName = ({ package_json_path }) => {
 const scaffoldNewLibrary = async ({ answers }) => {
     const project_root = join(cwd(), 'shared', answers.library_name);
     const package_json_path = join(cwd(), 'package.json')
+    // add license to package.json
+    const { license } = readFileContent({ currentDir: cwd() })
     mkdirSync(project_root, { recursive: true });
     const { workspace_name } = retrieveWorkSpaceName({ package_json_path })
     writeFile(join(`${project_root}`, 'package.json'), JSON.stringify(assets.genericPackageJsonContent({
         addDeps: false,
-        answers: { ...answers, project_base: workspace_name },
+        answers: { ...answers, project_base: workspace_name, license },
         suffix: `${answers.library_name}`,
         isMicroservice: false,
         os,
@@ -1368,6 +1374,10 @@ const scaffoldApp = ({ answers }) => {
     const app_directory = join(project_root, 'gateways/apps', answers.app_name)
     const webserver_dir = join(app_directory, webserver)
 
+    // Remove the directory if it already exists
+    if (existsSync(app_directory)) {
+        rmSync(app_directory, { recursive: true });
+    }
     mkdirSync(webserver_dir, { recursive: true })
     writeFileSync(join(app_directory, 'docker-compose.dev.yml'), assets.dockerComposeContent({ services: answers.services, app_name: answers.app_name, webserver }));
     writeFileSync(join(app_directory, 'docker-compose.yml'), assets.dockerComposeContent({ services: answers.services, app_name: answers.app_name, webserver }));
