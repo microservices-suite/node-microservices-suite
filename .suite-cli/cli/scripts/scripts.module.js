@@ -1193,6 +1193,7 @@ const generateMCSHelper = ({ project_root, answers }) => {
     });
     writeFile(join(`${project_root}/microservices/${answers.service_name}`, 'index.js'), assets.serverContent({ answers }));
     writeFile(join(`${project_root}/microservices/${answers.service_name}`, '.env'), assets.envContent({ answers }));
+    writeFile(join(`${project_root}/microservices/${answers.service_name}`, '.dockerignore'), assets.dockerIgnoreContent());
     writeFile(join(`${project_root}/microservices/${answers.service_name}`, '.env.dev'), assets.envContent({ answers }));
     writeFile(join(`${project_root}/microservices/${answers.service_name}`, 'Dockerfile.dev'), assets.dockerfileContent());
     writeFile(join(`${project_root}/microservices/${answers.service_name}`, 'ecosystem.config.js'), assets.ecosystemContent({ answers }));
