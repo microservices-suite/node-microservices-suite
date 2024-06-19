@@ -1,5 +1,5 @@
-module.exports = () => `
-const { APIError } = require("@top-rescue/utilities");
+module.exports = ({ answers }) => `
+const { APIError } = require("${answers.project_base}/utilities");
 
 /**
  * Publishes a message to a specified exchange with a given routing key.

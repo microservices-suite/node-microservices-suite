@@ -1,6 +1,6 @@
-module.exports = () => `
+module.exports = ({ answers }) => `
 const amqp = require('amqplib');
-const { APIError } = require("@top-rescue/utilities");
+const { APIError } = require("${answers.project_base}/utilities");
 
 /**
  * Initializes a connection to the RabbitMQ broker, creates a channel, and asserts an exchange.

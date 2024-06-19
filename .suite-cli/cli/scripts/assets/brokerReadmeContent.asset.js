@@ -26,7 +26,7 @@ The ${answers.project_base.charAt(0).toUpperCase() + answers.project_base.slice(
 Install the package using npm:
 
 \`\`\`bash
-npm install @top-rescue/broker
+npm install ${answers.project_base}/broker
 \`\`\`
 
 ## Usage

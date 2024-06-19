@@ -824,6 +824,7 @@ const addPackageJson = async ({ project_root, answers }) => {
         `${answers.project_base}/errors@1.0.0`,
         `${answers.project_base}/utilities@1.0.0`,
         `${answers.project_base}/middlewares@1.0.0`,
+        `${answers.project_base}/broker@1.0.0`,
         "dotenv",
         "express",
         "helmet",
@@ -834,6 +835,7 @@ const addPackageJson = async ({ project_root, answers }) => {
     const devDependencies = ["nodemon", "jest"];
     const configDependencies = ['dotenv', 'joi', 'morgan', 'winston']
     const utilitiesDependencies = ['joi']
+    const brokerDependencies = ['amqplib']
     // Join dependencies into a single string for the command
     const depsCommand = dependencies.join(' ');
     const devDepsCommand = devDependencies.join(' ');
@@ -854,7 +856,7 @@ const addPackageJson = async ({ project_root, answers }) => {
 
     // Delay before executing yarn commands
     await new Promise(resolve => setTimeout(resolve, 1));
-    const command = `yarn workspace ${answers.project_base}/${answers.service_name} add ${depsCommand} && yarn workspace ${answers.project_base}/${answers.service_name} add -D ${devDepsCommand} && yarn workspace ${answers.project_base}/utilities add ${utilitiesDependencies} && yarn workspace ${answers.project_base}/config add ${configDependencies.join(' ')}`;
+    const command = `yarn workspace ${answers.project_base}/${answers.service_name} add ${depsCommand} && yarn workspace ${answers.project_base}/${answers.service_name} add -D ${devDepsCommand} && yarn workspace ${answers.project_base}/utilities add ${utilitiesDependencies} && yarn workspace ${answers.project_base}/config add ${configDependencies.join(' ')} && yarn workspace ${answers.project_base}/broker add ${brokerDependencies}`;
 
     // Execute the command
     const childProcess = spawn(command, {
@@ -988,7 +990,7 @@ const addMicroservice = ({ project_root, answers }) => {
                 writeFile(join(current_dir, 'README.md'), assets.middlewaresReadmeContent({ answers }));
                 break;
             case `shared/broker`:
-                writeFile(join(current_dir, 'exchange.js'), assets.brokerExchangeContent());
+                writeFile(join(current_dir, 'exchange.js'), assets.brokerExchangeContent({ answers }));
                 writeFile(join(current_dir, 'index.js'), assets.brokerIndexContent());
                 writeFile(join(current_dir, 'package.json'), JSON.stringify(assets.genericPackageJsonContent({
                     addDeps: false,
@@ -999,9 +1001,9 @@ const addMicroservice = ({ project_root, answers }) => {
                     description: ""
                 }), null, 2));
                 writeFile(join(current_dir, 'README.md'), assets.brokerReadmeContent({ answers }));
-                writeFile(join(current_dir, 'publisher.js'), assets.brokerPublisherContent());
+                writeFile(join(current_dir, 'publisher.js'), assets.brokerPublisherContent({ answers }));
                 writeFile(join(current_dir, 'subscriber.js'), assets.brokerSubscriberContent());
-                writeFile(join(current_dir, 'worker.queue.js'), assets.brokerWorkerQueueContent());
+                writeFile(join(current_dir, 'worker.queue.js'), assets.brokerWorkerQueueContent({ answers }));
                 break;
             case `tests/${answers.service_name}/e2e`:
                 writeFile(join(current_dir, 'test1.js'), assets.e2eTestContent({ answers }));
@@ -1194,17 +1196,17 @@ const generatRootPath = ({ currentDir, height = 0 }) => {
  * @param {string} options.answers.service_name - The name of the microservice.
  */
 const generateMCSHelper = ({ project_root, answers }) => {
-    ['models', 'controllers', 'routes', 'services'].forEach(mcs => {
+    ['models', 'controllers', 'routes', 'services', 'subscriber'].forEach(mcs => {
         // Correct the file extension based on directory
         const mcsPath = `${project_root}/microservices/${answers.service_name}/src/${mcs}`
         mkdirSync(mcsPath, { recursive: true })
         const fileExtension = `${mcs}.js`;
 
         // Write main file content
-        const mainContent = mcs === 'models' ? assets.modelContent({ answers }) : mcs === 'routes' ? assets.routesContent({ answers }) : mcs === 'controllers' ? assets.controllersContent({ answers }) : assets.servicesContent({ answers });
+        const mainContent = mcs === 'models' ? assets.modelContent({ answers }) : mcs === 'routes' ? assets.routesContent({ answers }) : mcs === 'controllers' ? assets.controllersContent({ answers }) : mcs === 'subscriber' ? assets.subscriberContent({ answers }) : assets.servicesContent({ answers });
         writeFileSync(join(mcsPath, `${fileExtension}`), mainContent);
         // Write index file content
-        const indexContent = mcs === 'models' ? assets.modelIndexContent() : mcs === 'routes' ? assets.routesIndexContent() : mcs === 'controllers' ? assets.controllersIndexContent() : assets.servicesIndexContent();
+        const indexContent = mcs === 'models' ? assets.modelIndexContent() : mcs === 'routes' ? assets.routesIndexContent() : mcs === 'controllers' ? assets.controllersIndexContent() : mcs === 'subscriber' ? assets.subscriberIndexContent() : assets.servicesIndexContent();
         writeFileSync(join(mcsPath, 'index.js'), indexContent);
     });
     writeFile(join(`${project_root}/microservices/${answers.service_name}`, 'index.js'), assets.serverContent({ answers }));
