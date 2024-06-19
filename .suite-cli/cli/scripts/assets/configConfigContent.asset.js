@@ -9,7 +9,9 @@ else {
 }
 const envVarsSchema = joi.object().keys({
     PORT: joi.number().required(),
-    DATABASE_URL: joi.string().uri().required()
+    DATABASE_URL: joi.string().uri().required(),
+    EXCHANGE: joi.string().required(),
+    AMQP_HOST: joi.string().required(),
 }).unknown();
 
 
@@ -22,7 +24,9 @@ if (error) {
 module.exports = {
     db: envVars.DATABASE_URL,
     port: envVars.PORT,
-    env: process.env.NODE_ENV
+    env: process.env.NODE_ENV,
+    exchange: envVars.EXCHANGE,
+    broker: envVars.AMQP_HOST,
 
 }
 `;

@@ -4,6 +4,7 @@ module.exports = ({ answers }) => (
         `shared/errors`,
         `shared/utilities`,
         `shared/middlewares`,
+        `shared/broker`,
         `tests/${answers.service_name}/e2e`,
         `tests/${answers.service_name}/integration`,
         `tests/${answers.service_name}/unit`,

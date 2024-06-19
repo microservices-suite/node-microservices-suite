@@ -1,3 +1,3 @@
 module.exports = () =>`
 FROM nginx
-COPY ./nginx.conf /etc/nginx/conf.d/nginx.conf`
+COPY ./default.conf /etc/nginx/conf.d/default.conf`
