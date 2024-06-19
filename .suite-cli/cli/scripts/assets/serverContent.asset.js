@@ -7,6 +7,8 @@ const { errorHandler } = require('${answers.project_base}/errors');
 const { validate, APIError } = require('${answers.project_base}/utilities');
 const { getUsers } = require('./src/services');
 const { router } = require('./src/routes');
+const { subscriber } = require('./src/subscriber');
+const {  workerQueue } = require('${answers.project_base}/broker');
 // const app = require('./src/app');
 
 mongoose.connect(config.db).then(() => {
@@ -38,8 +40,14 @@ server.on('error', (err) => {
     }
 });
 
-server.listen(config.port, () => {
+server.listen(config.port, async() => {
     logger.info(\`🚀 ${answers.project_base}/${answers.service_name} listening at: http://localhost:\${config.port}\`);
+    const channel = await workerQueue.amqpInitializeQueue({ config });
+    await workerQueue.consumeFromQueue({
+        channel,
+        queue: '${answers.service_name}',
+        subscriberHandler: subscriber.subscriberHandler
+    });
 });
 
 app.use(morgan.errorHandler);

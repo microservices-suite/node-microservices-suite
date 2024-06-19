@@ -56,5 +56,7 @@ module.exports.brokerPublisherContent = require('./brokerPublisherContent.asset'
 module.exports.brokerReadmeContent = require('./brokerReadmeContent.asset');
 module.exports.brokerSubscriberContent = require('./brokerSubscriberContent.asset'); 
 module.exports.brokerWorkerQueueContent = require('./brokerWorkerQueueContent.asset'); 
+module.exports.subscriberContent = require('./subscriberContent.asset'); 
+module.exports.subscriberIndexContent = require('./subscriberIndexContent.asset'); 
 
 
