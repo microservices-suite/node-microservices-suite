@@ -1373,12 +1373,14 @@ const scaffoldApp = ({ answers }) => {
     const project_root = generatRootPath({ currentDir: cwd() })
     const app_directory = join(project_root, 'gateways/apps', answers.app_name)
     const webserver_dir = join(app_directory, webserver)
+    const data_dir = join(app_directory, 'data')
 
     // Remove the directory if it already exists
     if (existsSync(app_directory)) {
         rmSync(app_directory, { recursive: true });
     }
-    mkdirSync(webserver_dir, { recursive: true })
+    mkdirSync(webserver_dir, { recursive: true });
+    mkdirSync(data_dir, { recursive: true });
     writeFileSync(join(app_directory, 'docker-compose.dev.yml'), assets.dockerComposeContent({ services: answers.services, app_name: answers.app_name, webserver }));
     writeFileSync(join(app_directory, 'docker-compose.yml'), assets.dockerComposeContent({ services: answers.services, app_name: answers.app_name, webserver }));
     ora().succeed(`Generated docker-compose configs at: ${app_directory}`)
@@ -1400,7 +1402,7 @@ const readFileContent = ({ currentDir }) => {
 }
 
 const generateNginxConfiguration = ({ services, webserver_dir }) => {
-    writeFileSync(join(webserver_dir, 'nginx.conf'), assets.nginxContent({ services }));
+    writeFileSync(join(webserver_dir, 'default.conf'), assets.nginxContent({ services }));
     writeFile(join(webserver_dir, 'Dockerfile'), assets.nginxDockerfileContent());
     writeFile(join(webserver_dir, 'Dockerfile.dev'), assets.nginxDockerfileContent());
     ora().succeed(`Generated webserver configs at: ${webserver_dir}`)
