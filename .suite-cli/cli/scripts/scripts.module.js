@@ -987,6 +987,22 @@ const addMicroservice = ({ project_root, answers }) => {
                 }), null, 2));
                 writeFile(join(current_dir, 'README.md'), assets.middlewaresReadmeContent({ answers }));
                 break;
+            case `shared/broker`:
+                writeFile(join(current_dir, 'exchange.js'), assets.brokerExchangeContent());
+                writeFile(join(current_dir, 'index.js'), assets.brokerIndexContent());
+                writeFile(join(current_dir, 'package.json'), JSON.stringify(assets.genericPackageJsonContent({
+                    addDeps: false,
+                    answers,
+                    suffix: 'broker',
+                    isMicroservice: false,
+                    os,
+                    description: ""
+                }), null, 2));
+                writeFile(join(current_dir, 'README.md'), assets.brokerReadmeContent({ answers }));
+                writeFile(join(current_dir, 'publisher.js'), assets.brokerPublisherContent());
+                writeFile(join(current_dir, 'subscriber.js'), assets.brokerSubscriberContent());
+                writeFile(join(current_dir, 'worker.queue.js'), assets.brokerWorkerQueueContent());
+                break;
             case `tests/${answers.service_name}/e2e`:
                 writeFile(join(current_dir, 'test1.js'), assets.e2eTestContent({ answers }));
                 break;
