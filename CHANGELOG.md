@@ -1,6 +1,10 @@
 # Changelog
 
 
+## v1.6.7
+
+[compare changes](https://github.com/microservices-suite/node-microservices-suite/compare/v2.1.0...v1.6.7)
+
 ## v1.6.6
 
 [compare changes](https://github.com/microservices-suite/node-microservices-suite/compare/v2.0.10...v1.6.6)

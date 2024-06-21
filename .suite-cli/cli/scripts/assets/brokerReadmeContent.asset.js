@@ -49,10 +49,5 @@ Configuration for the ${answers.project_base.charAt(0).toUpperCase() + answers.p
 
 ## Contributing
 
-We welcome contributions to the ${answers.project_base.charAt(0).toUpperCase() + answers.project_base.slice(1)} Broker Library. Please follow our [contribution guidelines](CONTRIBUTING.md) for details on how to get started.
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE.md) file for more details.
 
 `;

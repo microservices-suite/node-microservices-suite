@@ -178,6 +178,7 @@ program
                     ...answers,
                     project_base,
                     private: true,
+                    default_broker: 'rabbitmq',
                     port: parseFloat(answers.port)
                   }
                 });
