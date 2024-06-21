@@ -990,8 +990,10 @@ const addMicroservice = ({ project_root, answers }) => {
                 writeFile(join(current_dir, 'README.md'), assets.middlewaresReadmeContent({ answers }));
                 break;
             case `shared/broker`:
-                writeFile(join(current_dir, 'exchange.js'), assets.brokerExchangeContent({ answers }));
-                writeFile(join(current_dir, 'index.js'), assets.brokerIndexContent());
+                const broker_dir = join(current_dir, 'rabbitmq'); //TODO: add support for kafka,aws sqs and more
+                mkdirSync(broker_dir, { recursive: true })
+                writeFile(join(broker_dir, 'exchange.js'), assets.brokerExchangeContent({ answers }));
+                writeFile(join(broker_dir, 'index.js'), assets.brokerIndexContent());
                 writeFile(join(current_dir, 'package.json'), JSON.stringify(assets.genericPackageJsonContent({
                     addDeps: false,
                     answers,
@@ -1001,9 +1003,9 @@ const addMicroservice = ({ project_root, answers }) => {
                     description: ""
                 }), null, 2));
                 writeFile(join(current_dir, 'README.md'), assets.brokerReadmeContent({ answers }));
-                writeFile(join(current_dir, 'publisher.js'), assets.brokerPublisherContent({ answers }));
-                writeFile(join(current_dir, 'subscriber.js'), assets.brokerSubscriberContent());
-                writeFile(join(current_dir, 'worker.queue.js'), assets.brokerWorkerQueueContent({ answers }));
+                writeFile(join(broker_dir, 'publisher.js'), assets.brokerPublisherContent({ answers }));
+                writeFile(join(broker_dir, 'subscriber.js'), assets.brokerSubscriberContent());
+                writeFile(join(broker_dir, 'worker.queue.js'), assets.brokerWorkerQueueContent({ answers }));
                 break;
             case `tests/${answers.service_name}/e2e`:
                 writeFile(join(current_dir, 'test1.js'), assets.e2eTestContent({ answers }));
@@ -1108,9 +1110,15 @@ const scaffoldNewService = async ({ answers }) => {
     }
     const package_json_path = join(project_root, 'package.json');
     const { workspace_name } = retrieveWorkSpaceName({ package_json_path });
-    await injectService({ project_root, answers, workspace_name })
-
-
+    const { default_broker } = readFileContent({ currentDir: cwd() })
+    await injectService({
+        project_root,
+        answers: {
+            ...answers,
+            default_broker
+        },
+        workspace_name
+    })
 };
 
 /**
