@@ -26,12 +26,16 @@ In this guide we describe using `npm` to install packages. Other package manager
 Install the CLI globally using the `npm install -g` command (see the **Note** above for details about global installs).
 
   ```bash
-  npm install @microservices-suite/cli -g
+  sudo npm install @microservices-suite/cli -g
   ```
 **HINT**
 Alternatively, you can use this command `npx @microservices-suite/cli@latest` without installing the cli globally.
 
 ### Prerequisites(required)
+- Starting from version `microservices-suite/cli@2.1.0` suite  introduces *fault tolerance* to its microservices. 
+  - As of this release suite uses rabbitmq as the default message broker for *fault tolerance*. 
+  - To be able to run your services with the `suite start -v {service}` command you need to have `rabbitmq` installed on your machine.
+  - To install rabbitmq follow this instructions 👉 [here ](https://www.rabbitmq.com/docs/download#:~:text=Linux%2C%20BSD%2C%20UNIX,OTP%20for%20RabbitMQ)
 - Suite uses `yarn workspaces` to generate and manage your monorepo. You need to install yarn globally to smoothly run our CLI.
   - Install yarn globally(You may need superuser priviledges).
     ```bash
