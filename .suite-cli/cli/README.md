@@ -8,15 +8,15 @@
 - Suite uses consistent and intuitive syntax for commands both in development and CI.
 Example 
   ```bash
-  yarn workspace @microservices-suite/utilities run dev
+  yarn workspace @microservices-suite/auth run dev
   ```
 The same command with suite-CLI
   ```bash
-  suite start utilities
+  suite start -v auth
   ```
 - The CLI uses automation and smart algorithmns to run otherwise repetetive tasks and orchestrate complex workflows with simple commands.
 - Streamline building & publishing docker images
-- Easily maintain and publish private packages to npm registry using `suite {library_name} release` 
+- Easily maintain and publish private packages to npm registry using `suite release <library_name>` 
 - Streamline containerization with docker and scale with kubernetes both in development and production.
 
 ### Installation
@@ -34,7 +34,7 @@ Alternatively, you can use this command `npx @microservices-suite/cli@latest` wi
 ### Prerequisites(required)
 - Starting from version `microservices-suite/cli@2.1.0` suite  introduces *fault tolerance* to its microservices. 
   - As of this release suite uses rabbitmq as the default message broker for *fault tolerance*. 
-  - To be able to run your services with the `suite start -v {service}` command you need to have `rabbitmq` installed on your machine.
+  - To be able to run your services with the `suite start -v <service_name>` command you need to have `rabbitmq` installed on your machine.
   - To install rabbitmq follow this instructions 👉 [here ](https://www.rabbitmq.com/docs/download#:~:text=Linux%2C%20BSD%2C%20UNIX,OTP%20for%20RabbitMQ)
 - Suite uses `yarn workspaces` to generate and manage your monorepo. You need to install yarn globally to smoothly run our CLI.
   - Install yarn globally(You may need superuser priviledges).
@@ -93,7 +93,7 @@ Alternatively, you can use this command `npx @microservices-suite/cli@latest` wi
 ### Install dependencies at workspace
 - This command lets you install dependencies with more control for where to install. This leverages no-hoisting feature to deliver symlinking close to the relevant workspace.
   ```bash
-  suite add <@microservices-suite/<workspace_name>> express axios
+  suite add -n <workspace_name> express axios
   ```
 
 ### Docker instances management
@@ -102,7 +102,7 @@ Alternatively, you can use this command `npx @microservices-suite/cli@latest` wi
   ```bash
   suite prune  [-fav]
   ```
-- This command works behaves exactly as docker and if `[-v-a]` flags are passed they specify you are targeting `volumes or al(volumes & system)`. 
+- This command works behaves exactly as docker and if `[-v-a]` flags are passed they specify you are targeting `volumes or all(volumes & system)`. 
 - This is part of house keeping that suite exposes to clean up your environemnt when its blotted with dangling images or containers and volumes.
   ```bash
   suite docker:start
