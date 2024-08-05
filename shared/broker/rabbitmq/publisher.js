@@ -1,5 +1,5 @@
 
-const { APIError } = require("@monorepo/utilities");
+const { APIError } = require("@microservices-suite/utilities");
 
 /**
  * Publishes a message to a specified exchange with a given routing key.

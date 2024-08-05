@@ -1,6 +1,6 @@
 
 const amqp = require('amqplib');
-const { APIError } = require("@monorepo/utilities");
+const { APIError } = require("@microservices-suite/utilities");
 
 /**
  * Initializes a connection to the RabbitMQ broker, creates a channel, and asserts an exchange.
