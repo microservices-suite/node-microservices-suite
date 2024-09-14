@@ -37,7 +37,7 @@ ${serviceNames.map(service => `      - ${service}`).join('\n')}
       retries: 3
       start_period: 40s
   rabbitmq:
-    image: rabbitmq:3.13.3
+    image: rabbitmq:3.13-management
     container_name: rabbitmq
     ports:
       - '5672:5672'
