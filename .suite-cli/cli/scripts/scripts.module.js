@@ -1211,10 +1211,18 @@ const generateMCSHelper = ({ project_root, answers }) => {
         const fileExtension = `${mcs}.js`;
 
         // Write main file content
-        const mainContent = mcs === 'models' ? assets.modelContent({ answers }) : mcs === 'routes' ? assets.routesContent({ answers }) : mcs === 'controllers' ? assets.controllersContent({ answers }) : mcs === 'subscriber' ? assets.subscriberContent({ answers }) : assets.servicesContent({ answers });
+        const mainContent = mcs === 'models' ? assets.modelContent({ answers }) :
+            mcs === 'routes' ? assets.routesContent({ answers }) :
+                mcs === 'controllers' ? assets.controllersContent({ answers }) :
+                    mcs === 'subscriber' ? assets.subscriberContent({ answers }) :
+                        assets.servicesContent({ answers });
         writeFileSync(join(mcsPath, `${fileExtension}`), mainContent);
         // Write index file content
-        const indexContent = mcs === 'models' ? assets.modelIndexContent() : mcs === 'routes' ? assets.routesIndexContent() : mcs === 'controllers' ? assets.controllersIndexContent() : mcs === 'subscriber' ? assets.subscriberIndexContent() : assets.servicesIndexContent();
+        const indexContent = mcs === 'models' ? assets.modelIndexContent() :
+            mcs === 'routes' ? assets.routesIndexContent() :
+                mcs === 'controllers' ? assets.controllersIndexContent() :
+                    mcs === 'subscriber' ? assets.subscriberIndexContent() :
+                        assets.servicesIndexContent();
         writeFileSync(join(mcsPath, 'index.js'), indexContent);
     });
     writeFile(join(`${project_root}/microservices/${answers.service_name}`, 'index.js'), assets.serverContent({ answers }));
@@ -1354,7 +1362,6 @@ const getExistingServices = ({ currentDir }) => {
 
 const getExistingApps = ({ currentDir }) => {
     const { apps } = readFileContent({ currentDir });
-
     return apps
 }
 
@@ -1451,7 +1458,6 @@ const scaffoldApp = ({ answers }) => {
             generateNginxConfiguration({ services: answers.services, webserver_dir });
             break
         default:
-
             ora().info('Handling other webservers');
     }
     generateKrakendConfiguration({
@@ -1470,6 +1476,7 @@ const readFileContent = ({ currentDir }) => {
     const root_dir = generatRootPath({ currentDir, height: 5 })
     // Read the project configuration file
     const configPath = resolve(root_dir, 'suite.json');
+    console.log(currentDir,'d')
     const project_config = JSON.parse(readFileSync(configPath, 'utf8'));
     return project_config
 }
