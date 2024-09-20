@@ -1211,10 +1211,18 @@ const generateMCSHelper = ({ project_root, answers }) => {
         const fileExtension = `${mcs}.js`;
 
         // Write main file content
-        const mainContent = mcs === 'models' ? assets.modelContent({ answers }) : mcs === 'routes' ? assets.routesContent({ answers }) : mcs === 'controllers' ? assets.controllersContent({ answers }) : mcs === 'subscriber' ? assets.subscriberContent({ answers }) : assets.servicesContent({ answers });
+        const mainContent = mcs === 'models' ? assets.modelContent({ answers }) :
+            mcs === 'routes' ? assets.routesContent({ answers }) :
+                mcs === 'controllers' ? assets.controllersContent({ answers }) :
+                    mcs === 'subscriber' ? assets.subscriberContent({ answers }) :
+                        assets.servicesContent({ answers });
         writeFileSync(join(mcsPath, `${fileExtension}`), mainContent);
         // Write index file content
-        const indexContent = mcs === 'models' ? assets.modelIndexContent() : mcs === 'routes' ? assets.routesIndexContent() : mcs === 'controllers' ? assets.controllersIndexContent() : mcs === 'subscriber' ? assets.subscriberIndexContent() : assets.servicesIndexContent();
+        const indexContent = mcs === 'models' ? assets.modelIndexContent() :
+            mcs === 'routes' ? assets.routesIndexContent() :
+                mcs === 'controllers' ? assets.controllersIndexContent() :
+                    mcs === 'subscriber' ? assets.subscriberIndexContent() :
+                        assets.servicesIndexContent();
         writeFileSync(join(mcsPath, 'index.js'), indexContent);
     });
     writeFile(join(`${project_root}/microservices/${answers.service_name}`, 'index.js'), assets.serverContent({ answers }));
@@ -1351,6 +1359,12 @@ const getExistingServices = ({ currentDir }) => {
     const { services } = readFileContent({ currentDir })
     return services
 }
+
+const getExistingApps = ({ currentDir }) => {
+    const { apps } = readFileContent({ currentDir });
+    return apps
+}
+
 const registerServiceWithSuiteJson = ({ root_dir, name, port }) => {
     // Read the project configuration file
     const configPath = resolve(root_dir, 'suite.json');
@@ -1365,6 +1379,20 @@ const registerServiceWithSuiteJson = ({ root_dir, name, port }) => {
     writeFile(configPath, JSON.stringify(config, null, 2), 'utf8');
 }
 
+const registerAppWithSuiteJson = ({ root_dir, name, services }) => {
+    // Read the project configuration file
+    const configPath = resolve(root_dir, 'suite.json');
+    const config = JSON.parse(readFileSync(configPath, 'utf8'));
+    const services_names = services.map((s) => s.name);
+    if (!config.apps) {
+        config.apps = [];
+    }
+    config.apps.push({ name, services: services_names });
+
+    // keep the apps ordered by names
+    config.apps.sort((a, b) => a.name - b.name);
+    writeFile(configPath, JSON.stringify(config, null, 2), 'utf8');
+}
 /**
  * Releases a package or generates a release for the workspace.
  * @async
@@ -1395,34 +1423,60 @@ const test = async ({ package }) => {
 
 const scaffoldApp = ({ answers }) => {
 
-    const { webserver } = readFileContent({ currentDir: cwd() })
-    const project_root = generatRootPath({ currentDir: cwd() })
-    const app_directory = join(project_root, 'gateways/apps', answers.app_name)
-    const webserver_dir = join(app_directory, webserver)
-    const data_dir = join(app_directory, 'data')
+    const { webserver } = readFileContent({ currentDir: cwd() });
+    const { projectName } = readFileContent({ currentDir: cwd() });
+    const project_root = generatRootPath({ currentDir: cwd() });
+    const app_directory = join(project_root, 'gateways/apps', answers.app_name);
+    const webserver_dir = join(app_directory, webserver);
+    const krakend_dir = join(app_directory, 'krakend');
+    const data_dir = join(app_directory, 'data');
 
     // Remove the directory if it already exists
     if (existsSync(app_directory)) {
         rmSync(app_directory, { recursive: true });
     }
     mkdirSync(webserver_dir, { recursive: true });
+    mkdirSync(krakend_dir, { recursive: true });
     mkdirSync(data_dir, { recursive: true });
-    writeFileSync(join(app_directory, 'docker-compose.dev.yml'), assets.dockerComposeContent({ services: answers.services, app_name: answers.app_name, webserver }));
-    writeFileSync(join(app_directory, 'docker-compose.yml'), assets.dockerComposeContent({ services: answers.services, app_name: answers.app_name, webserver }));
+    writeFileSync(join(app_directory, 'docker-compose.dev.yml'), assets.dockerComposeContent({
+        services: answers.services,
+        app_name: answers.app_name,
+        webserver,
+        krakend_port: answers.gateway_port,
+        env: 'dev'
+    }));
+    writeFileSync(join(app_directory, 'docker-compose.yml'), assets.dockerComposeContent({
+        services: answers.services,
+        app_name: answers.app_name,
+        webserver,
+        krakend_port: answers.gateway_port,
+        env: 'prod'
+    }));
     ora().succeed(`Generated docker-compose configs at: ${app_directory}`)
     switch (webserver) {
         case 'nginx':
             generateNginxConfiguration({ services: answers.services, webserver_dir });
             break
         default:
-
             ora().info('Handling other webservers');
     }
+    generateKrakendConfiguration({
+        services: answers.services,
+        krakend_dir,
+        projectName,
+        gateway_port: answers.gateway_port,
+        api_version: answers.api_version,
+        gateway_cache_period: answers.gateway_cache_period,
+        gateway_timeout: answers.gateway_timeout
+    });
+    registerAppWithSuiteJson({ root_dir: project_root, name: answers.app_name, services: answers.services })
+
 }
 const readFileContent = ({ currentDir }) => {
     const root_dir = generatRootPath({ currentDir, height: 5 })
     // Read the project configuration file
     const configPath = resolve(root_dir, 'suite.json');
+    console.log(currentDir,'d')
     const project_config = JSON.parse(readFileSync(configPath, 'utf8'));
     return project_config
 }
@@ -1432,6 +1486,27 @@ const generateNginxConfiguration = ({ services, webserver_dir }) => {
     writeFile(join(webserver_dir, 'Dockerfile'), assets.nginxDockerfileContent());
     writeFile(join(webserver_dir, 'Dockerfile.dev'), assets.nginxDockerfileContent());
     ora().succeed(`Generated webserver configs at: ${webserver_dir}`)
+}
+const generateKrakendConfiguration = ({
+    services,
+    krakend_dir,
+    projectName,
+    gateway_port,
+    api_version,
+    gateway_cache_period,
+    gateway_timeout
+}) => {
+    writeFile(join(krakend_dir,
+        'krakend.json'),
+        assets.krakendConfigContent({
+            services,
+            projectName,
+            gateway_port,
+            api_version,
+            gateway_cache_period,
+            gateway_timeout
+        }));
+    ora().succeed(`Generated krakend gateway configs at: ${krakend_dir}`)
 }
 const installDependencies = async ({ project_base, workspace, spinner, deps, flags }) => {
 
@@ -1549,6 +1624,66 @@ const getDependencies = ({ type, workspace }) => {
             break
     }
 }
+
+
+const scaffoldGateways = async ({ answers }) => {
+    console.log({answers})
+    const { webserver } = readFileContent({ currentDir: cwd() });
+    const { projectName } = readFileContent({ currentDir: cwd() });
+    const { apps } = answers;
+    const project_root = generatRootPath({ currentDir: cwd() });
+
+    await Promise.all(apps.map(async (app) => {
+        return scaffoldGateway({ project_root, app, webserver, projectName })
+    }))
+}
+
+const scaffoldGateway = ({ project_root, app, webserver, projectName }) => {
+    const app_directory = join(project_root, 'gateways/apps', app.name);
+    const webserver_dir = join(app_directory, webserver);
+    const krakend_dir = join(app_directory, 'krakend');
+    const services = app.services;
+
+    // Remove the directory if it already exists
+    if (existsSync(krakend_dir)) {
+        rmSync(krakend_dir, { recursive: true });
+    }
+    mkdirSync(webserver_dir, { recursive: true });
+    mkdirSync(krakend_dir, { recursive: true });
+    writeFileSync(join(app_directory, 'docker-compose.dev.yml'), assets.dockerComposeContent({
+        services,
+        app_name: app.name,
+        webserver,
+        krakend_port: answers.gateway_port,
+        env: 'dev'
+    }));
+    writeFileSync(join(app_directory, 'docker-compose.yml'), assets.dockerComposeContent({
+        services,
+        app_name: app.name,
+        webserver,
+        krakend_port: answers.gateway_port,
+        env: 'prod'
+    }));
+    ora().succeed(`Generated docker-compose configs at: ${app_directory}`)
+    switch (webserver) {
+        case 'nginx':
+            generateNginxConfiguration({ services, webserver_dir });
+            break
+        default:
+            ora().info('Handling other webservers');
+    }
+    generateKrakendConfiguration({
+        services,
+        krakend_dir,
+        projectName,
+        gateway_port: answers.gateway_port,
+        api_version: answers.api_version,
+        gateway_cache_period: answers.gateway_cache_period,
+        gateway_timeout: answers.gateway_timeout
+    });
+
+}
+
 module.exports = {
     generateDirectoryPath,
     changeDirectory,
@@ -1578,5 +1713,7 @@ module.exports = {
     getNextAvailablePort,
     getExistingServices,
     test,
-    scaffoldApp
+    scaffoldApp,
+    scaffoldGateways,
+    getExistingApps
 }

@@ -1,0 +1,20 @@
+{
+  "name": "@microservices-suite/broker",
+  "version": "1.0.1",
+  "description": "",
+  "main": "index.js",
+  "author": "Gilbert",
+  "license": "ISC",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "scripts": {
+    "release": "npx bumpp-version@latest && npm publish"
+  },
+  "private": false,
+  "dependencies": {
+    "amqplib": "^0.10.4",
+    "@microservices-suite/utilities": "1.0.6"
+  }
+}

@@ -5,7 +5,7 @@ const { Command } = require('commander');
 const { createPromptModule } = require('inquirer');
 const { execSync } = require('node:child_process')
 const actionHandlers = require('./scripts')
-const { logInfo, getExistingServices, getNextAvailablePort, scaffoldApp } = require('./scripts/scripts.module');
+const { logInfo, getExistingServices, getExistingApps, getNextAvailablePort, scaffoldApp, scaffoldGateways } = require('./scripts/scripts.module');
 const { cwd } = require('node:process');
 const program = new Command()
 const prompt = createPromptModule()
@@ -239,8 +239,81 @@ program
                   checked: true, // Default all services to be selected
                 })),
               },
+              {
+                type: 'input',
+                name: 'gateway_port',
+                message: 'Enter port (optional):',
+                default: 8080,
+                validate: input => !isNaN(input) ? true : 'Port must be a number.'
+              },
+              {
+                type: 'input',
+                name: 'api_version',
+                message: 'Whats the api version? (optional):',
+                default: 'v1',
+              },
+              {
+                type: 'input',
+                name: 'gateway_cache_period',
+                message: 'How long do you want the gateway to cache data (optional):',
+                default: 3600,
+                validate: input => !isNaN(input) ? true : 'Caching period must be a number.'
+              },
+              {
+                type: 'input',
+                name: 'gateway_timeout',
+                message: 'How long should a request take before timing out (optional):',
+                default: 300,
+                validate: input => input === '' || !isNaN(input) ? true : 'Timeout must be a number.'
+              }
             ]).then(answers => {
               scaffoldApp({ answers })
+            })
+            break;
+          case 'gateway':
+            const all_apps = getExistingApps({ currentDir: cwd() });
+            console.log({all_apps})
+            const formatAppsName = (app) => app.name;
+            prompt([
+              {
+                type: 'checkbox',
+                name: 'apps',
+                message: 'Select apps',
+                choices: all_apps.map(app => ({
+                  name: formatAppsName(app),
+                  value: app,
+                  checked: true, // Default all services to be selected
+                })),
+              },
+              {
+                type: 'input',
+                name: 'gateway_port',
+                message: 'Enter port (optional):',
+                default: 8080,
+                validate: input => !isNaN(input) ? true : 'Port must be a number.'
+              },
+              {
+                type: 'input',
+                name: 'api_version',
+                message: 'Whats the api version? (optional):',
+                default: 'v1',
+              },
+              {
+                type: 'input',
+                name: 'gateway_cache_period',
+                message: 'How long do you want the gateway to cache data (optional):',
+                default: 3600,
+                validate: input => !isNaN(input) ? true : 'Caching period must be a number.'
+              },
+              {
+                type: 'input',
+                name: 'gateway_timeout',
+                message: 'How long should a request take before timing out (optional):',
+                default: 300,
+                validate: input => input === '' || !isNaN(input) ? true : 'Timeout must be a number.'
+              }
+            ]).then(answers => {
+              scaffoldGateways({ answers })
             })
             break;
           default:

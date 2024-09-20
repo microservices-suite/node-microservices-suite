@@ -1,4 +1,4 @@
-module.exports = ({ services, webserver }) => {
+module.exports = ({ services, webserver, krakend_port, env }) => {
   const servicesConfig = services.map(service => `
   ${service.name.toLowerCase().replace(/\s+/g, '-')}: 
     build: 
@@ -37,7 +37,7 @@ ${serviceNames.map(service => `      - ${service}`).join('\n')}
       retries: 3
       start_period: 40s
   rabbitmq:
-    image: rabbitmq:3.13.3
+    image: rabbitmq:3.13-management
     container_name: rabbitmq
     ports:
       - '5672:5672'
@@ -54,5 +54,13 @@ ${serviceNames.map(service => `      - ${service}`).join('\n')}
     volumes:
       - type: bind
         source: ./data
-        target: /data/db`;
+        target: /data/db
+  krakend:
+    image: devopsfaith/krakend:2.7${env === 'dev' ? '-watch' : ''}
+    ports:
+      - '${krakend_port}:${krakend_port}'
+      - '8090:8090'
+    volumes:
+      - ./krakend/:/etc/krakend/
+    command: ['run','-d','-c','/etc/krakend/krakend.json']`;
 };

@@ -58,5 +58,6 @@ module.exports.brokerSubscriberContent = require('./brokerSubscriberContent.asse
 module.exports.brokerWorkerQueueContent = require('./brokerWorkerQueueContent.asset'); 
 module.exports.subscriberContent = require('./subscriberContent.asset'); 
 module.exports.subscriberIndexContent = require('./subscriberIndexContent.asset'); 
+module.exports.krakendConfigContent = require('./krakendConfigContent.asset'); 
 
 
