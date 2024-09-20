@@ -1476,7 +1476,6 @@ const readFileContent = ({ currentDir }) => {
     const root_dir = generatRootPath({ currentDir, height: 5 })
     // Read the project configuration file
     const configPath = resolve(root_dir, 'suite.json');
-    console.log(currentDir,'d')
     const project_config = JSON.parse(readFileSync(configPath, 'utf8'));
     return project_config
 }
@@ -1627,23 +1626,25 @@ const getDependencies = ({ type, workspace }) => {
 
 
 const scaffoldGateways = async ({ answers }) => {
-    console.log({answers})
     const { webserver } = readFileContent({ currentDir: cwd() });
     const { projectName } = readFileContent({ currentDir: cwd() });
     const { apps } = answers;
     const project_root = generatRootPath({ currentDir: cwd() });
 
     await Promise.all(apps.map(async (app) => {
-        return scaffoldGateway({ project_root, app, webserver, projectName })
+        console.log('---------------------------------------------')
+        console.log(`🦧${app.name}-gateway`)
+        return scaffoldGateway({ project_root, app, answers, webserver, projectName })
+        
     }))
 }
 
-const scaffoldGateway = ({ project_root, app, webserver, projectName }) => {
+const scaffoldGateway = ({ project_root, app, answers, webserver, projectName }) => {
     const app_directory = join(project_root, 'gateways/apps', app.name);
     const webserver_dir = join(app_directory, webserver);
     const krakend_dir = join(app_directory, 'krakend');
     const services = app.services;
-
+    const nginx_services = getExistingServices({ currentDir: cwd() });
     // Remove the directory if it already exists
     if (existsSync(krakend_dir)) {
         rmSync(krakend_dir, { recursive: true });
@@ -1667,7 +1668,7 @@ const scaffoldGateway = ({ project_root, app, webserver, projectName }) => {
     ora().succeed(`Generated docker-compose configs at: ${app_directory}`)
     switch (webserver) {
         case 'nginx':
-            generateNginxConfiguration({ services, webserver_dir });
+            generateNginxConfiguration({ services:nginx_services, webserver_dir });
             break
         default:
             ora().info('Handling other webservers');

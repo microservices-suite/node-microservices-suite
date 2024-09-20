@@ -272,7 +272,6 @@ program
             break;
           case 'gateway':
             const all_apps = getExistingApps({ currentDir: cwd() });
-            console.log({all_apps})
             const formatAppsName = (app) => app.name;
             prompt([
               {
