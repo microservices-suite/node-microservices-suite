@@ -1639,12 +1639,12 @@ const scaffoldGateways = async ({ answers }) => {
     }))
 }
 
-const scaffoldGateway = ({ project_root, app, webserver, projectName }) => {
+const scaffoldGateway = ({ project_root, app, answers, webserver, projectName }) => {
     const app_directory = join(project_root, 'gateways/apps', app.name);
     const webserver_dir = join(app_directory, webserver);
     const krakend_dir = join(app_directory, 'krakend');
     const services = app.services;
-
+    const nginx_services = getExistingServices({ currentDir: cwd() });
     // Remove the directory if it already exists
     if (existsSync(krakend_dir)) {
         rmSync(krakend_dir, { recursive: true });
@@ -1668,7 +1668,7 @@ const scaffoldGateway = ({ project_root, app, webserver, projectName }) => {
     ora().succeed(`Generated docker-compose configs at: ${app_directory}`)
     switch (webserver) {
         case 'nginx':
-            generateNginxConfiguration({ services, webserver_dir });
+            generateNginxConfiguration({ services:nginx_services, webserver_dir });
             break
         default:
             ora().info('Handling other webservers');
