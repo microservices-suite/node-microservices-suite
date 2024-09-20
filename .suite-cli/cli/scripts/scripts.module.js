@@ -1476,7 +1476,6 @@ const readFileContent = ({ currentDir }) => {
     const root_dir = generatRootPath({ currentDir, height: 5 })
     // Read the project configuration file
     const configPath = resolve(root_dir, 'suite.json');
-    console.log(currentDir,'d')
     const project_config = JSON.parse(readFileSync(configPath, 'utf8'));
     return project_config
 }
@@ -1627,14 +1626,16 @@ const getDependencies = ({ type, workspace }) => {
 
 
 const scaffoldGateways = async ({ answers }) => {
-    console.log({answers})
     const { webserver } = readFileContent({ currentDir: cwd() });
     const { projectName } = readFileContent({ currentDir: cwd() });
     const { apps } = answers;
     const project_root = generatRootPath({ currentDir: cwd() });
 
     await Promise.all(apps.map(async (app) => {
-        return scaffoldGateway({ project_root, app, webserver, projectName })
+        console.log('---------------------------------------------')
+        console.log(`🦧${app.name}-gateway`)
+        return scaffoldGateway({ project_root, app, answers, webserver, projectName })
+        
     }))
 }
 
