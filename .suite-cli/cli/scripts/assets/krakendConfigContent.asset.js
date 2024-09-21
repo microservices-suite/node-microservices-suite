@@ -9,30 +9,30 @@ module.exports = ({
   // Health check for all services
   const suiteStatusCheckBackends = services.map((service) => `
     {
-      "host": ["http://${service.toLowerCase()}:${service.port}"],
+      "host": ["http://${service.name.toLowerCase()}:${service.port}"],
       "url_pattern": "/",
       "mapping": {
-        "message": "${service.toLowerCase()}"
+        "message": "${service.name.toLowerCase()}"
       }
     }`).join(',\n');
 
   // List all services
   const allServicesListBackends = services.map((service) => `
     {
-      "host": ["http://${service.toLowerCase()}:${service.port}"],
-      "url_pattern": "/api/${api_version}/${service.toLowerCase()}s",
+      "host": ["http://${service.name.toLowerCase()}:${service.port}"],
+      "url_pattern": "/api/${api_version}/${service.name.toLowerCase()}s",
       "mapping": {
-        "data": "${service.toLowerCase()}s"
+        "data": "${service.name.toLowerCase()}s"
       }
     }`).join(',\n');
 
   // Each service backend
   const eachServiceListBackends = [services[0]].map((service) => `
     {
-      "host": ["http://${service.toLowerCase()}:${service.port}"],
-      "url_pattern": "/api/${api_version}/${service.toLowerCase()}s",
+      "host": ["http://${service.name.toLowerCase()}:${service.port}"],
+      "url_pattern": "/api/${api_version}/${service.name.toLowerCase()}s",
       "mapping": {
-        "data": "${service.toLowerCase()}s"
+        "data": "${service.name.toLowerCase()}s"
       }
     }`).join(',\n');
 
@@ -59,8 +59,8 @@ module.exports = ({
       "backend": [${allServicesListBackends}]
     },
     {
-      "@comment": "Fetch all data from the ${services[0].toLowerCase()} service",
-      "endpoint": "/api/${api_version}/${services[0].toLowerCase()}s",
+      "@comment": "Fetch all data from the ${services[0].name.toLowerCase()} service",
+      "endpoint": "/api/${api_version}/${services[0].name.toLowerCase()}s",
       "method": "GET",
       "backend": [${eachServiceListBackends}]
     }

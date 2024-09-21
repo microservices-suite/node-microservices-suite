@@ -1628,14 +1628,22 @@ const getDependencies = ({ type, workspace }) => {
 const scaffoldGateways = async ({ answers }) => {
     const { webserver } = readFileContent({ currentDir: cwd() });
     const { projectName } = readFileContent({ currentDir: cwd() });
-    const { apps } = answers;
+    let { apps } = answers;
     const project_root = generatRootPath({ currentDir: cwd() });
-
+    const service_objects = getExistingServices({ currentDir: cwd() });
+    // add port to services in each app eg ['auth']=>[{name:'auth',port:9001}]
+    apps = apps.map((app) => {
+        app.services.map((name, i) => {
+            const service_object = service_objects.find((s) => s.name === name);
+            app.services[i] = { name, port: service_object.port }
+        })
+        return app
+    })
     await Promise.all(apps.map(async (app) => {
         console.log('---------------------------------------------')
         console.log(`🦧${app.name}-gateway`)
         return scaffoldGateway({ project_root, app, answers, webserver, projectName })
-        
+
     }))
 }
 
@@ -1644,7 +1652,6 @@ const scaffoldGateway = ({ project_root, app, answers, webserver, projectName })
     const webserver_dir = join(app_directory, webserver);
     const krakend_dir = join(app_directory, 'krakend');
     const services = app.services;
-    const nginx_services = getExistingServices({ currentDir: cwd() });
     // Remove the directory if it already exists
     if (existsSync(krakend_dir)) {
         rmSync(krakend_dir, { recursive: true });
@@ -1668,7 +1675,7 @@ const scaffoldGateway = ({ project_root, app, answers, webserver, projectName })
     ora().succeed(`Generated docker-compose configs at: ${app_directory}`)
     switch (webserver) {
         case 'nginx':
-            generateNginxConfiguration({ services:nginx_services, webserver_dir });
+            generateNginxConfiguration({ services, webserver_dir });
             break
         default:
             ora().info('Handling other webservers');

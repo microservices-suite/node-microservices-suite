@@ -1,21 +1,21 @@
 module.exports = ({ services, webserver, krakend_port, env }) => {
   const servicesConfig = services.map(service => `
-  ${service.toLowerCase().replace(/\s+/g, '-')}: 
+  ${service.name.toLowerCase().replace(/\s+/g, '-')}: 
     build: 
       dockerfile: Dockerfile.dev 
-      context: ../../../microservices/${service} 
+      context: ../../../microservices/${service.name} 
     ports: 
-      - "${krakend_port}:${krakend_port}" 
+      - "${service.port}:${service.port}" 
     volumes: 
       - /app/node_modules 
-      - ../../../microservices/${service}:/app 
+      - ../../../microservices/${service.name}:/app 
     depends_on:
       rabbitmq:
         condition: service_healthy
 `).join('');
 
   // Collect all service names for the 'depends_on' section of the web server
-  const serviceNames = services.map(service => service.toLowerCase().replace(/\s+/g, '-'));
+  const serviceNames = services.map(service => service.name.toLowerCase().replace(/\s+/g, '-'));
 
   return `
 version: '3.8'
