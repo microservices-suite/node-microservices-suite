@@ -1,35 +1,6 @@
 # Changelog
 
 
-## v1.7.0
-
-[compare changes](https://github.com/microservices-suite/node-microservices-suite/compare/v1.0.0...v1.7.0)
-
-### 🚀 Enhancements
-
-- Add b roker ([b3da782](https://github.com/microservices-suite/node-microservices-suite/commit/b3da782))
-- Add support for krakend api gateway ([da33fc6](https://github.com/microservices-suite/node-microservices-suite/commit/da33fc6))
-
-### 🩹 Fixes
-
-- Replace rabbitmq image with the one with management plugin ([0ae9ce6](https://github.com/microservices-suite/node-microservices-suite/commit/0ae9ce6))
-- Nginx content generator to include port and name of services ([faea32d](https://github.com/microservices-suite/node-microservices-suite/commit/faea32d))
-- Fix undefined toLowerCase() for string service ([664e1fc](https://github.com/microservices-suite/node-microservices-suite/commit/664e1fc))
-- Properly generate krakend config,nginx config and dockercompose files ([646b564](https://github.com/microservices-suite/node-microservices-suite/commit/646b564))
-
-### 💅 Refactors
-
-- Refacor code into short sentences ([a5b142e](https://github.com/microservices-suite/node-microservices-suite/commit/a5b142e))
-- Remove console statements ([31383bb](https://github.com/microservices-suite/node-microservices-suite/commit/31383bb))
-
-### 🏡 Chore
-
-- Release v1.0.1 ([701381e](https://github.com/microservices-suite/node-microservices-suite/commit/701381e))
-
-### ❤️ Contributors
-
-- Gilbert Andanje ([@GAndanje](http://github.com/GAndanje))
-
 ## v1.6.7
 
 [compare changes](https://github.com/microservices-suite/node-microservices-suite/compare/v2.1.0...v1.6.7)
