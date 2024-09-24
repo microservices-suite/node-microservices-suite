@@ -17,6 +17,8 @@ To easily work with a `@microservices-suite monorepo` you need to install [Suite
 │  ├─ gateways/
 |  │  ├─ apps/
 |  │  |   ├─app-1/
+|  │  │   | ├─ data/
+|  │  │   | ├─ krakend/
 |  │  │   | ├─ webserver/
 |  │  │   | |  ├─Dockerfile
 |  │  │   | |  ├─Dockerfile.dev
@@ -27,10 +29,6 @@ To easily work with a `@microservices-suite monorepo` you need to install [Suite
 │  ├─ graphql/
 |  │  ├─ app-1/
 |  │  │  ├─ apollo-server
-|  │  │  ├─ README.md
-│  ├─ data-persistence/
-|  │  ├─ db-1/
-|  │  │  ├─ Dockerfile
 |  │  │  ├─ README.md
 │  ├─ k8s/
 |  │  ├─ service-1/

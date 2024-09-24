@@ -1,0 +1,194 @@
+
+{
+  "$schema": "https://www.krakend.io/schema/v2.5/krakend.json",
+  "version": 3,
+  "name": "Microservices-suite API Gateway",
+  "port": 8080,
+  "cache_ttl": "3600s",
+  "timeout": "300s",
+  "endpoints": [
+    {
+      "@comment": "Check the health of all your APIs",
+      "endpoint": "/__suite_status",
+      "method": "GET",
+      "backend": [
+    {
+      "host": ["http://cart:9010"],
+      "url_pattern": "/",
+      "mapping": {
+        "message": "cart"
+      }
+    },
+
+    {
+      "host": ["http://user:9011"],
+      "url_pattern": "/",
+      "mapping": {
+        "message": "user"
+      }
+    },
+
+    {
+      "host": ["http://customer:9012"],
+      "url_pattern": "/",
+      "mapping": {
+        "message": "customer"
+      }
+    },
+
+    {
+      "host": ["http://email:9013"],
+      "url_pattern": "/",
+      "mapping": {
+        "message": "email"
+      }
+    },
+
+    {
+      "host": ["http://notification:9014"],
+      "url_pattern": "/",
+      "mapping": {
+        "message": "notification"
+      }
+    },
+
+    {
+      "host": ["http://payment:9015"],
+      "url_pattern": "/",
+      "mapping": {
+        "message": "payment"
+      }
+    },
+
+    {
+      "host": ["http://product:9016"],
+      "url_pattern": "/",
+      "mapping": {
+        "message": "product"
+      }
+    },
+
+    {
+      "host": ["http://rbac:9017"],
+      "url_pattern": "/",
+      "mapping": {
+        "message": "rbac"
+      }
+    },
+
+    {
+      "host": ["http://supplier:9018"],
+      "url_pattern": "/",
+      "mapping": {
+        "message": "supplier"
+      }
+    },
+
+    {
+      "host": ["http://upload:9019"],
+      "url_pattern": "/",
+      "mapping": {
+        "message": "upload"
+      }
+    }]
+    },
+    {
+      "@comment": "Hit all API list endpoints simultaneously",
+      "endpoint": "/api/v1/",
+      "method": "GET",
+      "backend": [
+    {
+      "host": ["http://cart:9010"],
+      "url_pattern": "/api/v1/carts",
+      "mapping": {
+        "data": "carts"
+      }
+    },
+
+    {
+      "host": ["http://user:9011"],
+      "url_pattern": "/api/v1/users",
+      "mapping": {
+        "data": "users"
+      }
+    },
+
+    {
+      "host": ["http://customer:9012"],
+      "url_pattern": "/api/v1/customers",
+      "mapping": {
+        "data": "customers"
+      }
+    },
+
+    {
+      "host": ["http://email:9013"],
+      "url_pattern": "/api/v1/emails",
+      "mapping": {
+        "data": "emails"
+      }
+    },
+
+    {
+      "host": ["http://notification:9014"],
+      "url_pattern": "/api/v1/notifications",
+      "mapping": {
+        "data": "notifications"
+      }
+    },
+
+    {
+      "host": ["http://payment:9015"],
+      "url_pattern": "/api/v1/payments",
+      "mapping": {
+        "data": "payments"
+      }
+    },
+
+    {
+      "host": ["http://product:9016"],
+      "url_pattern": "/api/v1/products",
+      "mapping": {
+        "data": "products"
+      }
+    },
+
+    {
+      "host": ["http://rbac:9017"],
+      "url_pattern": "/api/v1/rbacs",
+      "mapping": {
+        "data": "rbacs"
+      }
+    },
+
+    {
+      "host": ["http://supplier:9018"],
+      "url_pattern": "/api/v1/suppliers",
+      "mapping": {
+        "data": "suppliers"
+      }
+    },
+
+    {
+      "host": ["http://upload:9019"],
+      "url_pattern": "/api/v1/uploads",
+      "mapping": {
+        "data": "uploads"
+      }
+    }]
+    },
+    {
+      "@comment": "Fetch all data from the cart service",
+      "endpoint": "/api/v1/carts",
+      "method": "GET",
+      "backend": [
+    {
+      "host": ["http://cart:9010"],
+      "url_pattern": "/api/v1/carts",
+      "mapping": {
+        "data": "carts"
+      }
+    }]
+    }
+  ]
+}
