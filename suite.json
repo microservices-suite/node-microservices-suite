@@ -1,0 +1,97 @@
+{
+  "projectName": "microservices-suite",
+  "repo_name": "microservices-suite",
+  "apis": [
+    "REST",
+    "GraphQL"
+  ],
+  "webserver": "nginx",
+  "license": "MIT",
+  "project_base": "@microservices-suite",
+  "private": true,
+  "default_broker": "rabbitmq",
+  "services": [
+    {
+      "name": "customer-service",
+      "port": 9000
+    },
+    {
+      "name": "product-service",
+      "port": 9002
+    },
+    {
+      "name": "rbac-service",
+      "port": 9004
+    },
+    {
+      "name": "rbac-service",
+      "port": 9005
+    },
+    {
+      "name": "rbac-service",
+      "port": 9005
+    },
+    {
+      "name": "payment-service",
+      "port": 9006
+    },
+    {
+      "name": "notification-service",
+      "port": 9007
+    },
+    {
+      "name": "email-service",
+      "port": 9008
+    },
+    {
+      "name": "cart-service",
+      "port": 9009
+    },
+    {
+      "name": "cart",
+      "port": 9010
+    },
+    {
+      "name": "user",
+      "port": 9011
+    },
+    {
+      "name": "customer",
+      "port": 9012
+    },
+    {
+      "name": "email",
+      "port": 9013
+    },
+    {
+      "name": "notification",
+      "port": 9014
+    },
+    {
+      "name": "payment",
+      "port": 9015
+    },
+    {
+      "name": "product",
+      "port": 9016
+    },
+    {
+      "name": "rbac",
+      "port": 9017
+    },
+    {
+      "name": "supplier",
+      "port": 9018
+    },
+    {
+      "name": "upload",
+      "port": 9019
+    }
+  ],
+  "apollo_servers": [
+    {
+      "name": "app1",
+      "port": 8001
+    }
+  ]
+}
