@@ -210,6 +210,7 @@ const installDepsAtWorkspace = ({ workspace_name, workspace_directory = 'microse
                         reject(err.stack.split('\n')[1]); // Extracting the first line of the stack trace
                     }
                 } else {
+                    // TODO: to fix hardcoded organization @microser...
                     resolve(`Successfully installed packages: @microservices-suite/${workspace_name}`);
                 }
             });
