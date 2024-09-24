@@ -24,14 +24,6 @@
       "port": 9004
     },
     {
-      "name": "rbac-service",
-      "port": 9005
-    },
-    {
-      "name": "rbac-service",
-      "port": 9005
-    },
-    {
       "name": "payment-service",
       "port": 9006
     },
@@ -86,6 +78,38 @@
     {
       "name": "upload",
       "port": 9019
+    }
+  ],
+  "apps": [
+    {
+      "name": "uber-eats",
+      "services": [
+        "cart",
+        "user",
+        "customer",
+        "email",
+        "notification",
+        "payment",
+        "product",
+        "rbac",
+        "supplier",
+        "upload"
+      ]
+    },
+    {
+      "name": "uber-eats",
+      "services": [
+        "cart",
+        "user",
+        "customer",
+        "email",
+        "notification",
+        "payment",
+        "product",
+        "rbac",
+        "supplier",
+        "upload"
+      ]
     }
   ],
   "apollo_servers": [
