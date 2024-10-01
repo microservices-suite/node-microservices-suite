@@ -1350,16 +1350,17 @@ const addProjectConfigs = ({ project_root, answers }) => {
 }
 
 // Function to get the next available port
-const getNextAvailablePort = ({ services }) => {
-    const usedPorts = services.map(service => service.port).sort((a, b) => a - b);
-    let last_port = usedPorts[usedPorts.length - 1] || 9000
+const getNextAvailablePort = ({ key, port }) => {
+    const used_ports = key.map(k => k[port]).sort((a, b) => a - b);
+    let last_port = used_ports[used_ports.length - 1] || 9000
     return last_port + 1;
 };
 
-const getExistingServices = ({ currentDir }) => {
-    const { services } = readFileContent({ currentDir })
-    return services
-}
+const getExistingComponent = ({ key, currentDir }) => {
+    const fileContent = readFileContent({ currentDir });
+    // Access the dynamic key from fileContent
+    return fileContent[key];  // Dynamically access the key in the object
+};
 
 const getExistingApps = ({ currentDir }) => {
     const { apps } = readFileContent({ currentDir });
@@ -1373,14 +1374,20 @@ const registerServiceWithSuiteJson = ({ root_dir, name, port }) => {
     if (!config.services) {
         config.services = [];
     }
-    config.services.push({ name, port });
+    const idx = config.services.findIndex((s) => s.name === name);
+    if (idx !== -1) {
+        config.services[idx] = { name, port }
+    }
+    else {
+        config.services.push({ name, port });
+    }
 
     // keep the services ordered by port
     config.services.sort((a, b) => a.port - b.port);
     writeFile(configPath, JSON.stringify(config, null, 2), 'utf8');
 }
 
-const registerAppWithSuiteJson = ({ root_dir, name, services }) => {
+const registerAppWithSuiteJson = ({ root_dir, name, services, port }) => {
     // Read the project configuration file
     const configPath = resolve(root_dir, 'suite.json');
     const config = JSON.parse(readFileSync(configPath, 'utf8'));
@@ -1388,7 +1395,13 @@ const registerAppWithSuiteJson = ({ root_dir, name, services }) => {
     if (!config.apps) {
         config.apps = [];
     }
-    config.apps.push({ name, services: services_names });
+    const idx = config.apps.findIndex((a) => a.name === name);
+    if (idx !== -1) {
+        config.apps[idx] = { name, GATEWAY_PORT: port, services: services_names }
+    }
+    else {
+        config.apps.push({ name, GATEWAY_PORT: port, services: services_names });
+    }
 
     // keep the apps ordered by names
     config.apps.sort((a, b) => a.name - b.name);
@@ -1423,7 +1436,6 @@ const test = async ({ package }) => {
 }
 
 const scaffoldApp = ({ answers }) => {
-
     const { webserver } = readFileContent({ currentDir: cwd() });
     const { projectName } = readFileContent({ currentDir: cwd() });
     const project_root = generatRootPath({ currentDir: cwd() });
@@ -1470,7 +1482,7 @@ const scaffoldApp = ({ answers }) => {
         gateway_cache_period: answers.gateway_cache_period,
         gateway_timeout: answers.gateway_timeout
     });
-    registerAppWithSuiteJson({ root_dir: project_root, name: answers.app_name, services: answers.services })
+    registerAppWithSuiteJson({ root_dir: project_root, name: answers.app_name, services: answers.services, port: answers.port })
 
 }
 const readFileContent = ({ currentDir }) => {
@@ -1631,7 +1643,7 @@ const scaffoldGateways = async ({ answers }) => {
     const { projectName } = readFileContent({ currentDir: cwd() });
     let { apps } = answers;
     const project_root = generatRootPath({ currentDir: cwd() });
-    const service_objects = getExistingServices({ currentDir: cwd() });
+    const service_objects = getExistingComponent({ key, currentDir: cwd() });
     // add port to services in each app eg ['auth']=>[{name:'auth',port:9001}]
     apps = apps.map((app) => {
         app.services.map((name, i) => {
@@ -1720,7 +1732,7 @@ module.exports = {
     scaffoldNewService,
     scaffoldNewLibrary,
     getNextAvailablePort,
-    getExistingServices,
+    getExistingComponent,
     test,
     scaffoldApp,
     scaffoldGateways,

@@ -5,7 +5,7 @@ const { Command } = require('commander');
 const { createPromptModule } = require('inquirer');
 const { execSync } = require('node:child_process')
 const actionHandlers = require('./scripts')
-const { logInfo, getExistingServices, getExistingApps, getNextAvailablePort, scaffoldApp, scaffoldGateways } = require('./scripts/scripts.module');
+const { logInfo, getExistingComponent, getExistingApps, getNextAvailablePort, scaffoldApp, scaffoldGateways } = require('./scripts/scripts.module');
 const { cwd } = require('node:process');
 const program = new Command()
 const prompt = createPromptModule()
@@ -123,6 +123,7 @@ program
       }
     ])
       .then(answers => {
+        const existing_services = getExistingComponent({ key: 'services', currentDir: cwd() })
         switch (answers.resource) {
           case 'monorepo':
             // Additional prompts specific to 'monorepo' resource
@@ -185,7 +186,6 @@ program
               });
             break;
           case 'service':
-            const existing_services = getExistingServices({ currentDir: cwd() })
             prompt([
               {
                 type: 'input',
@@ -193,20 +193,31 @@ program
                 message: 'Enter service name:',
                 // TODO: validate workspace compliant name using regex
                 validate: input => input ? true : 'Name cannot be empty',
-              }, {
-                type: 'input',
-                name: 'port',
-                message: 'Enter port (optional):',
-                default: getNextAvailablePort({ services: existing_services }),
-                validate: input => input === '' || !isNaN(input) ? true : 'Port must be a number.'
-              }
-            ]).then((answers) => actionHandlers.scaffoldNewService({
-              answers: {
-                ...answers,
-                private: true,
-                port: parseFloat(answers.port)
-              }
-            }))
+              },
+            ]).then((ans) => {
+              const { service_name } = ans;
+              const service_idx = existing_services.findIndex((s) => s.name === service_name);
+              // if service exists return the port otherwise generate next available port
+              const next_port = existing_services[service_idx]?.port || getNextAvailablePort({ key: existing_services, port: 'port' });
+              prompt([
+                {
+                  type: 'input',
+                  name: 'port',
+                  message: 'Enter port (optional):',
+                  default: next_port,
+                  validate: input => input === '' || !isNaN(input) ? true : 'Port must be a number.'
+                }
+              ]).then((answers) => {
+                actionHandlers.scaffoldNewService({
+                  answers: {
+                    ...answers,
+                    service_name,
+                    private: true,
+                    port: parseFloat(answers.port)
+                  }
+                })
+              });
+            });
             break;
           case 'library':
             prompt([
@@ -220,9 +231,8 @@ program
             ]).then((answers) => actionHandlers.scaffoldNewLibrary({ answers: { ...answers, private: false } }))
             break
           case 'app':
-            const all_services = getExistingServices({ currentDir: cwd() })
+            const existing_apps = getExistingComponent({ key: 'apps', currentDir: cwd() })
             const formatServiceName = (service) => `${service.name}: ${service.port}`;
-
             prompt([
               {
                 type: 'input',
@@ -233,42 +243,55 @@ program
                 type: 'checkbox',
                 name: 'services',
                 message: 'Select services',
-                choices: all_services.map(service => ({
+                choices: existing_services.map(service => ({
                   name: formatServiceName(service),
                   value: service,
                   checked: true, // Default all services to be selected
                 })),
-              },
-              {
-                type: 'input',
-                name: 'gateway_port',
-                message: 'Enter port (optional):',
-                default: 8080,
-                validate: input => !isNaN(input) ? true : 'Port must be a number.'
-              },
-              {
-                type: 'input',
-                name: 'api_version',
-                message: 'Whats the api version? (optional):',
-                default: 'v1',
-              },
-              {
-                type: 'input',
-                name: 'gateway_cache_period',
-                message: 'How long do you want the gateway to cache data (optional):',
-                default: 3600,
-                validate: input => !isNaN(input) ? true : 'Caching period must be a number.'
-              },
-              {
-                type: 'input',
-                name: 'gateway_timeout',
-                message: 'How long should a request take before timing out (optional):',
-                default: 300,
-                validate: input => input === '' || !isNaN(input) ? true : 'Timeout must be a number.'
-              }
-            ]).then(answers => {
-              scaffoldApp({ answers })
-            })
+              }]).then((ans) => {
+                const { app_name } = ans;
+                const app_idx = existing_apps.findIndex((a) => a.name === app_name);
+                // if app exists return the port otherwise generate next available port
+                const next_port = existing_apps[app_idx]?.GATEWAY_PORT || getNextAvailablePort({ key: existing_apps, port: 'GATEWAY_PORT' });
+                prompt([
+                  {
+                    type: 'input',
+                    name: 'gateway_port',
+                    message: 'Enter gateway port (optional):',
+                    default: next_port,
+                    validate: input => !isNaN(input) ? true : 'Port must be a number.'
+                  },
+                  {
+                    type: 'input',
+                    name: 'api_version',
+                    message: 'Whats the api version? (optional):',
+                    default: 'v1',
+                  },
+                  {
+                    type: 'input',
+                    name: 'gateway_cache_period',
+                    message: 'How long do you want the gateway to cache data (optional):',
+                    default: 3600,
+                    validate: input => !isNaN(input) ? true : 'Caching period must be a number.'
+                  },
+                  {
+                    type: 'input',
+                    name: 'gateway_timeout',
+                    message: 'How long should a request take before timing out (optional):',
+                    default: 300,
+                    validate: input => input === '' || !isNaN(input) ? true : 'Timeout must be a number.'
+                  }
+                ]).then((answers) => {
+                  scaffoldApp({
+                    answers: {
+                      ...answers,
+                      ...ans,
+                      port: parseFloat(answers.gateway_port)
+
+                    }
+                  })
+                });
+              })
             break;
           case 'gateway':
             const all_apps = getExistingApps({ currentDir: cwd() });
