@@ -123,7 +123,12 @@ program
       }
     ])
       .then(answers => {
-        const existing_services = getExistingComponent({ key: 'services', currentDir: cwd() })
+        let existing_services = []
+        try {
+           existing_services = getExistingComponent({ key: 'services', currentDir: cwd() })
+        } catch (error) {
+          
+        }
         switch (answers.resource) {
           case 'monorepo':
             // Additional prompts specific to 'monorepo' resource
