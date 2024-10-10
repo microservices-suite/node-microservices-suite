@@ -1,0 +1,353 @@
+
+version: '3.8'
+services:
+
+  hd: 
+    build: 
+      dockerfile: Dockerfile.dev 
+      context: ../../../microservices/hd 
+    ports: 
+      - "null:null" 
+    volumes: 
+      - /app/node_modules 
+      - ../../../microservices/hd:/app 
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  customer-service: 
+    build: 
+      dockerfile: Dockerfile.dev 
+      context: ../../../microservices/customer-service 
+    ports: 
+      - "9000:9000" 
+    volumes: 
+      - /app/node_modules 
+      - ../../../microservices/customer-service:/app 
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  product-service: 
+    build: 
+      dockerfile: Dockerfile.dev 
+      context: ../../../microservices/product-service 
+    ports: 
+      - "9002:9002" 
+    volumes: 
+      - /app/node_modules 
+      - ../../../microservices/product-service:/app 
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  rbac-service: 
+    build: 
+      dockerfile: Dockerfile.dev 
+      context: ../../../microservices/rbac-service 
+    ports: 
+      - "9004:9004" 
+    volumes: 
+      - /app/node_modules 
+      - ../../../microservices/rbac-service:/app 
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  payment-service: 
+    build: 
+      dockerfile: Dockerfile.dev 
+      context: ../../../microservices/payment-service 
+    ports: 
+      - "9006:9006" 
+    volumes: 
+      - /app/node_modules 
+      - ../../../microservices/payment-service:/app 
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  notification-service: 
+    build: 
+      dockerfile: Dockerfile.dev 
+      context: ../../../microservices/notification-service 
+    ports: 
+      - "9007:9007" 
+    volumes: 
+      - /app/node_modules 
+      - ../../../microservices/notification-service:/app 
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  email-service: 
+    build: 
+      dockerfile: Dockerfile.dev 
+      context: ../../../microservices/email-service 
+    ports: 
+      - "9008:9008" 
+    volumes: 
+      - /app/node_modules 
+      - ../../../microservices/email-service:/app 
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  cart-service: 
+    build: 
+      dockerfile: Dockerfile.dev 
+      context: ../../../microservices/cart-service 
+    ports: 
+      - "9009:9009" 
+    volumes: 
+      - /app/node_modules 
+      - ../../../microservices/cart-service:/app 
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  cart: 
+    build: 
+      dockerfile: Dockerfile.dev 
+      context: ../../../microservices/cart 
+    ports: 
+      - "9010:9010" 
+    volumes: 
+      - /app/node_modules 
+      - ../../../microservices/cart:/app 
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  user: 
+    build: 
+      dockerfile: Dockerfile.dev 
+      context: ../../../microservices/user 
+    ports: 
+      - "9011:9011" 
+    volumes: 
+      - /app/node_modules 
+      - ../../../microservices/user:/app 
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  customer: 
+    build: 
+      dockerfile: Dockerfile.dev 
+      context: ../../../microservices/customer 
+    ports: 
+      - "9012:9012" 
+    volumes: 
+      - /app/node_modules 
+      - ../../../microservices/customer:/app 
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  email: 
+    build: 
+      dockerfile: Dockerfile.dev 
+      context: ../../../microservices/email 
+    ports: 
+      - "9013:9013" 
+    volumes: 
+      - /app/node_modules 
+      - ../../../microservices/email:/app 
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  notification: 
+    build: 
+      dockerfile: Dockerfile.dev 
+      context: ../../../microservices/notification 
+    ports: 
+      - "9014:9014" 
+    volumes: 
+      - /app/node_modules 
+      - ../../../microservices/notification:/app 
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  payment: 
+    build: 
+      dockerfile: Dockerfile.dev 
+      context: ../../../microservices/payment 
+    ports: 
+      - "9015:9015" 
+    volumes: 
+      - /app/node_modules 
+      - ../../../microservices/payment:/app 
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  product: 
+    build: 
+      dockerfile: Dockerfile.dev 
+      context: ../../../microservices/product 
+    ports: 
+      - "9016:9016" 
+    volumes: 
+      - /app/node_modules 
+      - ../../../microservices/product:/app 
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  rbac: 
+    build: 
+      dockerfile: Dockerfile.dev 
+      context: ../../../microservices/rbac 
+    ports: 
+      - "9017:9017" 
+    volumes: 
+      - /app/node_modules 
+      - ../../../microservices/rbac:/app 
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  supplier: 
+    build: 
+      dockerfile: Dockerfile.dev 
+      context: ../../../microservices/supplier 
+    ports: 
+      - "9018:9018" 
+    volumes: 
+      - /app/node_modules 
+      - ../../../microservices/supplier:/app 
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  upload: 
+    build: 
+      dockerfile: Dockerfile.dev 
+      context: ../../../microservices/upload 
+    ports: 
+      - "9019:9019" 
+    volumes: 
+      - /app/node_modules 
+      - ../../../microservices/upload:/app 
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  th: 
+    build: 
+      dockerfile: Dockerfile.dev 
+      context: ../../../microservices/th 
+    ports: 
+      - "9020:9020" 
+    volumes: 
+      - /app/node_modules 
+      - ../../../microservices/th:/app 
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  kjhgf: 
+    build: 
+      dockerfile: Dockerfile.dev 
+      context: ../../../microservices/kjhgf 
+    ports: 
+      - "9021:9021" 
+    volumes: 
+      - /app/node_modules 
+      - ../../../microservices/kjhgf:/app 
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  hhgfdsdfghj: 
+    build: 
+      dockerfile: Dockerfile.dev 
+      context: ../../../microservices/hhgfdsdfghj 
+    ports: 
+      - "9022:9022" 
+    volumes: 
+      - /app/node_modules 
+      - ../../../microservices/hhgfdsdfghj:/app 
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  ghjk: 
+    build: 
+      dockerfile: Dockerfile.dev 
+      context: ../../../microservices/ghjk 
+    ports: 
+      - "9023:9023" 
+    volumes: 
+      - /app/node_modules 
+      - ../../../microservices/ghjk:/app 
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  nginx:
+    depends_on:
+      - hd
+      - customer-service
+      - product-service
+      - rbac-service
+      - payment-service
+      - notification-service
+      - email-service
+      - cart-service
+      - cart
+      - user
+      - customer
+      - email
+      - notification
+      - payment
+      - product
+      - rbac
+      - supplier
+      - upload
+      - th
+      - kjhgf
+      - hhgfdsdfghj
+      - ghjk
+    restart: always
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile.dev
+    ports:
+      - '4000:80'
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:80/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: rabbitmq
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      retries: 5
+  mongodb:
+    image: mongo
+    ports:
+      - '27017:27017'
+    restart: always
+    volumes:
+      - type: bind
+        source: ./data
+        target: /data/db
+  krakend:
+    image: devopsfaith/krakend:2.7
+    ports:
+      - '9003:9003'
+      - '8090:8090'
+    volumes:
+      - ./krakend/:/etc/krakend/
+    command: ['run','-d','-c','/etc/krakend/krakend.json']

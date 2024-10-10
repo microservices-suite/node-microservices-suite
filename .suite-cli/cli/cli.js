@@ -355,7 +355,17 @@ program
         }
       });
   });
-
-
+  program
+  .command('remove')
+  .description('Clean remove a monorepo resource plus all the associated files. No residual files remain behind')
+  .option('service', 'remove service and associated files')
+  .option('app', 'remove app and associated files')
+  .option('library', 'remove library and associated files')
+  .option('microservice', 'remove microservice and associated files')
+  .option('gateway', 'remove gateway and associated files')
+  .action(async (options) => {
+    console.log({options})
+     await actionHandlers.dockerPrune({ options }) 
+    });
 program.parse(process.argv);
 module.exports = program

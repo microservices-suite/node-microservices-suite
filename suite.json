@@ -12,6 +12,10 @@
   "default_broker": "rabbitmq",
   "services": [
     {
+      "name": "hd",
+      "port": null
+    },
+    {
       "name": "customer-service",
       "port": 9000
     },
@@ -78,12 +82,45 @@
     {
       "name": "upload",
       "port": 9019
+    },
+    {
+      "name": "th",
+      "port": 9020
+    },
+    {
+      "name": "kjhgf",
+      "port": 9021
+    },
+    {
+      "name": "hhgfdsdfghj",
+      "port": 9022
+    },
+    {
+      "name": "ghjk",
+      "port": 9023
+    },
+    {
+      "name": "shjksgd",
+      "port": 30067
+    },
+    {
+      "name": "test",
+      "port": 30068
     }
   ],
   "apps": [
     {
-      "name": "uber-eats",
+      "name": "orders",
+      "GATEWAY_PORT": 8006,
       "services": [
+        "hd",
+        "customer-service",
+        "product-service",
+        "rbac-service",
+        "payment-service",
+        "notification-service",
+        "email-service",
+        "cart-service",
         "cart",
         "user",
         "customer",
@@ -93,12 +130,26 @@
         "product",
         "rbac",
         "supplier",
-        "upload"
+        "upload",
+        "th",
+        "kjhgf",
+        "hhgfdsdfghj",
+        "ghjk",
+        "shjksgd"
       ]
     },
     {
-      "name": "uber-eats",
+      "name": "dnmw",
+      "GATEWAY_PORT": 9000,
       "services": [
+        "hd",
+        "customer-service",
+        "product-service",
+        "rbac-service",
+        "payment-service",
+        "notification-service",
+        "email-service",
+        "cart-service",
         "cart",
         "user",
         "customer",
@@ -108,7 +159,99 @@
         "product",
         "rbac",
         "supplier",
-        "upload"
+        "upload",
+        "th",
+        "kjhgf",
+        "hhgfdsdfghj",
+        "ghjk",
+        "shjksgd"
+      ]
+    },
+    {
+      "name": "hkd",
+      "GATEWAY_PORT": 9001,
+      "services": [
+        "hd",
+        "customer-service",
+        "product-service",
+        "rbac-service",
+        "payment-service",
+        "notification-service",
+        "email-service",
+        "cart-service",
+        "cart",
+        "user",
+        "customer",
+        "email",
+        "notification",
+        "payment",
+        "product",
+        "rbac",
+        "supplier",
+        "upload",
+        "th",
+        "kjhgf",
+        "hhgfdsdfghj",
+        "ghjk",
+        "shjksgd"
+      ]
+    },
+    {
+      "name": "name",
+      "GATEWAY_PORT": 9002,
+      "services": [
+        "hd",
+        "customer-service",
+        "product-service",
+        "rbac-service",
+        "payment-service",
+        "notification-service",
+        "email-service",
+        "cart-service",
+        "cart",
+        "user",
+        "customer",
+        "email",
+        "notification",
+        "payment",
+        "product",
+        "rbac",
+        "supplier",
+        "upload",
+        "th",
+        "kjhgf",
+        "hhgfdsdfghj",
+        "ghjk",
+        "shjksgd"
+      ]
+    },
+    {
+      "name": "app",
+      "GATEWAY_PORT": 7890,
+      "services": [
+        "hd",
+        "customer-service",
+        "product-service",
+        "rbac-service",
+        "payment-service",
+        "notification-service",
+        "email-service",
+        "cart-service",
+        "cart",
+        "user",
+        "customer",
+        "email",
+        "notification",
+        "payment",
+        "product",
+        "rbac",
+        "supplier",
+        "upload",
+        "th",
+        "kjhgf",
+        "hhgfdsdfghj",
+        "ghjk",
+        "shjksgd"
       ]
     }
   ],
