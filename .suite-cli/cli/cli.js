@@ -294,14 +294,20 @@ program
               })
             break;
           case 'gateway':
-            const all_apps = getExistingApps({ currentDir: cwd() });
+            const apps = getExistingApps({ currentDir: cwd() });
+            if(!apps) {
+              logInfo({ message: `No apps found in this project. You need to have atleast one app to generate a gateway` })
+              ora().info(`Run 'suite generate' to create one...`)
+              process.exit(0);
+
+            }
             const formatAppsName = (app) => app.name;
             prompt([
               {
                 type: 'checkbox',
                 name: 'apps',
                 message: 'Select apps',
-                choices: all_apps.map(app => ({
+                choices: apps.map(app => ({
                   name: formatAppsName(app),
                   value: app,
                   checked: true, // Default all services to be selected
