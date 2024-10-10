@@ -236,7 +236,7 @@ program
             ]).then((answers) => actionHandlers.scaffoldNewLibrary({ answers: { ...answers, private: false } }))
             break
           case 'app':
-            const existing_apps = getExistingComponent({ key: 'apps', currentDir: cwd() })
+            const existing_apps = getExistingComponent({ key: 'apps', currentDir: cwd() })||[]
             const formatServiceName = (service) => `${service.name}: ${service.port}`;
             prompt([
               {
