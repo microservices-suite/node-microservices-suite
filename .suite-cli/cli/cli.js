@@ -123,7 +123,12 @@ program
       }
     ])
       .then(answers => {
-        const existing_services = getExistingComponent({ key: 'services', currentDir: cwd() })
+        let existing_services = []
+        try {
+           existing_services = getExistingComponent({ key: 'services', currentDir: cwd() })
+        } catch (error) {
+          
+        }
         switch (answers.resource) {
           case 'monorepo':
             // Additional prompts specific to 'monorepo' resource
@@ -231,7 +236,7 @@ program
             ]).then((answers) => actionHandlers.scaffoldNewLibrary({ answers: { ...answers, private: false } }))
             break
           case 'app':
-            const existing_apps = getExistingComponent({ key: 'apps', currentDir: cwd() })
+            const existing_apps = getExistingComponent({ key: 'apps', currentDir: cwd() })||[]
             const formatServiceName = (service) => `${service.name}: ${service.port}`;
             prompt([
               {
@@ -294,14 +299,20 @@ program
               })
             break;
           case 'gateway':
-            const all_apps = getExistingApps({ currentDir: cwd() });
+            const apps = getExistingApps({ currentDir: cwd() });
+            if(!apps) {
+              logInfo({ message: `No apps found in this project. You need to have atleast one app to generate a gateway` })
+              ora().info(`Run 'suite generate' to create one...`)
+              process.exit(0);
+
+            }
             const formatAppsName = (app) => app.name;
             prompt([
               {
                 type: 'checkbox',
                 name: 'apps',
                 message: 'Select apps',
-                choices: all_apps.map(app => ({
+                choices: apps.map(app => ({
                   name: formatAppsName(app),
                   value: app,
                   checked: true, // Default all services to be selected
@@ -344,7 +355,17 @@ program
         }
       });
   });
-
-
+  program
+  .command('remove')
+  .description('Clean remove a monorepo resource plus all the associated files. No residual files remain behind')
+  .option('service', 'remove service and associated files')
+  .option('app', 'remove app and associated files')
+  .option('library', 'remove library and associated files')
+  .option('microservice', 'remove microservice and associated files')
+  .option('gateway', 'remove gateway and associated files')
+  .action(async (options) => {
+    console.log({options})
+     await actionHandlers.dockerPrune({ options }) 
+    });
 program.parse(process.argv);
 module.exports = program

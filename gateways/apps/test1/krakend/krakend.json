@@ -1,0 +1,386 @@
+
+{
+  "$schema": "https://www.krakend.io/schema/v2.5/krakend.json",
+  "version": 3,
+  "name": "Microservices-suite API Gateway",
+  "port": 9004,
+  "cache_ttl": "3600s",
+  "timeout": "300s",
+  "endpoints": [
+    {
+      "@comment": "Check the health of all your APIs",
+      "endpoint": "/__suite_status",
+      "method": "GET",
+      "backend": [
+    {
+      "host": ["http://hd:null"],
+      "url_pattern": "/",
+      "mapping": {
+        "message": "hd"
+      }
+    },
+
+    {
+      "host": ["http://customer-service:9000"],
+      "url_pattern": "/",
+      "mapping": {
+        "message": "customer-service"
+      }
+    },
+
+    {
+      "host": ["http://product-service:9002"],
+      "url_pattern": "/",
+      "mapping": {
+        "message": "product-service"
+      }
+    },
+
+    {
+      "host": ["http://rbac-service:9004"],
+      "url_pattern": "/",
+      "mapping": {
+        "message": "rbac-service"
+      }
+    },
+
+    {
+      "host": ["http://payment-service:9006"],
+      "url_pattern": "/",
+      "mapping": {
+        "message": "payment-service"
+      }
+    },
+
+    {
+      "host": ["http://notification-service:9007"],
+      "url_pattern": "/",
+      "mapping": {
+        "message": "notification-service"
+      }
+    },
+
+    {
+      "host": ["http://email-service:9008"],
+      "url_pattern": "/",
+      "mapping": {
+        "message": "email-service"
+      }
+    },
+
+    {
+      "host": ["http://cart-service:9009"],
+      "url_pattern": "/",
+      "mapping": {
+        "message": "cart-service"
+      }
+    },
+
+    {
+      "host": ["http://cart:9010"],
+      "url_pattern": "/",
+      "mapping": {
+        "message": "cart"
+      }
+    },
+
+    {
+      "host": ["http://user:9011"],
+      "url_pattern": "/",
+      "mapping": {
+        "message": "user"
+      }
+    },
+
+    {
+      "host": ["http://customer:9012"],
+      "url_pattern": "/",
+      "mapping": {
+        "message": "customer"
+      }
+    },
+
+    {
+      "host": ["http://email:9013"],
+      "url_pattern": "/",
+      "mapping": {
+        "message": "email"
+      }
+    },
+
+    {
+      "host": ["http://notification:9014"],
+      "url_pattern": "/",
+      "mapping": {
+        "message": "notification"
+      }
+    },
+
+    {
+      "host": ["http://payment:9015"],
+      "url_pattern": "/",
+      "mapping": {
+        "message": "payment"
+      }
+    },
+
+    {
+      "host": ["http://product:9016"],
+      "url_pattern": "/",
+      "mapping": {
+        "message": "product"
+      }
+    },
+
+    {
+      "host": ["http://rbac:9017"],
+      "url_pattern": "/",
+      "mapping": {
+        "message": "rbac"
+      }
+    },
+
+    {
+      "host": ["http://supplier:9018"],
+      "url_pattern": "/",
+      "mapping": {
+        "message": "supplier"
+      }
+    },
+
+    {
+      "host": ["http://upload:9019"],
+      "url_pattern": "/",
+      "mapping": {
+        "message": "upload"
+      }
+    },
+
+    {
+      "host": ["http://th:9020"],
+      "url_pattern": "/",
+      "mapping": {
+        "message": "th"
+      }
+    },
+
+    {
+      "host": ["http://kjhgf:9021"],
+      "url_pattern": "/",
+      "mapping": {
+        "message": "kjhgf"
+      }
+    },
+
+    {
+      "host": ["http://hhgfdsdfghj:9022"],
+      "url_pattern": "/",
+      "mapping": {
+        "message": "hhgfdsdfghj"
+      }
+    },
+
+    {
+      "host": ["http://ghjk:9023"],
+      "url_pattern": "/",
+      "mapping": {
+        "message": "ghjk"
+      }
+    }]
+    },
+    {
+      "@comment": "Hit all API list endpoints simultaneously",
+      "endpoint": "/api/v1/",
+      "method": "GET",
+      "backend": [
+    {
+      "host": ["http://hd:null"],
+      "url_pattern": "/api/v1/hds",
+      "mapping": {
+        "data": "hds"
+      }
+    },
+
+    {
+      "host": ["http://customer-service:9000"],
+      "url_pattern": "/api/v1/customer-services",
+      "mapping": {
+        "data": "customer-services"
+      }
+    },
+
+    {
+      "host": ["http://product-service:9002"],
+      "url_pattern": "/api/v1/product-services",
+      "mapping": {
+        "data": "product-services"
+      }
+    },
+
+    {
+      "host": ["http://rbac-service:9004"],
+      "url_pattern": "/api/v1/rbac-services",
+      "mapping": {
+        "data": "rbac-services"
+      }
+    },
+
+    {
+      "host": ["http://payment-service:9006"],
+      "url_pattern": "/api/v1/payment-services",
+      "mapping": {
+        "data": "payment-services"
+      }
+    },
+
+    {
+      "host": ["http://notification-service:9007"],
+      "url_pattern": "/api/v1/notification-services",
+      "mapping": {
+        "data": "notification-services"
+      }
+    },
+
+    {
+      "host": ["http://email-service:9008"],
+      "url_pattern": "/api/v1/email-services",
+      "mapping": {
+        "data": "email-services"
+      }
+    },
+
+    {
+      "host": ["http://cart-service:9009"],
+      "url_pattern": "/api/v1/cart-services",
+      "mapping": {
+        "data": "cart-services"
+      }
+    },
+
+    {
+      "host": ["http://cart:9010"],
+      "url_pattern": "/api/v1/carts",
+      "mapping": {
+        "data": "carts"
+      }
+    },
+
+    {
+      "host": ["http://user:9011"],
+      "url_pattern": "/api/v1/users",
+      "mapping": {
+        "data": "users"
+      }
+    },
+
+    {
+      "host": ["http://customer:9012"],
+      "url_pattern": "/api/v1/customers",
+      "mapping": {
+        "data": "customers"
+      }
+    },
+
+    {
+      "host": ["http://email:9013"],
+      "url_pattern": "/api/v1/emails",
+      "mapping": {
+        "data": "emails"
+      }
+    },
+
+    {
+      "host": ["http://notification:9014"],
+      "url_pattern": "/api/v1/notifications",
+      "mapping": {
+        "data": "notifications"
+      }
+    },
+
+    {
+      "host": ["http://payment:9015"],
+      "url_pattern": "/api/v1/payments",
+      "mapping": {
+        "data": "payments"
+      }
+    },
+
+    {
+      "host": ["http://product:9016"],
+      "url_pattern": "/api/v1/products",
+      "mapping": {
+        "data": "products"
+      }
+    },
+
+    {
+      "host": ["http://rbac:9017"],
+      "url_pattern": "/api/v1/rbacs",
+      "mapping": {
+        "data": "rbacs"
+      }
+    },
+
+    {
+      "host": ["http://supplier:9018"],
+      "url_pattern": "/api/v1/suppliers",
+      "mapping": {
+        "data": "suppliers"
+      }
+    },
+
+    {
+      "host": ["http://upload:9019"],
+      "url_pattern": "/api/v1/uploads",
+      "mapping": {
+        "data": "uploads"
+      }
+    },
+
+    {
+      "host": ["http://th:9020"],
+      "url_pattern": "/api/v1/ths",
+      "mapping": {
+        "data": "ths"
+      }
+    },
+
+    {
+      "host": ["http://kjhgf:9021"],
+      "url_pattern": "/api/v1/kjhgfs",
+      "mapping": {
+        "data": "kjhgfs"
+      }
+    },
+
+    {
+      "host": ["http://hhgfdsdfghj:9022"],
+      "url_pattern": "/api/v1/hhgfdsdfghjs",
+      "mapping": {
+        "data": "hhgfdsdfghjs"
+      }
+    },
+
+    {
+      "host": ["http://ghjk:9023"],
+      "url_pattern": "/api/v1/ghjks",
+      "mapping": {
+        "data": "ghjks"
+      }
+    }]
+    },
+    {
+      "@comment": "Fetch all data from the hd service",
+      "endpoint": "/api/v1/hds",
+      "method": "GET",
+      "backend": [
+    {
+      "host": ["http://hd:null"],
+      "url_pattern": "/api/v1/hds",
+      "mapping": {
+        "data": "hds"
+      }
+    }]
+    }
+  ]
+}
