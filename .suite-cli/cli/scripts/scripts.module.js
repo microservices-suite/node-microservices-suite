@@ -1643,7 +1643,7 @@ const scaffoldGateways = async ({ answers }) => {
     const { projectName } = readFileContent({ currentDir: cwd() });
     let { apps } = answers;
     const project_root = generatRootPath({ currentDir: cwd() });
-    const service_objects = getExistingComponent({ key, currentDir: cwd() });
+    const service_objects = getExistingComponent({ key:'services', currentDir: cwd() });
     // add port to services in each app eg ['auth']=>[{name:'auth',port:9001}]
     apps = apps.map((app) => {
         app.services.map((name, i) => {
