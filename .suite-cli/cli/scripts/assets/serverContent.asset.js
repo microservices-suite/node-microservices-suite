@@ -11,12 +11,19 @@ const { subscriber } = require('./src/subscriber');
 const ${answers.default_broker} = require('${answers.project_base}/broker/${answers.default_broker}');
 // const app = require('./src/app');
 
-mongoose.connect(config.db).then(() => {
-    logger.info(\`📀 successfully connected to db: \${config.db}\`);
-}).catch(err => {
-    logger.error(\`failed to connect to db. Exiting... \${err.message}\`);
-    process.exit(0);
-});
+const connectWithRetry = () => {
+    mongoose.connect(config.db)
+    .then(() => {
+            logger.info(\`📀 successfully connected to db: \${config.db}\`);
+        })
+        .catch((err) => {
+            logger.error(\`Failed to connect to db. Exiting... \${err.message}\`);
+            logger.info('Retrying connection in 5 seconds...');
+            setTimeout(connectWithRetry, 5000); // Retry after 5 seconds
+        });
+};
+
+connectWithRetry();
 
 const app = express();
 
