@@ -4,11 +4,17 @@ const ora = require('ora')
 const { Command } = require('commander');
 const { createPromptModule } = require('inquirer');
 const { execSync } = require('node:child_process')
-const actionHandlers = require('./scripts')
-const { logInfo, getExistingComponent, getExistingApps, getNextAvailablePort, scaffoldApp, scaffoldGateways } = require('./scripts/scripts.module');
 const { cwd } = require('node:process');
-const program = new Command()
-const prompt = createPromptModule()
+const { readFileSync } = require('node:fs');
+const path = require('node:path');
+const actionHandlers = require('./scripts')
+const { logInfo, getExistingComponent, getExistingApps, getNextAvailablePort, scaffoldApp, scaffoldGateways,readFileContent } = require('./scripts/scripts.module');
+
+const program = new Command();
+const packageJsonPath = path.join(__dirname, 'package.json');
+const packageJSON = JSON.parse(readFileSync(packageJsonPath,{'encoding':'utf8'}));
+program.version(packageJSON.version); //get library version set by release script
+const prompt = createPromptModule();
 program
   .command('add')
   .description('Adds dependencies at given workspace and updates package.json')
