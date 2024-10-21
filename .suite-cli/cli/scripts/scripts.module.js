@@ -1736,5 +1736,6 @@ module.exports = {
     test,
     scaffoldApp,
     scaffoldGateways,
-    getExistingApps
+    getExistingApps,
+    readFileContent
 }
