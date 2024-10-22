@@ -4,11 +4,20 @@ const ora = require('ora')
 const { Command } = require('commander');
 const { createPromptModule } = require('inquirer');
 const { execSync } = require('node:child_process')
-const actionHandlers = require('./scripts')
-const { logInfo, getExistingComponent, getExistingApps, getNextAvailablePort, scaffoldApp, scaffoldGateways } = require('./scripts/scripts.module');
 const { cwd } = require('node:process');
-const program = new Command()
-const prompt = createPromptModule()
+const { readFileSync } = require('node:fs');
+const path = require('node:path');
+const { cwd } = require('node:process');
+const { readFileSync } = require('node:fs');
+const path = require('node:path');
+const actionHandlers = require('./scripts')
+const { logInfo, getExistingComponent, getExistingApps, getNextAvailablePort, scaffoldApp, scaffoldGateways, readFileContent } = require('./scripts/scripts.module');
+
+const program = new Command();
+const packageJsonPath = path.join(__dirname, 'package.json');
+const packageJSON = JSON.parse(readFileSync(packageJsonPath, { 'encoding': 'utf8' }));
+program.version(packageJSON.version); //get library version set by release script
+const prompt = createPromptModule();
 program
   .command('add')
   .description('Adds dependencies at given workspace and updates package.json')
@@ -125,9 +134,9 @@ program
       .then(answers => {
         let existing_services = []
         try {
-           existing_services = getExistingComponent({ key: 'services', currentDir: cwd() })
+          existing_services = getExistingComponent({ key: 'services', currentDir: cwd() })
         } catch (error) {
-          
+
         }
         switch (answers.resource) {
           case 'monorepo':
@@ -236,7 +245,7 @@ program
             ]).then((answers) => actionHandlers.scaffoldNewLibrary({ answers: { ...answers, private: false } }))
             break
           case 'app':
-            const existing_apps = getExistingComponent({ key: 'apps', currentDir: cwd() })||[]
+            const existing_apps = getExistingComponent({ key: 'apps', currentDir: cwd() }) || []
             const formatServiceName = (service) => `${service.name}: ${service.port}`;
             prompt([
               {
@@ -300,7 +309,7 @@ program
             break;
           case 'gateway':
             const apps = getExistingApps({ currentDir: cwd() });
-            if(!apps) {
+            if (!apps) {
               logInfo({ message: `No apps found in this project. You need to have atleast one app to generate a gateway` })
               ora().info(`Run 'suite generate' to create one...`)
               process.exit(0);
@@ -356,16 +365,45 @@ program
       });
   });
   program
-  .command('remove')
-  .description('Clean remove a monorepo resource plus all the associated files. No residual files remain behind')
-  .option('service', 'remove service and associated files')
-  .option('app', 'remove app and associated files')
-  .option('library', 'remove library and associated files')
-  .option('microservice', 'remove microservice and associated files')
-  .option('gateway', 'remove gateway and associated files')
-  .action(async (options) => {
-    console.log({options})
-     await actionHandlers.dockerPrune({ options }) 
-    });
+  .command('remove <resource> [resource_name]')
+  .description('Clean remove a monorepo resource or all resources of a specific type with the --all flag.')
+  .option('-f, --force', 'Force removal without confirmation')
+  .option('--all', 'Remove all resources of the specified type')  // Add --all flag
+  .action(async (resource, resource_name, options) => {
+    const spinner = ora();
+
+    // Validate --all flag usage
+    if (!resource_name && !options.all) {
+      spinner.fail('You must provide either a resource name or the --all flag to remove all resources.');
+      return;
+    }
+
+    try {
+      // Confirm the deletion if --force is not provided
+      if (!options.force) {
+        const { confirmRemoval } = await prompt([
+          {
+            type: 'confirm',
+            name: 'confirmRemoval',
+            message: `Are you sure you want to remove ${options.all ? `all ${resource}s` : `${resource} "${resource_name}"`} ?`,
+            default: false
+          }
+        ]);
+
+        if (!confirmRemoval) {
+          spinner.info('Operation cancelled.');
+          return;
+        }
+      }
+
+      // Call the resource removal handler
+      await actionHandlers.removeResource({ answers: { resource, resource_name, options } });
+
+    } catch (error) {
+      spinner.fail(`Failed to remove ${resource} ${resource_name || 'resources'}: ${error.message}`);
+    }
+  });
+
+
 program.parse(process.argv);
 module.exports = program
