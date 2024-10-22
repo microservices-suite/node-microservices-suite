@@ -1,9 +1,11 @@
 const chalk = require('chalk')
 const { join, sep, resolve } = require('node:path')
+const fs = require('fs');
+const path = require('node:path');
 const os = require('os')
 const { mkdirSync, readFile } = require('fs')
 const { cwd, chdir, exit, platform } = require('node:process')
-const { existsSync, statSync, readdirSync, writeFileSync, readFileSync, rmSync } = require('node:fs');
+const { existsSync, statSync, readdirSync, writeFileSync, readFileSync, rmSync, rm } = require('node:fs');
 let { exec, spawn } = require('node:child_process');
 const { writeFile } = require('node:fs/promises');
 const assets = require('./assets')
@@ -1643,7 +1645,7 @@ const scaffoldGateways = async ({ answers }) => {
     const { projectName } = readFileContent({ currentDir: cwd() });
     let { apps } = answers;
     const project_root = generatRootPath({ currentDir: cwd() });
-    const service_objects = getExistingComponent({ key:'services', currentDir: cwd() });
+    const service_objects = getExistingComponent({ key: 'services', currentDir: cwd() });
     // add port to services in each app eg ['auth']=>[{name:'auth',port:9001}]
     apps = apps.map((app) => {
         app.services.map((name, i) => {
@@ -1705,6 +1707,244 @@ const scaffoldGateway = ({ project_root, app, answers, webserver, projectName })
 
 }
 
+/**
+ * Removes a microservice and all associated files.
+ * @param {Object} options - Options for removing the microservice.
+ * @param {string} options.project_root - The root directory of the project.
+ * @param {string} options.service_name - The name of the microservice to be removed.
+ * @param {boolean} [options.sync] - If true, use synchronous file removal.
+ */
+const removeResource = async ({ answers }) => {
+    const { resource, resource_name, options } = answers;
+    let project_root;
+
+    try {
+        project_root = generatRootPath({ currentDir: cwd() });
+    } catch (error) {
+        // Not within a suite repo
+        if (error.message && error.message === 'suite.json and(or) .git not found') {
+            ora('This does not look like a suite repo').warn()
+            ora().info('If it is run <suite init> from project root to reinitialize suite project and try again')
+            exit(1)
+        }
+        else {
+            // rethrow the error
+            throw new Error('Error code 10005.Kindly raise an issue at https://github.com/microservices-suite/node-microservices-suite/issues')
+        }
+    }
+    const spinner = ora();
+    if (options.all) {
+        // Logic to remove all resources of the given type
+        
+        const resourceEnum = {
+            library: ['shared'],
+            app: ['gateways', 'apps'],
+            service: ['microservices'],
+            gateway: ['gateways', 'apps']
+        }
+        if(!resourceEnum[resource]) return ora().warn(`Unkown resource name ${resource}`)
+        const allResourceChildrenPath = path.join(project_root, ...(resourceEnum[resource]));
+        if (!fs.existsSync(allResourceChildrenPath)) {
+            spinner.warn(`No ${resource}(s) found.`);
+            return;
+        }
+
+        // Remove all resources
+        const services = fs.readdirSync(allResourceChildrenPath);
+        if (services.length === 0) {
+            spinner.warn(`No ${resource}(s) found.`);
+            return;
+        }
+
+        // Synchronous removal of all services
+        services.forEach(service => {
+            const fullPath = path.join(allResourceChildrenPath, service);
+            fs.rmSync(fullPath, { recursive: true, force: true });
+        });
+        spinner.succeed(`All ${resource}(s) have been removed.`);
+
+        return;
+    }
+
+    // Call the appropriate action handler based on the resource type
+    switch (resource) {
+        case 'service':
+            await removeService({ service_name: resource_name, project_root, sync: true });
+            break;
+        case 'app':
+            await removeApp({ app_name: resource_name, project_root, sync: true });
+            break;
+        case 'library':
+            await removeLibrary({ library_name: resource_name, project_root, sync: true });
+            break;
+        case 'gateway':
+            await removeGateway({ gateway_name: resource_name, project_root, sync: true });
+            break;
+        default:
+            throw new Error(`Unknown resource type: ${resource}`);
+    }
+
+};
+/**
+ * Removes a microservice and all associated files.
+ * @param {Object} options - Options for removing the microservice.
+ * @param {string} options.project_root - The root directory of the project.
+ * @param {string} options.service_name - The name of the microservice to be removed.
+ * @param {boolean} [options.sync] - If true, use synchronous file removal.
+ * @param {boolean} [options.all] - If true, remove all services of the specified type.
+ */
+const removeService = async ({ service_name, project_root, sync }) => {
+    const servicePath = path.join(project_root, 'microservices', service_name);
+    const spinner = ora(`Removing microservice "${service_name}"...`).start();
+
+    try {
+        // Check if the specific service exists
+        if (!fs.existsSync(servicePath)) {
+            spinner.warn(`Microservice "${service_name}" not found.`);
+            return;
+        }
+
+        if (sync) {
+            // Synchronous removal of the specific service
+            fs.rmSync(servicePath, { recursive: true, force: true });
+            spinner.succeed(`Microservice "${service_name}" and all associated files have been removed.`);
+        } else {
+            // Asynchronous removal of the specific service
+            fs.rm(servicePath, { recursive: true, force: true }, (err) => {
+                if (err) throw err;
+                spinner.succeed(`Microservice "${service_name}" and all associated files have been removed.`);
+            });
+        }
+    } catch (error) {
+        spinner.fail(`Error while removing microservice "${service_name}": ${error.message}`);
+    }
+};
+
+
+/**
+ * Removes a microservice and all associated files.
+ * @param {Object} options - Options for removing the microservice.
+ * @param {string} options.project_root - The root directory of the project.
+ * @param {string} options.app_name - The name of the microapp to be removed.
+ * @param {boolean} [options.sync] - If true, use synchronous file removal.
+ */
+/**
+ * Removes an app from both Docker and Kubernetes directories.
+ * @param {Object} options - Options for removing the app.
+ * @param {string} options.app_name - The name of the app to be removed.
+ * @param {string} options.project_root - The root directory of the project.
+ * @param {boolean} [options.sync] - If true, use synchronous file removal.
+ */
+const removeApp = async ({ app_name, project_root, sync = true }) => {
+    const appDockerPath = path.join(project_root, 'gateways', 'apps', app_name);
+    const appKubePath = path.join(project_root, 'k8s', app_name);
+
+    // Check if the app exists in either Docker or Kubernetes directories
+    const dockerExists = existsSync(appDockerPath);
+    const kubeExists = existsSync(appKubePath);
+
+    if (!dockerExists && !kubeExists) {
+        ora().warn(`App "${app_name}" not found in Docker or Kubernetes.`);
+        return;
+    }
+
+    try {
+        if (sync) {
+            // Use synchronous removal
+            if (dockerExists) {
+                rmSync(appDockerPath, { recursive: true, force: true });
+                ora().info(`Docker files for app "${app_name}" have been removed.`);
+            }
+
+            if (kubeExists) {
+                rmSync(appKubePath, { recursive: true, force: true });
+                ora().info(`Kubernetes files for app "${app_name}" have been removed.`);
+            }
+        } else {
+            // Use asynchronous removal
+            if (dockerExists) {
+                rm(appDockerPath, { recursive: true, force: true }, (err) => {
+                    if (err) throw err;
+                    ora().info(`Docker files for app "${app_name}" have been removed.`);
+                });
+            }
+
+            if (kubeExists) {
+                rm(appKubePath, { recursive: true, force: true }, (err) => {
+                    if (err) throw err;
+                    ora().info(`Kubernetes files for app "${app_name}" have been removed.`);
+                });
+            }
+        }
+
+        ora().succeed(`App "${app_name}" removed successfully.`);
+    } catch (error) {
+        ora().fail(`Error while removing app "${app_name}": ${error.message}`);
+    }
+};
+
+/**
+ * Removes a microservice and all associated files.
+ * @param {Object} options - Options for removing the microservice.
+ * @param {string} options.project_root - The root directory of the project.
+ * @param {string} options.library_name - The name of the microlibrary to be removed.
+ * @param {boolean} [options.sync] - If true, use synchronous file removal.
+ */
+const removeLibrary = async ({ library_name, project_root, sync }) => {
+    const libraryPath = path.join(project_root, 'shared', library_name);
+    // Check if the microservice directory exists
+    if (!existsSync(libraryPath)) {
+        ora().warn(`Library "${library_name}" not found.`);
+        return;
+    }
+    try {
+        if (sync) {
+            // Use synchronous removal
+            rmSync(libraryPath, { recursive: true, force: true });
+            ora().info(`Library "${library_name}" and all associated files have been removed.`);
+        } else {
+            // Use asynchronous removal
+            rm(libraryPath, { recursive: true, force: true }, (err) => {
+                if (err) throw err;
+                ora().info(`Library "${library_name}" and all associated files have been removed.`);
+            });
+        }
+        ora().succeed(`Library "${library_name}" removed successfully.`);
+    } catch (error) {
+        ora().fail(`Error while removing Library "${library_name}":`, error.message);
+    }
+};
+
+/**
+ * Removes a microservice and all associated files.
+ * @param {Object} options - Options for removing the microservice.
+ * @param {string} options.project_root - The root directory of the project.
+ * @param {string} options.gateway - The name of the microgateway to be removed.
+ * @param {boolean} [options.sync] - If true, use synchronous file removal.
+ */
+const removeGateway = async ({ gateway, project_root, sync }) => {
+    const gatewayPath = path.join(project_root, 'apps', gateway);
+    if (!existsSync(gatewayPath)) {
+        ora().warn(`Gateway "${gateway}" not found.`);
+        return;
+    }
+    try {
+        if (sync) {
+            // Use synchronous removal
+            rmSync(gatewayPath, { recursive: true, force: true });
+            ora().info(`Gateway "${gateway}" and all associated files have been removed.`);
+        } else {
+            // Use asynchronous removal
+            rm(gatewayPath, { recursive: true, force: true }, (err) => {
+                if (err) throw err;
+                ora().info(`Gateway "${gateway}" and all associated files have been removed.`);
+            });
+        }
+        ora().succeed(`Gateway "${gateway}" removed successfully.`);
+    } catch (error) {
+        ora().fail(`Error while removing Gateway "${gateway}":`, error.message);
+    }
+};
 module.exports = {
     generateDirectoryPath,
     changeDirectory,
@@ -1737,5 +1977,8 @@ module.exports = {
     scaffoldApp,
     scaffoldGateways,
     getExistingApps,
-    readFileContent
+    readFileContent,
+    removeResource,
+    removeService,
+    removeApp
 }
