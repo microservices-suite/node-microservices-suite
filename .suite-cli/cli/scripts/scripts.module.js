@@ -1978,7 +1978,6 @@ module.exports = {
     scaffoldGateways,
     getExistingApps,
     readFileContent,
-    removeResource,
-    removeService,
-    removeApp
+    readFileContent,
+    removeResource
 }

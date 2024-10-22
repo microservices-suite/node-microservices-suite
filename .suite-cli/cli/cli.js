@@ -7,6 +7,9 @@ const { execSync } = require('node:child_process')
 const { cwd } = require('node:process');
 const { readFileSync } = require('node:fs');
 const path = require('node:path');
+const { cwd } = require('node:process');
+const { readFileSync } = require('node:fs');
+const path = require('node:path');
 const actionHandlers = require('./scripts')
 const { logInfo, getExistingComponent, getExistingApps, getNextAvailablePort, scaffoldApp, scaffoldGateways, readFileContent } = require('./scripts/scripts.module');
 
