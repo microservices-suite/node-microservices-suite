@@ -361,14 +361,17 @@ program
         }
       });
   });
-  program
+program
   .command('remove <resource> [resource_name]')
   .description('Clean remove a monorepo resource or all resources of a specific type with the --all flag.')
   .option('-f, --force', 'Force removal without confirmation')
   .option('--all', 'Remove all resources of the specified type')  // Add --all flag
   .action(async (resource, resource_name, options) => {
     const spinner = ora();
-
+    if (!['service', 'app', 'library', 'gateway'].includes(resource)) {
+      spinner.fail('Supported resources are ["service","app","library","gateway"] ');
+      return;
+    }
     // Validate --all flag usage
     if (!resource_name && !options.all) {
       spinner.fail('You must provide either a resource name or the --all flag to remove all resources.');
