@@ -1,24 +1,23 @@
-module.exports = ({ service, image, ports }) => `
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ${service}
+  name: mongodb
 spec:
   selector:
     matchLabels:
-      app: ${service}
+      app: mongodb
   template:
     metadata:
       labels:
-        app: ${service}
+        app: mongodb
     spec:
       containers:
-      - name: ${service}
-        image: ${image}
+      - name: mongodb
+        image: mongo
         resources:
           limits:
             memory: "128Mi"
             cpu: "500m"
         ports:
-${ports.map(port => `        - containerPort: ${port}`).join('\n')}
-`;
+        - containerPort: 27017
