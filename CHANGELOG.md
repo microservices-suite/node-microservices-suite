@@ -1,6 +1,35 @@
 # Changelog
 
 
+## v1.8.0
+
+[compare changes](https://github.com/microservices-suite/node-microservices-suite/compare/v3.0.1...v1.8.0)
+
+### 🚀 Enhancements
+
+- Add global --version to suite library that can be used to check install version ([92e05aa](https://github.com/microservices-suite/node-microservices-suite/commit/92e05aa))
+- Add global --version to suite library that can be used to check install version ([3666586](https://github.com/microservices-suite/node-microservices-suite/commit/3666586))
+- Add deletion command to remove 1 or all resources ([bd9d2dd](https://github.com/microservices-suite/node-microservices-suite/commit/bd9d2dd))
+- Add kubernetes support ([031fb80](https://github.com/microservices-suite/node-microservices-suite/commit/031fb80))
+
+### 🩹 Fixes
+
+- Add retry mechanism to retry connection on unreachable db server eg in kubernetes clusters ([65b121c](https://github.com/microservices-suite/node-microservices-suite/commit/65b121c))
+- Undo double importation ([ec276c0](https://github.com/microservices-suite/node-microservices-suite/commit/ec276c0))
+- Validate resource being deleted ([ae7f85a](https://github.com/microservices-suite/node-microservices-suite/commit/ae7f85a))
+
+### 💅 Refactors
+
+- Remove bloat files ([fd15197](https://github.com/microservices-suite/node-microservices-suite/commit/fd15197))
+
+### 🏡 Chore
+
+- **release:** V1.7.0 ([0587014](https://github.com/microservices-suite/node-microservices-suite/commit/0587014))
+
+### ❤️ Contributors
+
+- Gilbert Andanje ([@GAndanje](http://github.com/GAndanje))
+
 ## v1.7.0
 
 [compare changes](https://github.com/microservices-suite/node-microservices-suite/compare/v3.0.1...v1.7.0)
