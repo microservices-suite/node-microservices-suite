@@ -1,24 +1,24 @@
-module.exports = ({ service, image, ports }) => `
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ${service}
+  name: rabbitmq
 spec:
   selector:
     matchLabels:
-      app: ${service}
+      app: rabbitmq
   template:
     metadata:
       labels:
-        app: ${service}
+        app: rabbitmq
     spec:
       containers:
-      - name: ${service}
-        image: ${image}
+      - name: rabbitmq
+        image: rabbitmq:3.13-management
         resources:
           limits:
             memory: "128Mi"
             cpu: "500m"
         ports:
-${ports.map(port => `        - containerPort: ${port}`).join('\n')}
-`;
+        - containerPort: 5672
+        - containerPort: 15672

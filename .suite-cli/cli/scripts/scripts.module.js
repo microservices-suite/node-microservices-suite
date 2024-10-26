@@ -10,6 +10,7 @@ let { exec, spawn } = require('node:child_process');
 const { writeFile } = require('node:fs/promises');
 const assets = require('./assets')
 const ora = require('ora')
+const glob = require('glob');
 
 /**
  * Dynamically generate directory path given workspace_name
@@ -569,7 +570,7 @@ const getComponentDirecotories = async ({ components, component_type }) => {
     const spinner = ora('Searching for component directories').start();
     let project_root;
     try {
-        project_root = generatRootPath({ currentDir: cwd() })
+        project_root = generateRootPath({ currentDir: cwd() })
     } catch (error) {
         if (error.message && error.message === 'suite.json and(or) .git not found') {
             spinner.warn('This does not look like a git repo.')
@@ -1067,7 +1068,7 @@ const addMicroservice = ({ project_root, answers }) => {
  */
 const scaffoldNewRepo = async ({ answers }) => {
     try {
-        project_root = generatRootPath({ currentDir: cwd() });
+        project_root = generateRootPath({ currentDir: cwd() });
     } catch (error) {
         // Not within a suite repo
         if (error.message && error.message === 'suite.json and(or) .git not found') {
@@ -1098,7 +1099,7 @@ const scaffoldNewRepo = async ({ answers }) => {
 const scaffoldNewService = async ({ answers }) => {
     let project_root;
     try {
-        project_root = generatRootPath({ currentDir: cwd() });
+        project_root = generateRootPath({ currentDir: cwd() });
     } catch (error) {
         // Not within a suite repo
         if (error.message && error.message === 'suite.json and(or) .git not found') {
@@ -1180,7 +1181,7 @@ const injectService = async ({ project_root, answers, workspace_name }) => {
  * @returns {string} The path to the root directory containing 'suite.json'.
  * @throws {Error} If 'suite.json' is not found within 3 levels up from the current directory.
  */
-const generatRootPath = ({ currentDir, height = 0 }) => {
+const generateRootPath = ({ currentDir, height = 0 }) => {
     if (existsSync(join(currentDir, 'suite.json')) && existsSync(join(currentDir, '.git'))) {
         return currentDir; // Return the current directory if 'suite.json' is found
 
@@ -1189,7 +1190,7 @@ const generatRootPath = ({ currentDir, height = 0 }) => {
         const parentDir = resolve(currentDir, '..');
         if (parentDir !== currentDir) {
             // Ensure we're not in the root directory 
-            return generatRootPath({ currentDir: parentDir, height: height + 1 }); // Recur with the parent directory and increased height 
+            return generateRootPath({ currentDir: parentDir, height: height + 1 }); // Recur with the parent directory and increased height 
         }
     }
 
@@ -1419,7 +1420,7 @@ const registerAppWithSuiteJson = ({ root_dir, name, services, port }) => {
 const test = async ({ package }) => {
     let rootDir = cwd();
     if (!package) {
-        rootDir = generatRootPath({ currentDir: cwd() });
+        rootDir = generateRootPath({ currentDir: cwd() });
     }
     try {
         const package_json_path = join(rootDir, 'package.json');
@@ -1436,16 +1437,128 @@ const test = async ({ package }) => {
         ora().fail('Command failed to run');
     }
 }
+const generateK8sBroker = ({ broker_directory }) => {
+    writeFileSync(join(broker_directory, 'deployment.yaml'), assets.k8sClusterDeploymentContent({
+        service: 'rabbitmq',
+        image: 'rabbitmq:3.13-management',
+        ports: [5672, 15672]
+    })
+    )
+    writeFileSync(join(broker_directory, 'clusterIp.yaml'), assets.k8sClusterIpContent({
+        service: 'rabbitmq',
+        ports: [
+            { name: 'server', port: 5672, targetPort: 5672 },
+            { name: 'management', port: 15672, targetPort: 15672 }
+        ]
+    })
+    )
+    writeFileSync(join(broker_directory, 'loadBalancer.yaml'), assets.k8sLoadBalancerContent({
+        service: 'rabbitmq',
+        ports: [
+            { name: 'server', port: 5672, targetPort: 5672, nodePort: 30001 },
+            { name: 'management', port: 15672, targetPort: 15672, nodePort: 30002 }
+        ]
+    })
+    )
+    writeFileSync(join(broker_directory, 'nodePort.yaml'), assets.k8sNodePortContent({
+        service: 'rabbitmq',
+        ports: [
+            { name: 'server', port: 5672, targetPort: 5672, nodePort: 30001 },
+            { name: 'management', port: 15672, targetPort: 15672, nodePort: 30002 }
+        ]
+    })
+    )
+}
+const generateK8sApp = ({ answers, k8s_directory, projectName, services = [] }) => {
+    const app_directory = k8s_directory
+    // Remove the directory if it already exists
+    if (existsSync(app_directory)) {
+        rmSync(app_directory, { recursive: true });
+    }
+    const nodePort = 30003
+    services.forEach((s, i) => {
+        ['db', 'server'].forEach((_, j) => {
+            const _dir = join(app_directory, s.name, _);
+            mkdirSync(_dir, { recursive: true });
+            const service_name = _ === 'db' ? 'mongodb' : s.name
+            const port = _ === 'db' ? '27017' : s.port
+            const image = _ === 'db' ? 'mongo' : `${projectName}/${s.name}:latest`
+            const loadBalancerPort = nodePort + (i * 2) + (j * 10);
+            writeFileSync(join(_dir, 'deployment.yaml'), assets.k8sClusterDeploymentContent({
+                service: service_name,
+                image,
+                ports: [port]
+            })
+            )
+            writeFileSync(join(_dir, 'clusterIp.yaml'), assets.k8sClusterIpContent({
+                service: service_name,
+                ports: [
+                    { name: service_name, port: port, targetPort: port },
+                ]
+            })
+            )
+            writeFileSync(join(_dir, 'loadBalancer.yaml'), assets.k8sLoadBalancerContent({
+                service: service_name,
+                ports: [
+                    { name: service_name, port: port, targetPort: port, nodePort: loadBalancerPort },
+                ]
+            })
+            )
+            writeFileSync(join(_dir, 'nodePort.yaml'), assets.k8sNodePortContent({
+                service: service_name,
+                ports: [
+                    { name: service_name, port: port, targetPort: port, nodePort: loadBalancerPort + 1 },
+                ]
+            })
+            )
 
+            const service_dir = join(app_directory, s.name)
+            writeFileSync(join(service_dir, 'configMap.yaml'), assets.k8sConfigMapContent({
+                service: s.name,
+                port: s.port,
+                project_base: projectName,
+                env: 'prod',
+                namespace: answers?.namespace || 'default',
+                app: answers.app_name
+            })
+            )
+            writeFileSync(join(service_dir, 'secret.yaml'), assets.k8sSecretContent({
+                service: s.name
+            })
+            )
+        })
+    })
+    writeFileSync(join(app_directory, 'combo.yaml'), assets.k8sComboContent({
+        project_base: projectName,
+        app: answers.app_name,
+        services: services.map((s) => ({ service: s.name, port: s.port, image: `${projectName}/${s.name}:latest` }))
+    })
+    )
+}
 const scaffoldApp = ({ answers }) => {
-    const { webserver } = readFileContent({ currentDir: cwd() });
-    const { projectName } = readFileContent({ currentDir: cwd() });
-    const project_root = generatRootPath({ currentDir: cwd() });
+    const { webserver, projectName, services } = readFileContent({ currentDir: cwd() });
+    const project_root = generateRootPath({ currentDir: cwd() });
     const app_directory = join(project_root, 'gateways/apps', answers.app_name);
+    const k8s_directory = join(project_root, `k8s/ns/${answers?.namespace || 'default'}`, answers.app_name);
+
     const webserver_dir = join(app_directory, webserver);
     const krakend_dir = join(app_directory, 'krakend');
     const data_dir = join(app_directory, 'data');
+    if (!existsSync(k8s_directory)) {
+        const ingress_directory = join(project_root, `k8s/ingress`);
+        const broker_directory = join(project_root, `k8s/broker`);
+        mkdirSync(ingress_directory, { recursive: true });
+        mkdirSync(broker_directory, { recursive: true });
 
+        generateK8sBroker({ broker_directory, projectName });
+        writeFileSync(join(ingress_directory, 'ingress.yaml'), assets.k8sIngressContent({
+            project_base: projectName,
+            app: answers.app_name,
+            services
+        }));
+
+    }
+    generateK8sApp({ answers, k8s_directory, projectName, services })
     // Remove the directory if it already exists
     if (existsSync(app_directory)) {
         rmSync(app_directory, { recursive: true });
@@ -1467,10 +1580,16 @@ const scaffoldApp = ({ answers }) => {
         krakend_port: answers.gateway_port,
         env: 'prod'
     }));
-    ora().succeed(`Generated docker-compose configs at: ${app_directory}`)
+    const relativeAppDir = path.relative(project_root, app_directory);
+    const relativeK8sDir = path.relative(project_root, k8s_directory);
+    const relativeWebServerDir = path.relative(project_root, webserver_dir);
+    const relativeKrakendDir = path.relative(project_root, krakend_dir);
+
+    ora().succeed(`Generated docker-compose configs at: ./${relativeAppDir}`);
+    ora().succeed(`Generated kubernetes configs at: ./${relativeK8sDir}`);
     switch (webserver) {
         case 'nginx':
-            generateNginxConfiguration({ services: answers.services, webserver_dir });
+            generateNginxConfiguration({ services: answers.services, webserver_dir, relativeWebServerDir });
             break
         default:
             ora().info('Handling other webservers');
@@ -1482,24 +1601,25 @@ const scaffoldApp = ({ answers }) => {
         gateway_port: answers.gateway_port,
         api_version: answers.api_version,
         gateway_cache_period: answers.gateway_cache_period,
-        gateway_timeout: answers.gateway_timeout
+        gateway_timeout: answers.gateway_timeout,
+        relativeKrakendDir
     });
     registerAppWithSuiteJson({ root_dir: project_root, name: answers.app_name, services: answers.services, port: answers.port })
 
 }
 const readFileContent = ({ currentDir }) => {
-    const root_dir = generatRootPath({ currentDir, height: 5 })
+    const root_dir = generateRootPath({ currentDir, height: 5 })
     // Read the project configuration file
     const configPath = resolve(root_dir, 'suite.json');
     const project_config = JSON.parse(readFileSync(configPath, 'utf8'));
     return project_config
 }
 
-const generateNginxConfiguration = ({ services, webserver_dir }) => {
+const generateNginxConfiguration = ({ services, webserver_dir, relativeWebServerDir }) => {
     writeFileSync(join(webserver_dir, 'default.conf'), assets.nginxContent({ services }));
     writeFile(join(webserver_dir, 'Dockerfile'), assets.nginxDockerfileContent());
     writeFile(join(webserver_dir, 'Dockerfile.dev'), assets.nginxDockerfileContent());
-    ora().succeed(`Generated webserver configs at: ${webserver_dir}`)
+    ora().succeed(`Generated webserver configs at: ./${relativeWebServerDir}`)
 }
 const generateKrakendConfiguration = ({
     services,
@@ -1508,7 +1628,8 @@ const generateKrakendConfiguration = ({
     gateway_port,
     api_version,
     gateway_cache_period,
-    gateway_timeout
+    gateway_timeout,
+    relativeKrakendDir
 }) => {
     writeFile(join(krakend_dir,
         'krakend.json'),
@@ -1520,7 +1641,7 @@ const generateKrakendConfiguration = ({
             gateway_cache_period,
             gateway_timeout
         }));
-    ora().succeed(`Generated krakend gateway configs at: ${krakend_dir}`)
+    ora().succeed(`Generated krakend gateway configs at: ${relativeKrakendDir}`)
 }
 const installDependencies = async ({ project_base, workspace, spinner, deps, flags }) => {
 
@@ -1644,7 +1765,7 @@ const scaffoldGateways = async ({ answers }) => {
     const { webserver } = readFileContent({ currentDir: cwd() });
     const { projectName } = readFileContent({ currentDir: cwd() });
     let { apps } = answers;
-    const project_root = generatRootPath({ currentDir: cwd() });
+    const project_root = generateRootPath({ currentDir: cwd() });
     const service_objects = getExistingComponent({ key: 'services', currentDir: cwd() });
     // add port to services in each app eg ['auth']=>[{name:'auth',port:9001}]
     apps = apps.map((app) => {
@@ -1690,7 +1811,7 @@ const scaffoldGateway = ({ project_root, app, answers, webserver, projectName })
     ora().succeed(`Generated docker-compose configs at: ${app_directory}`)
     switch (webserver) {
         case 'nginx':
-            generateNginxConfiguration({ services, webserver_dir });
+            generateNginxConfiguration({ services, webserver_dir, relativeWebServerDir });
             break
         default:
             ora().info('Handling other webservers');
@@ -1702,98 +1823,231 @@ const scaffoldGateway = ({ project_root, app, answers, webserver, projectName })
         gateway_port: answers.gateway_port,
         api_version: answers.api_version,
         gateway_cache_period: answers.gateway_cache_period,
-        gateway_timeout: answers.gateway_timeout
+        gateway_timeout: answers.gateway_timeout,
+        relativeKrakendDir
     });
 
 }
 
-/**
- * Removes a microservice and all associated files.
- * @param {Object} options - Options for removing the microservice.
- * @param {string} options.project_root - The root directory of the project.
- * @param {string} options.service_name - The name of the microservice to be removed.
- * @param {boolean} [options.sync] - If true, use synchronous file removal.
- */
+// /**
+//  * Removes a microservice and all associated files.
+//  * @param {Object} options - Options for removing the microservice.
+//  * @param {string} options.project_root - The root directory of the project.
+//  * @param {string} options.service_name - The name of the microservice to be removed.
+//  */
+// const removeResource = async ({ answers }) => {
+//     const { resource, resource_name, options } = answers;
+//     let project_root;
+
+//     try {
+//         project_root = generateRootPath({ currentDir: cwd() });
+//     } catch (error) {
+//         // Not within a suite repo
+//         if (error.message && error.message === 'suite.json and(or) .git not found') {
+//             ora('This does not look like a suite repo').warn()
+//             ora().info('If it is run <suite init> from project root to reinitialize suite project and try again')
+//             exit(1)
+//         }
+//         else {
+//             // rethrow the error
+//             throw new Error('Error code 10005.Kindly raise an issue at https://github.com/microservices-suite/node-microservices-suite/issues')
+//         }
+//     }
+//     const spinner = ora();
+//     if (options.all) {
+//         // Logic to remove all resources of the given type
+
+//         const resourceEnum = {
+//             library: ['shared'],
+//             app: ['gateways', 'apps'],
+//             service: ['microservices'],
+//             gateway: ['gateways', 'apps'],
+//             k8s: ['k8s']
+//         }
+//         if (!resourceEnum[resource]) return ora().warn(`Unkown resource name ${resource}`)
+//         const allResourceChildrenPath = path.join(project_root, ...(resourceEnum[resource]));
+//         if (!fs.existsSync(allResourceChildrenPath)) {
+//             spinner.warn(`No ${resource}(s) found.`);
+//             return;
+//         }
+
+//         // Remove all resources
+//         const services = fs.readdirSync(allResourceChildrenPath);
+//         if (services.length === 0) {
+//             spinner.warn(`No ${resource}(s) found.`);
+//             return;
+//         }
+
+//         // Synchronous removal of all services
+//         services.forEach(service => {
+//             const fullPath = path.join(allResourceChildrenPath, service);
+//             fs.rmSync(fullPath, { recursive: true, force: true });
+//         });
+//         spinner.succeed(`All ${resource}(s) have been removed.`);
+
+//         return;
+//     }
+
+//     // Call the appropriate action handler based on the resource type
+//     switch (resource) {
+//         case 'service':
+//             await removeService({ service_name: resource_name, project_root, sync: true });
+//             break;
+//         case 'app':
+//             await removeApp({ app_name: resource_name, project_root, sync: true });
+//             break;
+//         case 'library':
+//             await removeLibrary({ library_name: resource_name, project_root });
+//             break;
+//         case 'gateway':
+//             await removeGateway({ gateway_name: resource_name, project_root });
+//             break;
+//         default:
+//             throw new Error(`Unknown resource type: ${resource}`);
+//     }
+//     updateSuiteJson(project_root, resource, resource_name);
+
+// };
+
 const removeResource = async ({ answers }) => {
     const { resource, resource_name, options } = answers;
     let project_root;
 
     try {
-        project_root = generatRootPath({ currentDir: cwd() });
+        project_root = generateRootPath({ currentDir: process.cwd() });
     } catch (error) {
-        // Not within a suite repo
-        if (error.message && error.message === 'suite.json and(or) .git not found') {
-            ora('This does not look like a suite repo').warn()
-            ora().info('If it is run <suite init> from project root to reinitialize suite project and try again')
-            exit(1)
-        }
-        else {
-            // rethrow the error
-            throw new Error('Error code 10005.Kindly raise an issue at https://github.com/microservices-suite/node-microservices-suite/issues')
+        if (error.message === 'suite.json and(or) .git not found') {
+            ora().warn('This does not look like a suite repo');
+            ora().info('If it is, run <suite init> from the project root to reinitialize and try again');
+            exit(1);
+        } else {
+            throw new Error('Error code 10005. Kindly raise an issue at https://github.com/microservices-suite/node-microservices-suite/issues');
         }
     }
+
     const spinner = ora();
+    const resourceEnum = {
+        library: ['shared'],
+        app: ['gateways', 'apps'],
+        service: ['microservices'],
+        gateway: ['gateways', 'apps'],
+        k8s: ['k8s']
+    };
+
+    if (!resourceEnum[resource]) {
+        spinner.warn(`Unknown resource type: ${resource}`);
+        return;
+    }
     if (options.all) {
-        // Logic to remove all resources of the given type
-        
-        const resourceEnum = {
-            library: ['shared'],
-            app: ['gateways', 'apps'],
-            service: ['microservices'],
-            gateway: ['gateways', 'apps']
+        const allResourceChildrenPath = path.join(project_root, ...resourceEnum[resource]);
+        if (resource === 'app') {
+            const kubeNamespacePaths = glob.sync(path.join(project_root, 'k8s', 'ns', '*'));
+            // Check if the app exists in Docker or Kubernetes directories
+            const kubeExists = kubeNamespacePaths.length > 0;
+            if (kubeExists) {
+                kubeNamespacePaths.forEach((appKubePath) => {
+                    rmSync(appKubePath, { recursive: true, force: true });
+                    ora().info(`Kubernetes apps have been removed.`);
+                });
+            }
         }
-        if(!resourceEnum[resource]) return ora().warn(`Unkown resource name ${resource}`)
-        const allResourceChildrenPath = path.join(project_root, ...(resourceEnum[resource]));
         if (!fs.existsSync(allResourceChildrenPath)) {
             spinner.warn(`No ${resource}(s) found.`);
-            return;
+            // return;
         }
 
-        // Remove all resources
-        const services = fs.readdirSync(allResourceChildrenPath);
-        if (services.length === 0) {
+        const resources = fs.readdirSync(allResourceChildrenPath);
+        if (resources.length === 0) {
             spinner.warn(`No ${resource}(s) found.`);
-            return;
+            // return;
         }
 
-        // Synchronous removal of all services
-        services.forEach(service => {
-            const fullPath = path.join(allResourceChildrenPath, service);
+        resources.forEach(res => {
+            const fullPath = path.join(allResourceChildrenPath, res);
             fs.rmSync(fullPath, { recursive: true, force: true });
         });
         spinner.succeed(`All ${resource}(s) have been removed.`);
-
+        updateSuiteJson(project_root, resource, resources);
         return;
     }
 
-    // Call the appropriate action handler based on the resource type
+    // Single resource removal case
     switch (resource) {
         case 'service':
-            await removeService({ service_name: resource_name, project_root, sync: true });
+            await removeService({ service_name: resource_name, project_root });
             break;
         case 'app':
-            await removeApp({ app_name: resource_name, project_root, sync: true });
+            await removeApp({ app_name: resource_name, project_root });
             break;
         case 'library':
-            await removeLibrary({ library_name: resource_name, project_root, sync: true });
+            await removeLibrary({ library_name: resource_name, project_root });
             break;
         case 'gateway':
-            await removeGateway({ gateway_name: resource_name, project_root, sync: true });
+            await removeGateway({ gateway_name: resource_name, project_root });
             break;
         default:
             throw new Error(`Unknown resource type: ${resource}`);
     }
 
+    updateSuiteJson(project_root, resource, resource_name);
+    spinner.succeed(`Resource "${resource_name}" of type "${resource}" has been removed successfully.`);
 };
+
+/**
+ * Updates the suitejson configuration after removing one or more resources.
+ * @param {string} project_root - The root directory of the project.
+ * @param {string} resource - The type of resource to remove (e.g., 'service', 'app').
+ * @param {string|string[]} resource_name - The name(s) of the resource(s) to remove.
+ */
+const updateSuiteJson = (project_root, resource, resource_name) => {
+    const suiteJsonPath = path.join(project_root, 'suite.json');
+    const suiteJson = JSON.parse(fs.readFileSync(suiteJsonPath, 'utf8'));
+    const namesToRemove = Array.isArray(resource_name) ? resource_name : [resource_name];
+    switch (resource) {
+        case 'service':
+            // Remove each service and clean up associated app services
+            suiteJson.services = suiteJson.services.filter(
+                service => !namesToRemove.includes(service.name)
+            );
+            suiteJson.apps.forEach(app => {
+                app.services = app.services.filter(
+                    service => !namesToRemove.includes(service)
+                );
+            });
+            ora().info(`Service(s) "${namesToRemove.join(', ')}" removed from suitejson`);
+            break;
+        case 'app':
+            // Remove each specified app
+            suiteJson.apps = suiteJson.apps.filter(
+                app => !namesToRemove.includes(app.name)
+            );
+            ora().info(`App(s) "${namesToRemove.join(', ')}" removed from suitejson`);
+            break;
+        case 'library':
+            // Implement library removal if needed.
+            ora().info(`Library "${namesToRemove.join(', ')}" removed from suitejson`);
+            break;
+        case 'gateway':
+            // Implement gateway removal if needed.
+            ora().info(`Gateway "${namesToRemove.join(', ')}" removed from suitejson`);
+            break;
+        default:
+            throw new Error(`Unknown resource type: ${resource}`);
+    }
+
+    fs.writeFileSync(suiteJsonPath, JSON.stringify(suiteJson, null, 2));
+    ora().info('suitejson updated successfully');
+};
+
+
 /**
  * Removes a microservice and all associated files.
  * @param {Object} options - Options for removing the microservice.
  * @param {string} options.project_root - The root directory of the project.
  * @param {string} options.service_name - The name of the microservice to be removed.
- * @param {boolean} [options.sync] - If true, use synchronous file removal.
  * @param {boolean} [options.all] - If true, remove all services of the specified type.
  */
-const removeService = async ({ service_name, project_root, sync }) => {
+const removeService = async ({ service_name, project_root }) => {
     const servicePath = path.join(project_root, 'microservices', service_name);
     const spinner = ora(`Removing microservice "${service_name}"...`).start();
 
@@ -1803,45 +2057,29 @@ const removeService = async ({ service_name, project_root, sync }) => {
             spinner.warn(`Microservice "${service_name}" not found.`);
             return;
         }
+        // Synchronous removal of the specific service
+        fs.rmSync(servicePath, { recursive: true, force: true });
+        spinner.succeed(`Microservice "${service_name}" and all associated files have been removed.`);
 
-        if (sync) {
-            // Synchronous removal of the specific service
-            fs.rmSync(servicePath, { recursive: true, force: true });
-            spinner.succeed(`Microservice "${service_name}" and all associated files have been removed.`);
-        } else {
-            // Asynchronous removal of the specific service
-            fs.rm(servicePath, { recursive: true, force: true }, (err) => {
-                if (err) throw err;
-                spinner.succeed(`Microservice "${service_name}" and all associated files have been removed.`);
-            });
-        }
     } catch (error) {
         spinner.fail(`Error while removing microservice "${service_name}": ${error.message}`);
     }
 };
 
-
-/**
- * Removes a microservice and all associated files.
- * @param {Object} options - Options for removing the microservice.
- * @param {string} options.project_root - The root directory of the project.
- * @param {string} options.app_name - The name of the microapp to be removed.
- * @param {boolean} [options.sync] - If true, use synchronous file removal.
- */
 /**
  * Removes an app from both Docker and Kubernetes directories.
  * @param {Object} options - Options for removing the app.
  * @param {string} options.app_name - The name of the app to be removed.
  * @param {string} options.project_root - The root directory of the project.
- * @param {boolean} [options.sync] - If true, use synchronous file removal.
  */
-const removeApp = async ({ app_name, project_root, sync = true }) => {
+const removeApp = async ({ app_name, project_root }) => {
     const appDockerPath = path.join(project_root, 'gateways', 'apps', app_name);
-    const appKubePath = path.join(project_root, 'k8s', app_name);
 
-    // Check if the app exists in either Docker or Kubernetes directories
+    // Use glob to locate Kubernetes namespace directories with `app_name`
+    const kubeNamespacePaths = glob.sync(path.join(project_root, 'k8s', 'ns', '*', app_name));
+    // Check if the app exists in Docker or Kubernetes directories
     const dockerExists = existsSync(appDockerPath);
-    const kubeExists = existsSync(appKubePath);
+    const kubeExists = kubeNamespacePaths.length > 0;
 
     if (!dockerExists && !kubeExists) {
         ora().warn(`App "${app_name}" not found in Docker or Kubernetes.`);
@@ -1849,34 +2087,18 @@ const removeApp = async ({ app_name, project_root, sync = true }) => {
     }
 
     try {
-        if (sync) {
-            // Use synchronous removal
-            if (dockerExists) {
-                rmSync(appDockerPath, { recursive: true, force: true });
-                ora().info(`Docker files for app "${app_name}" have been removed.`);
-            }
-
-            if (kubeExists) {
-                rmSync(appKubePath, { recursive: true, force: true });
-                ora().info(`Kubernetes files for app "${app_name}" have been removed.`);
-            }
-        } else {
-            // Use asynchronous removal
-            if (dockerExists) {
-                rm(appDockerPath, { recursive: true, force: true }, (err) => {
-                    if (err) throw err;
-                    ora().info(`Docker files for app "${app_name}" have been removed.`);
-                });
-            }
-
-            if (kubeExists) {
-                rm(appKubePath, { recursive: true, force: true }, (err) => {
-                    if (err) throw err;
-                    ora().info(`Kubernetes files for app "${app_name}" have been removed.`);
-                });
-            }
+        // Synchronous removal
+        if (dockerExists) {
+            rmSync(appDockerPath, { recursive: true, force: true });
+            ora().info(`Docker files for app "${app_name}" have been removed.`);
         }
 
+        if (kubeExists) {
+            kubeNamespacePaths.forEach((appKubePath) => {
+                rmSync(appKubePath, { recursive: true, force: true });
+                ora().info(`Kubernetes files for app "${app_name}" have been removed.`);
+            });
+        }
         ora().succeed(`App "${app_name}" removed successfully.`);
     } catch (error) {
         ora().fail(`Error while removing app "${app_name}": ${error.message}`);
@@ -1888,9 +2110,8 @@ const removeApp = async ({ app_name, project_root, sync = true }) => {
  * @param {Object} options - Options for removing the microservice.
  * @param {string} options.project_root - The root directory of the project.
  * @param {string} options.library_name - The name of the microlibrary to be removed.
- * @param {boolean} [options.sync] - If true, use synchronous file removal.
  */
-const removeLibrary = async ({ library_name, project_root, sync }) => {
+const removeLibrary = async ({ library_name, project_root }) => {
     const libraryPath = path.join(project_root, 'shared', library_name);
     // Check if the microservice directory exists
     if (!existsSync(libraryPath)) {
@@ -1898,17 +2119,9 @@ const removeLibrary = async ({ library_name, project_root, sync }) => {
         return;
     }
     try {
-        if (sync) {
-            // Use synchronous removal
-            rmSync(libraryPath, { recursive: true, force: true });
-            ora().info(`Library "${library_name}" and all associated files have been removed.`);
-        } else {
-            // Use asynchronous removal
-            rm(libraryPath, { recursive: true, force: true }, (err) => {
-                if (err) throw err;
-                ora().info(`Library "${library_name}" and all associated files have been removed.`);
-            });
-        }
+        // Use synchronous removal
+        rmSync(libraryPath, { recursive: true, force: true });
+        ora().info(`Library "${library_name}" and all associated files have been removed.`);
         ora().succeed(`Library "${library_name}" removed successfully.`);
     } catch (error) {
         ora().fail(`Error while removing Library "${library_name}":`, error.message);
@@ -1920,26 +2133,18 @@ const removeLibrary = async ({ library_name, project_root, sync }) => {
  * @param {Object} options - Options for removing the microservice.
  * @param {string} options.project_root - The root directory of the project.
  * @param {string} options.gateway - The name of the microgateway to be removed.
- * @param {boolean} [options.sync] - If true, use synchronous file removal.
  */
-const removeGateway = async ({ gateway, project_root, sync }) => {
+const removeGateway = async ({ gateway, project_root }) => {
     const gatewayPath = path.join(project_root, 'apps', gateway);
     if (!existsSync(gatewayPath)) {
         ora().warn(`Gateway "${gateway}" not found.`);
         return;
     }
     try {
-        if (sync) {
-            // Use synchronous removal
-            rmSync(gatewayPath, { recursive: true, force: true });
-            ora().info(`Gateway "${gateway}" and all associated files have been removed.`);
-        } else {
-            // Use asynchronous removal
-            rm(gatewayPath, { recursive: true, force: true }, (err) => {
-                if (err) throw err;
-                ora().info(`Gateway "${gateway}" and all associated files have been removed.`);
-            });
-        }
+        // Use synchronous removal
+        rmSync(gatewayPath, { recursive: true, force: true });
+        ora().info(`Gateway "${gateway}" and all associated files have been removed.`);
+
         ora().succeed(`Gateway "${gateway}" removed successfully.`);
     } catch (error) {
         ora().fail(`Error while removing Gateway "${gateway}":`, error.message);
@@ -1978,6 +2183,5 @@ module.exports = {
     scaffoldGateways,
     getExistingApps,
     readFileContent,
-    readFileContent,
-    removeResource
+    removeResource,
 }
