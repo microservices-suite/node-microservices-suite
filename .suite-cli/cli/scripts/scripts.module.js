@@ -1469,7 +1469,7 @@ const generateK8sBroker = ({ broker_directory }) => {
     })
     )
 }
-const generateK8sApp = ({ answers, k8s_directory, projectName, services = [] }) => {
+const generateK8sApp = ({ namespace, app_name, k8s_directory, projectName, services = [] }) => {
     const app_directory = k8s_directory
     // Remove the directory if it already exists
     if (existsSync(app_directory)) {
@@ -1518,8 +1518,8 @@ const generateK8sApp = ({ answers, k8s_directory, projectName, services = [] }) 
                 port: s.port,
                 project_base: projectName,
                 env: 'prod',
-                namespace: answers?.namespace || 'default',
-                app: answers.app_name
+                namespace: namespace || 'default',
+                app: app_name
             })
             )
             writeFileSync(join(service_dir, 'secret.yaml'), assets.k8sSecretContent({
@@ -1530,7 +1530,7 @@ const generateK8sApp = ({ answers, k8s_directory, projectName, services = [] }) 
     })
     writeFileSync(join(app_directory, 'combo.yaml'), assets.k8sComboContent({
         project_base: projectName,
-        app: answers.app_name,
+        app: app_name,
         services: services.map((s) => ({ service: s.name, port: s.port, image: `${projectName}/${s.name}:latest` }))
     })
     )
@@ -1544,21 +1544,28 @@ const scaffoldApp = ({ answers }) => {
     const webserver_dir = join(app_directory, webserver);
     const krakend_dir = join(app_directory, 'krakend');
     const data_dir = join(app_directory, 'data');
-    if (!existsSync(k8s_directory)) {
-        const ingress_directory = join(project_root, `k8s/ingress`);
-        const broker_directory = join(project_root, `k8s/broker`);
-        mkdirSync(ingress_directory, { recursive: true });
-        mkdirSync(broker_directory, { recursive: true });
-
-        generateK8sBroker({ broker_directory, projectName });
-        writeFileSync(join(ingress_directory, 'ingress.yaml'), assets.k8sIngressContent({
-            project_base: projectName,
-            app: answers.app_name,
-            services
-        }));
+    if (existsSync(k8s_directory)) {
+        rmSync(k8s_directory, { recursive: true });
 
     }
-    generateK8sApp({ answers, k8s_directory, projectName, services })
+    const ingress_directory = join(project_root, `k8s/ingress`);
+    const broker_directory = join(project_root, `k8s/broker`);
+    mkdirSync(ingress_directory, { recursive: true });
+    mkdirSync(broker_directory, { recursive: true });
+
+    generateK8sBroker({ broker_directory, projectName });
+    writeFileSync(join(ingress_directory, 'ingress.yaml'), assets.k8sIngressContent({
+        project_base: projectName,
+        app: answers.app_name,
+        services
+    }));
+    generateK8sApp({
+        app_name: answers?.app_name,
+        namespace: answers?.namespace,
+        k8s_directory,
+        projectName,
+        services: answers.services
+    })
     // Remove the directory if it already exists
     if (existsSync(app_directory)) {
         rmSync(app_directory, { recursive: true });
