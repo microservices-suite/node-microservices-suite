@@ -15,13 +15,6 @@ spec:
             path: "/"
             backend:
               service:
-                name: notification
-                port:
-                  number: 9001
-          - pathType: Prefix
-            path: "/"
-            backend:
-              service:
                 name: payment
                 port:
                   number: 9002

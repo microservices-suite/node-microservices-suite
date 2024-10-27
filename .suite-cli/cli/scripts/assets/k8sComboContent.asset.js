@@ -151,7 +151,7 @@ spec:
   const generateIngress = ({ app, project_base, services }) => {
     const content = services.map(({ service, port }) => `
           - pathType: Prefix
-            path: "/${service}/*"
+            path: "/"
             backend:
               service:
                 name: ${service}

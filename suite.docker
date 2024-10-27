@@ -1,0 +1,15 @@
+docker
+├── README.md
+└── apps
+    └── nyati
+        ├── data
+        ├── docker-compose.dev.yml
+        ├── docker-compose.yml
+        ├── krakend
+        │   └── krakend.json
+        └── nginx
+            ├── Dockerfile
+            ├── Dockerfile.dev
+            └── default.conf
+
+6 directories, 7 files

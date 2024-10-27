@@ -1,0 +1,28 @@
+k8s
+├── README.md
+├── broker
+│   ├── clusterIp.yaml
+│   ├── deployment.yaml
+│   ├── loadBalancer.yaml
+│   └── nodePort.yaml
+├── ingress
+│   └── ingress.yaml
+└── ns
+    └── default
+        └── nyati
+            ├── combo.yaml
+            └── payment
+                ├── configMap.yaml
+                ├── db
+                │   ├── clusterIp.yaml
+                │   ├── deployment.yaml
+                │   ├── loadBalancer.yaml
+                │   └── nodePort.yaml
+                ├── secret.yaml
+                └── server
+                    ├── clusterIp.yaml
+                    ├── deployment.yaml
+                    ├── loadBalancer.yaml
+                    └── nodePort.yaml
+
+9 directories, 17 files

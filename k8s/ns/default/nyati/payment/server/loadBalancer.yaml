@@ -11,4 +11,4 @@ spec:
     - name: payment
       port: 9002
       targetPort: 9002
-      nodePort: 30015
+      nodePort: 30013

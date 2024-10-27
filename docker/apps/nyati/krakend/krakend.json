@@ -13,14 +13,6 @@
       "method": "GET",
       "backend": [
     {
-      "host": ["http://notification:9001"],
-      "url_pattern": "/",
-      "mapping": {
-        "message": "notification"
-      }
-    },
-
-    {
       "host": ["http://payment:9002"],
       "url_pattern": "/",
       "mapping": {
@@ -34,14 +26,6 @@
       "method": "GET",
       "backend": [
     {
-      "host": ["http://notification:9001"],
-      "url_pattern": "/api/v1/notifications",
-      "mapping": {
-        "data": "notifications"
-      }
-    },
-
-    {
       "host": ["http://payment:9002"],
       "url_pattern": "/api/v1/payments",
       "mapping": {
@@ -50,15 +34,15 @@
     }]
     },
     {
-      "@comment": "Fetch all data from the notification service",
-      "endpoint": "/api/v1/notifications",
+      "@comment": "Fetch all data from the payment service",
+      "endpoint": "/api/v1/payments",
       "method": "GET",
       "backend": [
     {
-      "host": ["http://notification:9001"],
-      "url_pattern": "/api/v1/notifications",
+      "host": ["http://payment:9002"],
+      "url_pattern": "/api/v1/payments",
       "mapping": {
-        "data": "notifications"
+        "data": "payments"
       }
     }]
     }
