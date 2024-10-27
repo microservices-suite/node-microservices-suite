@@ -159,4 +159,4 @@ web_modules/
 .pnp.*
 
 # ignore data volume
-gateways/apps/*/data
+docker/apps/*/data

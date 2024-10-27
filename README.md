@@ -14,7 +14,7 @@ To easily work with a `@microservices-suite monorepo` you need to install [Suite
 |  │  │  ├─ cli.js
 |  │  │  ├─ package.json
 |  │  │  ├─ README.md
-│  ├─ gateways/
+│  ├─ docker/
 |  │  ├─ apps/
 |  │  |   ├─app-1/
 |  │  │   | ├─ data/

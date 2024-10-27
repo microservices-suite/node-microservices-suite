@@ -11,7 +11,7 @@ module.exports = ({ answers }) => (
         `tests/${answers.service_name}/snapshot`,
         `microservices`,
         `k8s/${answers.service_name}`,
-        `gateways/apps`,
+        `docker/apps`,
         ...(answers.apis.map((api) => `${api}/app1`)),
     ]
 )
