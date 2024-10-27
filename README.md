@@ -20,16 +20,17 @@ To easily work with a `@microservices-suite monorepo` you need to install [Suite
 │           ├── docker-compose.dev.yml
 │           ├── docker-compose.yml
 │           ├── krakend
+│           │   ├── README.md
 │           │   └── krakend.json
 │           └── nginx
 │               ├── Dockerfile
 │               ├── Dockerfile.dev
 │               └── default.conf
 ├── graphql
-│   ├── README.md
 │   └── nyati-app
 │       └── appollo-server.yml
 ├── k8s
+│   ├── README.md
 │   ├── broker
 │   │   ├── clusterIp.yaml
 │   │   ├── deployment.yaml
@@ -116,15 +117,18 @@ To easily work with a `@microservices-suite monorepo` you need to install [Suite
 │       ├── pick.js
 │       └── validate.js
 ├── suite.config
+├── suite.docker
 ├── suite.html
 ├── suite.json
+├── suite.k8s
+├── suite.ms
 └── tests
     ├── README.md
     └── cli
         └── scripts
             └── retrieveWorkspaceName.test.js
 
-36 directories, 80 files
+36 directories, 84 files
 ```
 ## Monorepo strategy benefits for microservices:
 
