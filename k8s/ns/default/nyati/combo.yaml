@@ -1,77 +1,6 @@
 
 # Kubernetes Configuration for nyati
 
-# Deployment for notification
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: notification
-spec:
-  selector:
-    matchLabels:
-      app: notification
-  template:
-    metadata:
-      labels:
-        app: notification
-    spec:
-      containers:
-      - name: notification
-        image: microservices-suite/notification:latest
-        resources:
-          limits:
-            memory: "128Mi"
-            cpu: "500m"
-        ports:
-        - containerPort: 9001
----
-
-# Service for notification (ClusterIP)
-apiVersion: v1
-kind: Service
-metadata:
-  name: notification
-spec:
-  type: ClusterIP
-  selector:
-    app: notification
-  ports:
-    - port: 9001
-      targetPort: 9001
-      
----
-
-# Service for notification (LoadBalancer)
-apiVersion: v1
-kind: Service
-metadata:
-  name: notification
-spec:
-  type: LoadBalancer
-  selector:
-    app: notification
-  ports:
-    - port: 9001
-      targetPort: 9001
-      
----
-
-# Service for notification (NodePort)
-apiVersion: v1
-kind: Service
-metadata:
-  name: notification
-spec:
-  type: NodePort
-  selector:
-    app: notification
-  ports:
-    - port: 9001
-      targetPort: 9001
-      
----
-
-
 # Deployment for payment
 apiVersion: apps/v1
 kind: Deployment
@@ -157,15 +86,7 @@ spec:
         paths:
 
           - pathType: Prefix
-            path: "/notification/*"
-            backend:
-              service:
-                name: notification
-                port:
-                  number: 9001
-    
-          - pathType: Prefix
-            path: "/payment/*"
+            path: "/"
             backend:
               service:
                 name: payment

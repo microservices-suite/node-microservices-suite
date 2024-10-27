@@ -1,0 +1,59 @@
+
+version: '3.8'
+services:
+
+  payment: 
+    build: 
+      dockerfile: Dockerfile.dev 
+      context: ../../../microservices/payment 
+    ports: 
+      - "9002:9002" 
+    volumes: 
+      - /app/node_modules 
+      - ../../../microservices/payment:/app 
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  nginx:
+    depends_on:
+      - payment
+    restart: always
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile.dev
+    ports:
+      - '4000:80'
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:80/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: rabbitmq
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      retries: 5
+  mongodb:
+    image: mongo
+    ports:
+      - '27017:27017'
+    restart: always
+    volumes:
+      - type: bind
+        source: ./data
+        target: /data/db
+  krakend:
+    image: devopsfaith/krakend:2.7
+    ports:
+      - '9001:9001'
+      - '8090:8090'
+    volumes:
+      - ./krakend/:/etc/krakend/
+    command: ['run','-d','-c','/etc/krakend/krakend.json']
