@@ -7,71 +7,124 @@ To easily work with a `@microservices-suite monorepo` you need to install [Suite
 
 ## Project file structure
 ```sequence
-├─ node-microservices-suite
-│  ├─ .suite-cli/
-|  │  ├─ cli/
-|  │  │  ├─ scripts/
-|  │  │  ├─ cli.js
-|  │  │  ├─ package.json
-|  │  │  ├─ README.md
-│  ├─ docker/
-|  │  ├─ apps/
-|  │  |   ├─app-1/
-|  │  │   | ├─ data/
-|  │  │   | ├─ krakend/
-|  │  │   | ├─ webserver/
-|  │  │   | |  ├─Dockerfile
-|  │  │   | |  ├─Dockerfile.dev
-|  │  │   | |  ├─webserver.conf
-|  │  │   | ├─ docker-compose.yml
-|  │  │   | ├─ docker-compose.dev.yml
-|  │  │   | ├─ README.md
-│  ├─ graphql/
-|  │  ├─ app-1/
-|  │  │  ├─ apollo-server
-|  │  │  ├─ README.md
-│  ├─ k8s/
-|  │  ├─ service-1/
-|  │  │  ├─ cluster-ip-service.yml
-|  │  │  ├─ cluster-deployment.yml
-|  │  │  ├─ ingress-service.yml
-|  │  │  ├─ README.md
-|  ├─ microservices/
-|  │  ├─ service-1/
-|  │  │  ├─ src
-|  │  │  ├─ .env
-|  │  │  ├─ .env.dev
-|  │  │  ├─ app.js
-|  │  │  ├─ Dockerfile
-├─ │  │  ├─ Dockerfile.dev
-|  │  │  ├─ ecosystem.config.js
-|  │  │  ├─ index.js
-|  │  │  ├─ package.json
-|  │  │  ├─ task.json
-|  ├─ shared/
-|  │  ├─ library-1/
-|  │  │  ├─ APIError.js
-|  │  │  ├─ catchAsync.js
-|  │  │  ├─ index.js
-|  │  │  ├─ package.json
-|  │  │  ├─ pick.js
-|  │  │  ├─ README.md
-|  │  │  ├─ validate
-│  ├─ tests/
-|  │  ├─ service-1/
-|  │  │  ├─ e2e/
-|  │  │  ├─ integration/
-|  │  │  ├─ snapshot/
-|  │  │  ├─ unit/
-|  │  │  ├─ README.md
-|  ├─ .gitignore
-|  ├─ .npmrc
-|  ├─ .yarnrc.yml
-|  ├─ docker-compose.yml
-|  ├─ package.json
-|  ├─ production.yml
-|  ├─ README.md
-|  ├─ yarn.lock
+.
+├── CHANGELOG.md
+├── CODE_OF_CONDUCT.md
+├── CONTRIBUTING.md
+├── LICENSE
+├── README.md
+├── docker
+│   ├── README.md
+│   └── apps
+│       └── nyati
+│           ├── docker-compose.dev.yml
+│           ├── docker-compose.yml
+│           ├── krakend
+│           │   └── krakend.json
+│           └── nginx
+│               ├── Dockerfile
+│               ├── Dockerfile.dev
+│               └── default.conf
+├── graphql
+│   ├── README.md
+│   └── nyati-app
+│       └── appollo-server.yml
+├── k8s
+│   ├── broker
+│   │   ├── clusterIp.yaml
+│   │   ├── deployment.yaml
+│   │   ├── loadBalancer.yaml
+│   │   └── nodePort.yaml
+│   ├── ingress
+│   │   └── ingress.yaml
+│   └── ns
+│       └── default
+│           └── nyati
+│               ├── combo.yaml
+│               └── payment
+│                   ├── configMap.yaml
+│                   ├── db
+│                   │   ├── clusterIp.yaml
+│                   │   ├── deployment.yaml
+│                   │   ├── loadBalancer.yaml
+│                   │   └── nodePort.yaml
+│                   ├── secret.yaml
+│                   └── server
+│                       ├── clusterIp.yaml
+│                       ├── deployment.yaml
+│                       ├── loadBalancer.yaml
+│                       └── nodePort.yaml
+├── microservices
+│   └── payment
+│       ├── Dockerfile.dev
+│       ├── ecosystem.config.js
+│       ├── index.js
+│       ├── package.json
+│       └── src
+│           ├── controllers
+│           │   ├── controllers.js
+│           │   └── index.js
+│           ├── models
+│           │   ├── index.js
+│           │   └── models.js
+│           ├── routes
+│           │   ├── index.js
+│           │   └── routes.js
+│           ├── services
+│           │   ├── index.js
+│           │   └── services.js
+│           └── subscriber
+│               ├── index.js
+│               └── subscriber.js
+├── package.json
+├── production.yml
+├── shared
+│   ├── README.md
+│   ├── broker
+│   │   ├── README.md
+│   │   ├── package.json
+│   │   └── rabbitmq
+│   │       ├── exchange.js
+│   │       ├── index.js
+│   │       ├── publisher.js
+│   │       ├── subscriber.js
+│   │       └── worker.queue.js
+│   ├── config
+│   │   ├── README.md
+│   │   ├── config.js
+│   │   ├── index.js
+│   │   ├── logger.js
+│   │   ├── morgan.js
+│   │   └── package.json
+│   ├── constants
+│   │   ├── README.md
+│   │   └── package.json
+│   ├── errors
+│   │   ├── README.md
+│   │   ├── errors.handler.js
+│   │   ├── index.js
+│   │   └── package.json
+│   ├── middlewares
+│   │   ├── README.md
+│   │   └── package.json
+│   └── utilities
+│       ├── APIError.js
+│       ├── README.md
+│       ├── asyncErrorHandler.js
+│       ├── index.js
+│       ├── package.json
+│       ├── pick.js
+│       └── validate.js
+├── suite.config
+├── suite.html
+├── suite.json
+└── tests
+    ├── README.md
+    └── cli
+        └── scripts
+            └── retrieveWorkspaceName.test.js
+
+36 directories, 80 files
 ```
 ## Monorepo strategy benefits for microservices:
 
