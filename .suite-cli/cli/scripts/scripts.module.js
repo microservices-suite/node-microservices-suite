@@ -1026,7 +1026,7 @@ const addMicroservice = ({ project_root, answers }) => {
             case `GraphQL/app1`:
                 writeFile(join(current_dir, 'appollo-server.js'), assets.apolloServerContent({ answers }));
                 break;
-            case `k8s/${answers.service_name}`:
+            case `k8s`:
                 // TODO: move k8s into a function 
                 writeFile(join(current_dir, 'README.md'), assets.k8sReadmeContent({ answers }));
                 break;
