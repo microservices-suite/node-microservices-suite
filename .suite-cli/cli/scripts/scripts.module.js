@@ -1071,7 +1071,6 @@ const scaffoldNewRepo = async ({ answers }) => {
             addProjectConfigs({ project_root: join(cwd(), answers.repo_name), answers })
             addMicroservice({ project_root: join(cwd(), answers.repo_name), answers })
             addPackageJson({ project_root: join(cwd(), answers.repo_name), answers })
-
             return
         }
         else {
