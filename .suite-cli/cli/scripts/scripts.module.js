@@ -1026,14 +1026,9 @@ const addMicroservice = ({ project_root, answers }) => {
             case `GraphQL/app1`:
                 writeFile(join(current_dir, 'appollo-server.js'), assets.apolloServerContent({ answers }));
                 break;
-            case `k8s/${answers.service_name}`:
-                // TODO: move k8s into a function
-                writeFile(join(current_dir, 'client-node-port.yaml'), assets.k8sClientNodeContent());
-                writeFile(join(current_dir, 'client-pod.yaml'), assets.k8sClientPodContent());
-                writeFile(join(current_dir, 'cluster-deployment.yml'), assets.k8sClusterDeploymentContent());
+            case `k8s`:
+                // TODO: move k8s into a function 
                 writeFile(join(current_dir, 'README.md'), assets.k8sReadmeContent({ answers }));
-                writeFile(join(current_dir, 'cluster-ip-service.yml'), assets.k8sClusterIpServiceContent());
-                writeFile(join(current_dir, 'ingress-service.yml'), assets.k8sIngressServiceContent());
                 break;
         }
     });
@@ -1076,6 +1071,7 @@ const scaffoldNewRepo = async ({ answers }) => {
             addProjectConfigs({ project_root: join(cwd(), answers.repo_name), answers })
             addMicroservice({ project_root: join(cwd(), answers.repo_name), answers })
             addPackageJson({ project_root: join(cwd(), answers.repo_name), answers })
+
             return
         }
         else {

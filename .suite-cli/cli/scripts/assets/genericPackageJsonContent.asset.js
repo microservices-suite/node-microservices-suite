@@ -9,7 +9,7 @@ module.exports = ({ answers, suffix, isMicroservice, description, os, addDeps })
         dependencies: {
             [`${answers.project_base}/config`]: "1.0.0",
             [`${answers.project_base}/errors`]: "1.0.0",
-            [`${answers.project_base}/utilities`]: "1.0.7",
+            [`${answers.project_base}/utilities`]: "1.0.0",
             [`${answers.project_base}/broker`]: "1.0.0",
             dotenv: "^16.4.5",
             express: "^4.18.3",
