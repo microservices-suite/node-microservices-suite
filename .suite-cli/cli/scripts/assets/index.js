@@ -67,5 +67,21 @@ module.exports.k8sIngressContent = require('./k8sIngressContent.asset');
 module.exports.k8sLoadBalancerContent = require('./k8sLoadBalancerContent.asset'); 
 module.exports.k8sNodePortContent = require('./k8sNodePortContent.asset'); 
 module.exports.k8sSecretContent = require('./k8sSecretContent.asset'); 
+module.exports.sreTreeContent = require('./sreTreeContent.asset'); 
+module.exports.logstashConfContent = require('./logstashConfContent.asset'); 
+module.exports.grafanaDashboardYamlContent = require('./grafanaDashboardYamlContent.asset'); 
+module.exports.grafanaDatasourcesYamlContent = require('./grafanaDatasourcesYamlContent.asset'); 
+module.exports.grafanaKrakendDashboardJsonContent = require('./grafanaKrakendDashboardJsonContent.asset'); 
+module.exports.krakenFlexibleConfigContent = require('./krakenFlexibleConfigContent.asset'); 
+module.exports.krakenJsonContent = require('./krakenJsonContent.asset'); 
+module.exports.krakendPartialsExtraConfContent = require('./krakendPartialsExtraConfContent.asset'); 
+module.exports.krakendPartialsInputHeadersContent = require('./krakendPartialsInputHeadersContent.asset'); 
+module.exports.krakendPartialsRateLimitBackendContent = require('./krakendPartialsRateLimitBackendContent.asset'); 
+module.exports.krakendSettingsProdEnvJsonContent = require('./krakendSettingsProdEnvJsonContent.asset'); 
+module.exports.krakendSettingsProdLoopExampleJsonContent = require('./krakendSettingsProdLoopExampleJsonContent.asset'); 
+module.exports.krakendSettingsDevEnvJsonContent = require('./krakendSettingsDevEnvJsonContent.asset'); 
+module.exports.krakendSettingsDevLoopExampleJsonContent = require('./krakendSettingsDevLoopExampleJsonContent.asset'); 
+module.exports.krakendTemplatesContent = require('./krakendTemplatesContent.asset'); 
+module.exports.elasticDashboardJsonContent = require('./elasticDashboardJsonContent.asset');
 
 

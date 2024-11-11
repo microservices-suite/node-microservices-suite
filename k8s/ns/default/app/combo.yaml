@@ -1,0 +1,98 @@
+
+# Kubernetes Configuration for app
+
+# Deployment for payment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment
+spec:
+  selector:
+    matchLabels:
+      app: payment
+  template:
+    metadata:
+      labels:
+        app: payment
+    spec:
+      containers:
+      - name: payment
+        image: microservices-suite/payment:latest
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 9002
+---
+
+# Service for payment (ClusterIP)
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment
+spec:
+  type: ClusterIP
+  selector:
+    app: payment
+  ports:
+    - port: 9002
+      targetPort: 9002
+      
+---
+
+# Service for payment (LoadBalancer)
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment
+spec:
+  type: LoadBalancer
+  selector:
+    app: payment
+  ports:
+    - port: 9002
+      targetPort: 9002
+      
+---
+
+# Service for payment (NodePort)
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment
+spec:
+  type: NodePort
+  selector:
+    app: payment
+  ports:
+    - port: 9002
+      targetPort: 9002
+      
+---
+
+
+# Ingress for app
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: microservices-suite
+  labels:
+    name: microservices-suite
+spec:
+  rules:
+    - host: app.com
+      http:
+        paths:
+
+          - pathType: Prefix
+            path: "/"
+            backend:
+              service:
+                name: payment
+                port:
+                  number: 9002
+    
+---
+
+# Add more configurations below if needed

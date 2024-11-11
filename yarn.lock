@@ -62,7 +62,7 @@
     lodash "^4.17.21"
 
 "@microservices-suite/cli@file:/Users/nathan3/Desktop/PracticeEnv/node-microservices-suite/.suite-cli/cli":
-  version "3.0.1"
+  version "3.1.2"
   resolved "file:.suite-cli/cli"
   dependencies:
     chalk "4.1.2"

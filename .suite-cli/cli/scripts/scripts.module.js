@@ -1531,10 +1531,61 @@ const generateK8sApp = ({ namespace, app_name, k8s_directory, projectName, servi
     })
     )
 }
+const injectSREConfigs = ({ project_root }) => {
+    const directories = assets.sreTreeContent()
+    directories.forEach((dir) => {
+        for (const dir_ of dir.subdirectories) {
+            const current_dir = `${project_root}/docker/sre/${dir.directory}/${dir_}`
+            mkdirSync(current_dir, { recursive: true });
+            switch (`${dir.directory}/${dir_}`) {
+
+                case 'grafana/dashboards':
+                    writeFile(join(current_dir, 'all.yaml'), assets.grafanaDashboardYamlContent());
+                    break;
+
+                case 'grafana/datasources':
+                    writeFile(join(current_dir, 'all.yaml'), assets.grafanaDatasourcesYamlContent());
+                    break;
+
+                case 'grafana/krakend':
+                    writeFile(join(current_dir, 'dashboard.json'), assets.grafanaKrakendDashboardJsonContent());
+                    break;
+
+                case 'krakend/partials':
+                    writeFile(join(current_dir, 'extra_config.tmpl'), assets.krakendPartialsExtraConfContent());
+                    writeFile(join(current_dir, 'input_headers.tmpl'), assets.krakendPartialsInputHeadersContent());
+                    writeFile(join(current_dir, 'rate_limit_backend.tmpl'), assets.krakendPartialsRateLimitBackendContent());
+                    break;
+
+                case 'krakend/settings':
+                    mkdirSync(join(current_dir, 'dev'), { recursive: true });
+                    mkdirSync(join(current_dir, 'prod'), { recursive: true });
+                    writeFile(join(current_dir, 'dev/env.json'), assets.krakendSettingsDevEnvJsonContent());
+                    writeFile(join(current_dir, 'prod/env.json'), assets.krakendSettingsProdEnvJsonContent());
+                    writeFile(join(current_dir, 'dev/loop_example.json'), assets.krakendSettingsDevLoopExampleJsonContent());
+                    writeFile(join(current_dir, 'prod/loop_example.json'), assets.krakendSettingsProdLoopExampleJsonContent());
+                    break;
+
+                case 'krakend/templates':
+                    writeFile(join(current_dir, 'sample_template.tmpl'), assets.krakendTemplatesContent());
+                    break;
+            }
+
+        }
+
+    });
+    mkdirSync(`${project_root}/docker/sre/elastic`, { recursive: true });
+    mkdirSync(`${project_root}/docker/sre/logstash`, { recursive: true });
+    writeFile(join(`${project_root}/docker/sre/elastic`, 'dashboard.ndjson'), assets.elasticDashboardJsonContent());
+    writeFile(join(`${project_root}/docker/sre/logstash`, 'logstash.conf'), assets.elasticDashboardJsonContent());
+    writeFile(join(`${project_root}/docker/sre/krakend`, 'krakend-flexible-config.tmpl'), assets.krakenFlexibleConfigContent());
+    writeFile(join(`${project_root}/docker/sre/krakend`, 'krakend.json'), assets.krakenJsonContent());
+}
 const scaffoldApp = ({ answers }) => {
     const { webserver, projectName, services } = readFileContent({ currentDir: cwd() });
     const project_root = generateRootPath({ currentDir: cwd() });
     const app_directory = join(project_root, 'docker/apps', answers.app_name);
+    const sre_directory = join(project_root, 'docker/sre');
     const k8s_directory = join(project_root, `k8s/ns/${answers?.namespace || 'default'}`, answers.app_name);
 
     const webserver_dir = join(app_directory, webserver);
@@ -1542,6 +1593,10 @@ const scaffoldApp = ({ answers }) => {
     const data_dir = join(app_directory, 'data');
     if (existsSync(k8s_directory)) {
         rmSync(k8s_directory, { recursive: true });
+
+    }
+    if (!existsSync(sre_directory)) {
+        injectSREConfigs({ project_root });
 
     }
     const ingress_directory = join(project_root, `k8s/ingress`);
