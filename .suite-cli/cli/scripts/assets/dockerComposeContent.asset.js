@@ -62,5 +62,53 @@ ${serviceNames.map(service => `      - ${service}`).join('\n')}
       - '8090:8090'
     volumes:
       - ./krakend/:/etc/krakend/
-    command: ['run','-d','-c','/etc/krakend/krakend.json']`;
+    command: ['run','-d','-c','/etc/krakend/krakend.json']
+  grafana:
+    image: grafana/grafana:9.1.2
+    ports:
+      - "3000:3000"
+    volumes:
+      - "./sre/grafana/datasources/all.yml:/etc/grafana/provisioning/datasources/all.yml"
+      - "./sre/grafana/dashboards/all.yml:/etc/grafana/provisioning/dashboards/all.yml"
+      - "./sre/grafana/krakend:/var/lib/grafana/dashboards/krakend"
+  influxdb:
+    image: influxdb:1.8.10
+    environment:
+      - "INFLUXDB_DB=krakend"
+      - "INFLUXDB_USER=krakend-dev"
+      - "INFLUXDB_USER_PASSWORD=pas5w0rd"
+      - "INFLUXDB_ADMIN_USER=admin"
+      - "INFLUXDB_ADMIN_PASSWORD=supersecretpassword"
+    ports:
+      - "8086:8086"
+  jaeger:
+    image: jaegertracing/all-in-one:1
+    ports:
+      - "16686:16686"
+      - "14268:14268"
+  elasticsearch:
+    image: elasticsearch:8.4.1
+    environment:
+      - "discovery.type=single-node"
+      - "xpack.security.enabled=false"
+      - "xpack.security.transport.ssl.enabled=false"
+      - "xpack.security.http.ssl.enabled=false"
+      - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
+    ports:
+      - "19200:9200"
+      - "9300:9300"
+  kibana:
+    image: kibana:8.4.1
+    ports:
+      - "5601:5601"
+  logstash:
+    image: logstash:8.4.1
+    ports:
+      - "12201:12201/udp"
+      - "5044:5044"
+    environment:
+      - "xpack.monitoring.elasticsearch.url=http://elasticsearch:9200"
+    volumes:
+      - ./sre/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    command: ["-f", "/usr/share/logstash/pipeline/logstash.conf"]`;
 };
