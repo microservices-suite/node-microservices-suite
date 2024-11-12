@@ -68,9 +68,9 @@ ${serviceNames.map(service => `      - ${service}`).join('\n')}
     ports:
       - "3000:3000"
     volumes:
-      - "./sre/grafana/datasources/all.yml:/etc/grafana/provisioning/datasources/all.yml"
-      - "./sre/grafana/dashboards/all.yml:/etc/grafana/provisioning/dashboards/all.yml"
-      - "./sre/grafana/krakend:/var/lib/grafana/dashboards/krakend"
+      - "../../sre/grafana/datasources/all.yml:/etc/grafana/provisioning/datasources/all.yml"
+      - "../../sre/grafana/dashboards/all.yml:/etc/grafana/provisioning/dashboards/all.yml"
+      - "../../sre/grafana/krakend:/var/lib/grafana/dashboards/krakend"
   influxdb:
     image: influxdb:1.8.10
     environment:
@@ -109,6 +109,6 @@ ${serviceNames.map(service => `      - ${service}`).join('\n')}
     environment:
       - "xpack.monitoring.elasticsearch.url=http://elasticsearch:9200"
     volumes:
-      - ./sre/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+      - ../../sre/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
     command: ["-f", "/usr/share/logstash/pipeline/logstash.conf"]`;
 };
