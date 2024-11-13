@@ -68,8 +68,8 @@ ${serviceNames.map(service => `      - ${service}`).join('\n')}
     ports:
       - "3000:3000"
     volumes:
-      - "../../sre/grafana/datasources/all.yml:/etc/grafana/provisioning/datasources/all.yml"
-      - "../../sre/grafana/dashboards/all.yml:/etc/grafana/provisioning/dashboards/all.yml"
+      - "../../sre/grafana/datasources/all.yaml:/etc/grafana/provisioning/datasources/all.yaml"
+      - "../../sre/grafana/dashboards/all.yaml:/etc/grafana/provisioning/dashboards/all.yaml"
       - "../../sre/grafana/krakend:/var/lib/grafana/dashboards/krakend"
   influxdb:
     image: influxdb:1.8.10
