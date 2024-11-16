@@ -64,6 +64,43 @@ module.exports = ({
       "method": "GET",
       "backend": [${eachServiceListBackends}]
     }
-  ]
+  ],
+   "extra_config": {
+    "telemetry/metrics": {
+        "collection_time": "30s",
+        "listen_address": ":8090"
+    },
+    "telemetry/influx": {
+        "address": "http://influxdb:8086",
+        "ttl": "25s",
+        "buffer_size": 100,
+        "username": "krakend-dev",
+        "password": "pas5w0rd"
+    },
+    "telemetry/logging": {
+        "level": "DEBUG",
+        "prefix": "[KRAKEND]",
+        "syslog": false,
+        "stdout": true
+    },
+    "telemetry/gelf": {
+        "address": "logstash:12201",
+        "enable_tcp": false
+    },
+    "telemetry/opencensus": {
+        "sample_rate": 100,
+        "reporting_period": 1,
+        "enabled_layers": {
+            "backend": true,
+            "router": true
+        },
+        "exporters": {
+            "jaeger": {
+                "endpoint": "http://jaeger:14268/api/traces",
+                "service_name": "krakend"
+            }
+        }
+    }
+  }
 }`;
 };
