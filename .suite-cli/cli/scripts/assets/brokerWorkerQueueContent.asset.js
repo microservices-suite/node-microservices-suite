@@ -30,7 +30,6 @@ const amqpInitializeQueue = async ({ config }) => {
         const channel = await connection.createChannel();
         return channel;
     } catch (error) {
-        console.error({error})
         throw new APIError(500, \`broker failed to initialize: \${error.message}\`);
     }
 };
