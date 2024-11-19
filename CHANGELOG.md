@@ -1,6 +1,31 @@
 # Changelog
 
 
+## v1.9.0
+
+[compare changes](https://github.com/microservices-suite/node-microservices-suite/compare/v3.1.2...v1.9.0)
+
+### 🚀 Enhancements
+
+- Add monitoring & observability ([548b98e](https://github.com/microservices-suite/node-microservices-suite/commit/548b98e))
+- Add telemetry to apps ([2c5776c](https://github.com/microservices-suite/node-microservices-suite/commit/2c5776c))
+- Add monitoring & observability ([dfa7c94](https://github.com/microservices-suite/node-microservices-suite/commit/dfa7c94))
+
+### 🩹 Fixes
+
+- Grafana pointing to the wrong volume ([caa1973](https://github.com/microservices-suite/node-microservices-suite/commit/caa1973))
+- Retry broker and db connections at start ([8ed19da](https://github.com/microservices-suite/node-microservices-suite/commit/8ed19da))
+- Grafana SQL queries ([1e1476b](https://github.com/microservices-suite/node-microservices-suite/commit/1e1476b))
+
+### 💅 Refactors
+
+- Update sre path ([d67e1c0](https://github.com/microservices-suite/node-microservices-suite/commit/d67e1c0))
+- Remove console from broker ([8ae5f4b](https://github.com/microservices-suite/node-microservices-suite/commit/8ae5f4b))
+
+### ❤️ Contributors
+
+- Gilbert Andanje ([@GAndanje](http://github.com/GAndanje))
+
 ## v1.8.0
 
 [compare changes](https://github.com/microservices-suite/node-microservices-suite/compare/v3.0.1...v1.8.0)
