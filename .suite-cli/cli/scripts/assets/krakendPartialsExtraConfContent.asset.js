@@ -1,4 +1,4 @@
-module.exports = () =>`
+module.exports = ({ app_name }) => `
 {
     "security/cors": {
       "allow_origins": [
@@ -23,7 +23,7 @@ module.exports = () =>`
     },
     "telemetry/logging": {
       "level": "DEBUG",
-      "prefix": "[KRAKEND]",
+      "prefix": "[SUITE]",
       "syslog": false,
       "stdout": true
     },
@@ -48,7 +48,7 @@ module.exports = () =>`
       "exporters": {
         "jaeger": {
           "endpoint": "http://jaeger:14268/api/traces",
-          "serviceName": "krakend"
+          "serviceName": "🦧${app_name}"
         }
       }
     }

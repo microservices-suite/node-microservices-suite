@@ -4,7 +4,8 @@ module.exports = ({
   api_version,
   gateway_cache_period,
   gateway_timeout,
-  gateway_port
+  gateway_port,
+  app_name
 }) => {
   // Health check for all services
   const suiteStatusCheckBackends = services.map((service) => `
@@ -79,7 +80,7 @@ module.exports = ({
     },
     "telemetry/logging": {
         "level": "DEBUG",
-        "prefix": "[KRAKEND]",
+        "prefix": "[SUITE]",
         "syslog": false,
         "stdout": true
     },
@@ -97,7 +98,7 @@ module.exports = ({
         "exporters": {
             "jaeger": {
                 "endpoint": "http://jaeger:14268/api/traces",
-                "service_name": "krakend"
+                "service_name": "🦧${app_name}"
             }
         }
     }
