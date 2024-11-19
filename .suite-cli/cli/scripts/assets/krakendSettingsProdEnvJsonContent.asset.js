@@ -1,6 +1,6 @@
-module.exports = () => `
+module.exports = ({answers}) => `
 {
-	"port": 8080,
+	"port": ${answers.gateway_port},
 	"host_member": "http://member.production-host.com",
 	"host_logistics": "http://logistics.production-host.com",
 	"host_payment": "http://payment.production-host.com",

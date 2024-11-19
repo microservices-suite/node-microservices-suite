@@ -1,11 +1,11 @@
-module.exports = () => `
+module.exports = ({answers}) => `
 {
     "$schema": "https://www.krakend.io/schema/v3.json",
     "version": 3,
     "name": "Sample Gateway",
     "port": {{ .env.port }},
-    "timeout": "30s",
-    "cache_ttl": "300s",
+    "timeout": \"${answers.gateway_timeout}s",
+    "cache_ttl": \"${answers.gateway_cache_period}s",
     "extra_config": {{ include "extra_config.tmpl" }},
     "endpoints": [
       {{ template "sample_template.tmpl" . }},
@@ -16,7 +16,7 @@ module.exports = () => `
             "endpoint": "{{ $endpoint }}",
             "backend": [
               {
-                "host": [ "http://localhost:8080" ],
+                "host": [ "http://localhost:${answers.gateway_port}" ],
                 "url_pattern": "/__debug{{ $endpoint }}"
               }
             ]

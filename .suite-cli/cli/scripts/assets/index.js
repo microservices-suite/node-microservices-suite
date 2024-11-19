@@ -82,6 +82,7 @@ module.exports.krakendSettingsProdLoopExampleJsonContent = require('./krakendSet
 module.exports.krakendSettingsDevEnvJsonContent = require('./krakendSettingsDevEnvJsonContent.asset'); 
 module.exports.krakendSettingsDevLoopExampleJsonContent = require('./krakendSettingsDevLoopExampleJsonContent.asset'); 
 module.exports.krakendTemplatesContent = require('./krakendTemplatesContent.asset'); 
-module.exports.elasticDashboardJsonContent = require('./elasticDashboardJsonContent.asset');
+module.exports.dockerComposeEnvContent = require('./dockerComposeEnvContent.asset');
+module.exports.makeFileContent = require('./makeFileContent.asset');
 
 
