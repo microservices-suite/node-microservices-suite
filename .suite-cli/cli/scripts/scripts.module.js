@@ -11,6 +11,7 @@ const { writeFile } = require('node:fs/promises');
 const assets = require('./assets')
 const ora = require('ora')
 const glob = require('glob');
+const https = require('https');
 
 /**
  * Dynamically generate directory path given workspace_name
@@ -1531,11 +1532,12 @@ const generateK8sApp = ({ namespace, app_name, k8s_directory, projectName, servi
     })
     )
 }
-const injectSREConfigs = ({ project_root }) => {
+
+const injectSREConfigs = async ({ app_directory, answers, relativeKrakendDir, krakend_dir, projectName }) => {
     const directories = assets.sreTreeContent()
     directories.forEach((dir) => {
         for (const dir_ of dir.subdirectories) {
-            const current_dir = `${project_root}/docker/sre/${dir.directory}/${dir_}`
+            const current_dir = `${app_directory}/telemetry/${dir.directory}/${dir_}`
             mkdirSync(current_dir, { recursive: true });
             switch (`${dir.directory}/${dir_}`) {
 
@@ -1560,8 +1562,8 @@ const injectSREConfigs = ({ project_root }) => {
                 case 'krakend/settings':
                     mkdirSync(join(current_dir, 'dev'), { recursive: true });
                     mkdirSync(join(current_dir, 'prod'), { recursive: true });
-                    writeFile(join(current_dir, 'dev/env.json'), assets.krakendSettingsDevEnvJsonContent());
-                    writeFile(join(current_dir, 'prod/env.json'), assets.krakendSettingsProdEnvJsonContent());
+                    writeFile(join(current_dir, 'dev/env.json'), assets.krakendSettingsDevEnvJsonContent({ answers }));
+                    writeFile(join(current_dir, 'prod/env.json'), assets.krakendSettingsProdEnvJsonContent({ answers }));
                     writeFile(join(current_dir, 'dev/loop_example.json'), assets.krakendSettingsDevLoopExampleJsonContent());
                     writeFile(join(current_dir, 'prod/loop_example.json'), assets.krakendSettingsProdLoopExampleJsonContent());
                     break;
@@ -1574,18 +1576,29 @@ const injectSREConfigs = ({ project_root }) => {
         }
 
     });
-    mkdirSync(`${project_root}/docker/sre/elastic`, { recursive: true });
-    mkdirSync(`${project_root}/docker/sre/logstash`, { recursive: true });
-    writeFile(join(`${project_root}/docker/sre/elastic`, 'dashboard.ndjson'), assets.elasticDashboardJsonContent());
-    writeFile(join(`${project_root}/docker/sre/logstash`, 'logstash.conf'), assets.elasticDashboardJsonContent());
-    writeFile(join(`${project_root}/docker/sre/krakend`, 'krakend-flexible-config.tmpl'), assets.krakenFlexibleConfigContent());
-    writeFile(join(`${project_root}/docker/sre/krakend`, 'krakend.json'), assets.krakenJsonContent());
+    mkdirSync(`${app_directory}/telemetry/elastic`, { recursive: true });
+    mkdirSync(`${app_directory}/telemetry/logstash`, { recursive: true });
+    writeFile(join(`${app_directory}/telemetry/logstash`, 'logstash.conf'), assets.logstashConfContent());
+    writeFile(join(`${app_directory}/telemetry/krakend`, 'krakend-flexible-config.tmpl'), assets.krakenFlexibleConfigContent({ answers }));
+    writeFile(join(`${app_directory}/telemetry/krakend`, 'krakend.json'), assets.krakenJsonContent({
+        services: answers.services,
+        krakend_dir,
+        projectName,
+        gateway_port: answers.gateway_port,
+        api_version: answers.api_version,
+        gateway_cache_period: answers.gateway_cache_period,
+        gateway_timeout: answers.gateway_timeout,
+        relativeKrakendDir
+    }));
+    writeFile(join(`${app_directory}`, '.env'), assets.dockerComposeEnvContent());
+    await downloadAndWriteDashboardFile(app_directory);
+
 }
 const scaffoldApp = ({ answers }) => {
     const { webserver, projectName, services } = readFileContent({ currentDir: cwd() });
     const project_root = generateRootPath({ currentDir: cwd() });
     const app_directory = join(project_root, 'docker/apps', answers.app_name);
-    const sre_directory = join(project_root, 'docker/sre');
+    const telemetry_directory = join(app_directory, 'telemetry');
     const k8s_directory = join(project_root, `k8s/ns/${answers?.namespace || 'default'}`, answers.app_name);
 
     const webserver_dir = join(app_directory, webserver);
@@ -1595,10 +1608,7 @@ const scaffoldApp = ({ answers }) => {
         rmSync(k8s_directory, { recursive: true });
 
     }
-    if (!existsSync(sre_directory)) {
-        injectSREConfigs({ project_root });
 
-    }
     const ingress_directory = join(project_root, `k8s/ingress`);
     const broker_directory = join(project_root, `k8s/broker`);
     mkdirSync(ingress_directory, { recursive: true });
@@ -1617,6 +1627,7 @@ const scaffoldApp = ({ answers }) => {
         projectName,
         services: answers.services
     })
+
     // Remove the directory if it already exists
     if (existsSync(app_directory)) {
         rmSync(app_directory, { recursive: true });
@@ -1624,6 +1635,7 @@ const scaffoldApp = ({ answers }) => {
     mkdirSync(webserver_dir, { recursive: true });
     mkdirSync(krakend_dir, { recursive: true });
     mkdirSync(data_dir, { recursive: true });
+
     writeFileSync(join(app_directory, 'docker-compose.dev.yml'), assets.dockerComposeContent({
         services: answers.services,
         app_name: answers.app_name,
@@ -1638,11 +1650,16 @@ const scaffoldApp = ({ answers }) => {
         krakend_port: answers.gateway_port,
         env: 'prod'
     }));
+    writeFileSync(join(app_directory, 'Makefile'), assets.makeFileContent());
     const relativeAppDir = path.relative(project_root, app_directory);
     const relativeK8sDir = path.relative(project_root, k8s_directory);
     const relativeWebServerDir = path.relative(project_root, webserver_dir);
     const relativeKrakendDir = path.relative(project_root, krakend_dir);
 
+    // add telemetry configurations to app
+    if (!existsSync(telemetry_directory)) {
+        injectSREConfigs({ app_directory, answers, relativeKrakendDir, krakend_dir, projectName });
+    }
     ora().succeed(`Generated docker-compose configs at: ./${relativeAppDir}`);
     ora().succeed(`Generated kubernetes configs at: ./${relativeK8sDir}`);
     switch (webserver) {
@@ -2128,6 +2145,33 @@ const removeGateway = async ({ gateway, project_root }) => {
         ora().fail(`Error while removing Gateway "${gateway}":`, error.message);
     }
 };
+
+const downloadAndWriteDashboardFile = (app_directory) => {
+    const fileUrl = 'https://raw.githubusercontent.com/krakend/playground-community/master/config/elastic/dashboard.ndjson';
+    const outputDirectory = path.join(app_directory, 'telemetry', 'elastic');
+    const filename = 'dashboard.ndjson';
+    const outputPath = path.join(outputDirectory, filename);
+
+    return new Promise((resolve, reject) => {
+        const file = fs.createWriteStream(outputPath);
+
+        https.get(fileUrl, (response) => {
+            if (response.statusCode === 200) {
+                response.pipe(file);
+                file.on('finish', () => {
+                    file.close(() => {
+                        resolve();
+                    });
+                });
+            } else {
+                reject(new Error(`Failed to download file: ${response.statusCode} ${response.statusMessage}`));
+            }
+        }).on('error', (err) => {
+            fs.unlink(outputPath, () => reject(err));
+        });
+    });
+};
+
 module.exports = {
     generateDirectoryPath,
     changeDirectory,

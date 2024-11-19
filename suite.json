@@ -16,15 +16,7 @@
       "port": 9002
     }
   ],
-  "apps": [
-    {
-      "name": "nyati",
-      "GATEWAY_PORT": 9001,
-      "services": [
-        "payment"
-      ]
-    }
-  ],
+  "apps": [],
   "apollo_servers": [
     {
       "name": "app1",
