@@ -1,4 +1,4 @@
-module.exports = () =>`
+module.exports = ({ app_name }) => `
 {
   "annotations": {
     "list": [
@@ -6970,7 +6970,7 @@ module.exports = () =>`
     ]
   },
   "timezone": "",
-  "title": "KrakenD",
+  "title": "🦧${app_name}",
   "uid": "I9FkyxWik",
   "version": 1
 }`

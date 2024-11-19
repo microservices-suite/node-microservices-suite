@@ -1550,11 +1550,11 @@ const injectSREConfigs = async ({ app_directory, answers, relativeKrakendDir, kr
                     break;
 
                 case 'grafana/krakend':
-                    writeFile(join(current_dir, 'dashboard.json'), assets.grafanaKrakendDashboardJsonContent());
+                    writeFile(join(current_dir, 'dashboard.json'), assets.grafanaKrakendDashboardJsonContent({ app_name: answers.app_name }));
                     break;
 
                 case 'krakend/partials':
-                    writeFile(join(current_dir, 'extra_config.tmpl'), assets.krakendPartialsExtraConfContent());
+                    writeFile(join(current_dir, 'extra_config.tmpl'), assets.krakendPartialsExtraConfContent({app_name: answers.app_name}));
                     writeFile(join(current_dir, 'input_headers.tmpl'), assets.krakendPartialsInputHeadersContent());
                     writeFile(join(current_dir, 'rate_limit_backend.tmpl'), assets.krakendPartialsRateLimitBackendContent());
                     break;
@@ -1588,10 +1588,11 @@ const injectSREConfigs = async ({ app_directory, answers, relativeKrakendDir, kr
         api_version: answers.api_version,
         gateway_cache_period: answers.gateway_cache_period,
         gateway_timeout: answers.gateway_timeout,
-        relativeKrakendDir
+        relativeKrakendDir,
+        app_name: answers.app_name
     }));
     writeFile(join(`${app_directory}`, '.env'), assets.dockerComposeEnvContent());
-    await downloadAndWriteDashboardFile(app_directory);
+    await readAndWriteDashboardFile(app_directory, answers);
 
 }
 const scaffoldApp = ({ answers }) => {
@@ -2146,30 +2147,19 @@ const removeGateway = async ({ gateway, project_root }) => {
     }
 };
 
-const downloadAndWriteDashboardFile = (app_directory) => {
-    const fileUrl = 'https://raw.githubusercontent.com/krakend/playground-community/master/config/elastic/dashboard.ndjson';
+const readAndWriteDashboardFile = (app_directory, answers) => {
     const outputDirectory = path.join(app_directory, 'telemetry', 'elastic');
     const filename = 'dashboard.ndjson';
     const outputPath = path.join(outputDirectory, filename);
+    // Read the NDJSON file content as a string
+    console.log({__dirname:__dirname})
+    const krakendNdjson = readFileSync(`${__dirname}/krakend.ndjson`, 'utf8');
 
-    return new Promise((resolve, reject) => {
-        const file = fs.createWriteStream(outputPath);
+    // Replace all occurrences of 'KrakenD' with 'SuiteCLI/<appname>'
+    const updatedContent = krakendNdjson.replace(/KrakenD/g, `🦧${answers.app_name}`);
 
-        https.get(fileUrl, (response) => {
-            if (response.statusCode === 200) {
-                response.pipe(file);
-                file.on('finish', () => {
-                    file.close(() => {
-                        resolve();
-                    });
-                });
-            } else {
-                reject(new Error(`Failed to download file: ${response.statusCode} ${response.statusMessage}`));
-            }
-        }).on('error', (err) => {
-            fs.unlink(outputPath, () => reject(err));
-        });
-    });
+    // Write the updated content to the new file
+    writeFileSync(outputPath, updatedContent);
 };
 
 module.exports = {
