@@ -6,6 +6,9 @@
   "repository": "https://github.com/microservices-suite/node-microservices-suite.git",
   "author": "Gilber Andanje <gilbertandanje@gmail.com>",
   "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
   "private": false,
   "bin": {
     "suite": "cli.js"
