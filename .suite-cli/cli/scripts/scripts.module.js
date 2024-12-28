@@ -2152,7 +2152,6 @@ const readAndWriteDashboardFile = (app_directory, answers) => {
     const filename = 'dashboard.ndjson';
     const outputPath = path.join(outputDirectory, filename);
     // Read the NDJSON file content as a string
-    console.log({__dirname:__dirname})
     const krakendNdjson = readFileSync(`${__dirname}/krakend.ndjson`, 'utf8');
 
     // Replace all occurrences of 'KrakenD' with 'SuiteCLI/<appname>'

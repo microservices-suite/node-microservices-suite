@@ -1,11 +1,14 @@
 {
   "name": "@microservices-suite/cli",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "This is the CLI tool for running the microservices-suite monorepo. It contains functionalities and tools required for automation and managing the repo across supported platforms. Works on Windows,MacOS and Linux as well as support to some extend other variants like SunOS, IBM AIX, FreeBSD, OpenBSD and more",
   "main": "cli.js",
   "repository": "https://github.com/microservices-suite/node-microservices-suite.git",
   "author": "Gilber Andanje <gilbertandanje@gmail.com>",
   "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
   "private": false,
   "bin": {
     "suite": "cli.js"
