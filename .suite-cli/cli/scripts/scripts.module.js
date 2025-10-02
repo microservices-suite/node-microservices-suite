@@ -1474,8 +1474,9 @@ const generateK8sApp = ({ namespace, app_name, k8s_directory, projectName, servi
     }
     const nodePort = 30003
     services.forEach((s, i) => {
-        ['db', 'server'].forEach((_, j) => {
-            const _dir = join(app_directory, s.name, _);
+        const dirs = s.remote ?['server'] : ['db','server'];
+        dirs.forEach((_, j) => {
+            const _dir = join(app_directory, s.name,_);
             mkdirSync(_dir, { recursive: true });
             const service_name = _ === 'db' ? 'mongodb' : s.name
             const port = _ === 'db' ? '27017' : s.port
