@@ -259,8 +259,16 @@ program
                   value: service,
                   checked: true, // Default all services to be selected
                 })),
-              }]).then((ans) => {
-                const { app_name } = ans;
+              },
+            {
+              type: "input",
+              name: "remote_hosts",
+              message: "Enter space-separated remote hosts/ip (optional):",
+              default: "localhost",
+              validate: (input) => (input ? true : "Port must not be empty."),
+            },
+          ]).then((ans) => {
+                const { app_name,remote_hosts } = ans;
                 const app_idx = existing_apps.findIndex((a) => a.name === app_name);
                 // if app exists return the port otherwise generate next available port
                 const next_port = existing_apps[app_idx]?.GATEWAY_PORT || getNextAvailablePort({ key: existing_apps, port: 'GATEWAY_PORT' });
@@ -293,10 +301,22 @@ program
                     validate: input => input === '' || !isNaN(input) ? true : 'Timeout must be a number.'
                   }
                 ]).then((answers) => {
+                  const mergedServices = [
+                  ...ans.services,
+                  ...remote_hosts.split(/\s+/).map((host) => {
+                    const [name, port] = host.split(":");
+                    return {
+                      name,
+                      port: port ? parseInt(port, 10) : 443,
+                      remote: true,
+                    };
+                  }),
+                  ];
                   scaffoldApp({
                     answers: {
                       ...answers,
                       ...ans,
+                      services:mergedServices,
                       port: parseFloat(answers.gateway_port)
 
                     }
