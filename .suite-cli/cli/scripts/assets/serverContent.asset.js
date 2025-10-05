@@ -72,7 +72,7 @@ app.use(morgan.successHandler);
 app.use('/api/v1', router);
 
 // Global error handler should come after all other middlewares
-app.all('*', (req, res, next) => {
+app.use((req, res, next) => {
     const err = new APIError(404, \`requested resource not found on server: \${req.originalUrl}\`);
     next(err);
 });
