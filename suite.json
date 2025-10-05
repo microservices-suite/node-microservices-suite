@@ -1,0 +1,26 @@
+{
+  "projectName": "microservices-suite",
+  "repo_name": "microservices-suite",
+  "apis": [
+    "REST",
+    "GraphQL"
+  ],
+  "webserver": "nginx",
+  "license": "MIT",
+  "project_base": "@microservices-suite",
+  "private": true,
+  "default_broker": "rabbitmq",
+  "services": [
+    {
+      "name": "payment",
+      "port": 9002
+    }
+  ],
+  "apps": [],
+  "apollo_servers": [
+    {
+      "name": "app1",
+      "port": 8001
+    }
+  ]
+}

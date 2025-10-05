@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+ <meta name="Author" content="Made by 'tree'">
+ <meta name="GENERATOR" content="tree v2.1.3 © 1996 - 2024 by Steve Baker, Thomas Moore, Francesc Rocher, Florian Sesser, Kyosuke Tokoro">
+ <title>Directory Tree</title>
+ <style type="text/css">
+  BODY { font-family : monospace, sans-serif;  color: black;}
+  P { font-family : monospace, sans-serif; color: black; margin:0px; padding: 0px;}
+  A:visited { text-decoration : none; margin : 0px; padding : 0px;}
+  A:link    { text-decoration : none; margin : 0px; padding : 0px;}
+  A:hover   { text-decoration: underline; background-color : yellow; margin : 0px; padding : 0px;}
+  A:active  { margin : 0px; padding : 0px;}
+  .VERSION { font-size: small; font-family : arial, sans-serif; }
+  .NORM  { color: black;  }
+  .FIFO  { color: purple; }
+  .CHAR  { color: yellow; }
+  .DIR   { color: blue;   }
+  .BLOCK { color: yellow; }
+  .LINK  { color: aqua;   }
+  .SOCK  { color: fuchsia;}
+  .EXEC  { color: green;  }
+ </style>
+</head>
+<body>
+	<h1>Directory Tree</h1><p>
+	<a href="baseHREF/./">.</a><br>
+	├── <a href="baseHREF/./CHANGELOG.md">CHANGELOG.md</a><br>
+	├── <a href="baseHREF/./CODE_OF_CONDUCT.md">CODE_OF_CONDUCT.md</a><br>
+	├── <a href="baseHREF/./CONTRIBUTING.md">CONTRIBUTING.md</a><br>
+	├── <a href="baseHREF/./LICENSE">LICENSE</a><br>
+	├── <a href="baseHREF/./README.md">README.md</a><br>
+	├── <a href="baseHREF/./docker/">docker</a><br>
+	│   ├── <a href="baseHREF/./docker/README.md">README.md</a><br>
+	│   └── <a href="baseHREF/./docker/apps/">apps</a><br>
+	│   &nbsp;&nbsp;&nbsp; └── <a href="baseHREF/./docker/apps/nyati/">nyati</a><br>
+	│   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ├── <a href="baseHREF/./docker/apps/nyati/docker-compose.dev.yml">docker-compose.dev.yml</a><br>
+	│   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ├── <a href="baseHREF/./docker/apps/nyati/docker-compose.yml">docker-compose.yml</a><br>
+	│   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ├── <a href="baseHREF/./docker/apps/nyati/krakend/">krakend</a><br>
+	│   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; │   ├── <a href="baseHREF/./docker/apps/nyati/krakend/README.md">README.md</a><br>
+	│   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; │   └── <a href="baseHREF/./docker/apps/nyati/krakend/krakend.json">krakend.json</a><br>
+	│   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; └── <a href="baseHREF/./docker/apps/nyati/nginx/">nginx</a><br>
+	│   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ├── <a href="baseHREF/./docker/apps/nyati/nginx/Dockerfile">Dockerfile</a><br>
+	│   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ├── <a href="baseHREF/./docker/apps/nyati/nginx/Dockerfile.dev">Dockerfile.dev</a><br>
+	│   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; └── <a href="baseHREF/./docker/apps/nyati/nginx/default.conf">default.conf</a><br>
+	├── <a href="baseHREF/./graphql/">graphql</a><br>
+	│   └── <a href="baseHREF/./graphql/nyati-app/">nyati-app</a><br>
+	│   &nbsp;&nbsp;&nbsp; └── <a href="baseHREF/./graphql/nyati-app/appollo-server.yml">appollo-server.yml</a><br>
+	├── <a href="baseHREF/./k8s/">k8s</a><br>
+	│   ├── <a href="baseHREF/./k8s/README.md">README.md</a><br>
+	│   ├── <a href="baseHREF/./k8s/broker/">broker</a><br>
+	│   │   ├── <a href="baseHREF/./k8s/broker/clusterIp.yaml">clusterIp.yaml</a><br>
+	│   │   ├── <a href="baseHREF/./k8s/broker/deployment.yaml">deployment.yaml</a><br>
+	│   │   ├── <a href="baseHREF/./k8s/broker/loadBalancer.yaml">loadBalancer.yaml</a><br>
+	│   │   └── <a href="baseHREF/./k8s/broker/nodePort.yaml">nodePort.yaml</a><br>
+	│   ├── <a href="baseHREF/./k8s/ingress/">ingress</a><br>
+	│   │   └── <a href="baseHREF/./k8s/ingress/ingress.yaml">ingress.yaml</a><br>
+	│   └── <a href="baseHREF/./k8s/ns/">ns</a><br>
+	│   &nbsp;&nbsp;&nbsp; └── <a href="baseHREF/./k8s/ns/default/">default</a><br>
+	│   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; └── <a href="baseHREF/./k8s/ns/default/nyati/">nyati</a><br>
+	│   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ├── <a href="baseHREF/./k8s/ns/default/nyati/combo.yaml">combo.yaml</a><br>
+	│   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; └── <a href="baseHREF/./k8s/ns/default/nyati/payment/">payment</a><br>
+	│   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ├── <a href="baseHREF/./k8s/ns/default/nyati/payment/configMap.yaml">configMap.yaml</a><br>
+	│   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ├── <a href="baseHREF/./k8s/ns/default/nyati/payment/db/">db</a><br>
+	│   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; │   ├── <a href="baseHREF/./k8s/ns/default/nyati/payment/db/clusterIp.yaml">clusterIp.yaml</a><br>
+	│   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; │   ├── <a href="baseHREF/./k8s/ns/default/nyati/payment/db/deployment.yaml">deployment.yaml</a><br>
+	│   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; │   ├── <a href="baseHREF/./k8s/ns/default/nyati/payment/db/loadBalancer.yaml">loadBalancer.yaml</a><br>
+	│   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; │   └── <a href="baseHREF/./k8s/ns/default/nyati/payment/db/nodePort.yaml">nodePort.yaml</a><br>
+	│   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ├── <a href="baseHREF/./k8s/ns/default/nyati/payment/secret.yaml">secret.yaml</a><br>
+	│   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; └── <a href="baseHREF/./k8s/ns/default/nyati/payment/server/">server</a><br>
+	│   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ├── <a href="baseHREF/./k8s/ns/default/nyati/payment/server/clusterIp.yaml">clusterIp.yaml</a><br>
+	│   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ├── <a href="baseHREF/./k8s/ns/default/nyati/payment/server/deployment.yaml">deployment.yaml</a><br>
+	│   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ├── <a href="baseHREF/./k8s/ns/default/nyati/payment/server/loadBalancer.yaml">loadBalancer.yaml</a><br>
+	│   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; └── <a href="baseHREF/./k8s/ns/default/nyati/payment/server/nodePort.yaml">nodePort.yaml</a><br>
+	├── <a href="baseHREF/./microservices/">microservices</a><br>
+	│   └── <a href="baseHREF/./microservices/payment/">payment</a><br>
+	│   &nbsp;&nbsp;&nbsp; ├── <a href="baseHREF/./microservices/payment/Dockerfile.dev">Dockerfile.dev</a><br>
+	│   &nbsp;&nbsp;&nbsp; ├── <a href="baseHREF/./microservices/payment/ecosystem.config.js">ecosystem.config.js</a><br>
+	│   &nbsp;&nbsp;&nbsp; ├── <a href="baseHREF/./microservices/payment/index.js">index.js</a><br>
+	│   &nbsp;&nbsp;&nbsp; ├── <a href="baseHREF/./microservices/payment/package.json">package.json</a><br>
+	│   &nbsp;&nbsp;&nbsp; └── <a href="baseHREF/./microservices/payment/src/">src</a><br>
+	│   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ├── <a href="baseHREF/./microservices/payment/src/controllers/">controllers</a><br>
+	│   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; │   ├── <a href="baseHREF/./microservices/payment/src/controllers/controllers.js">controllers.js</a><br>
+	│   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; │   └── <a href="baseHREF/./microservices/payment/src/controllers/index.js">index.js</a><br>
+	│   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ├── <a href="baseHREF/./microservices/payment/src/models/">models</a><br>
+	│   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; │   ├── <a href="baseHREF/./microservices/payment/src/models/index.js">index.js</a><br>
+	│   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; │   └── <a href="baseHREF/./microservices/payment/src/models/models.js">models.js</a><br>
+	│   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ├── <a href="baseHREF/./microservices/payment/src/routes/">routes</a><br>
+	│   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; │   ├── <a href="baseHREF/./microservices/payment/src/routes/index.js">index.js</a><br>
+	│   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; │   └── <a href="baseHREF/./microservices/payment/src/routes/routes.js">routes.js</a><br>
+	│   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ├── <a href="baseHREF/./microservices/payment/src/services/">services</a><br>
+	│   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; │   ├── <a href="baseHREF/./microservices/payment/src/services/index.js">index.js</a><br>
+	│   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; │   └── <a href="baseHREF/./microservices/payment/src/services/services.js">services.js</a><br>
+	│   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; └── <a href="baseHREF/./microservices/payment/src/subscriber/">subscriber</a><br>
+	│   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ├── <a href="baseHREF/./microservices/payment/src/subscriber/index.js">index.js</a><br>
+	│   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; └── <a href="baseHREF/./microservices/payment/src/subscriber/subscriber.js">subscriber.js</a><br>
+	├── <a href="baseHREF/./package.json">package.json</a><br>
+	├── <a href="baseHREF/./production.yml">production.yml</a><br>
+	├── <a href="baseHREF/./shared/">shared</a><br>
+	│   ├── <a href="baseHREF/./shared/README.md">README.md</a><br>
+	│   ├── <a href="baseHREF/./shared/broker/">broker</a><br>
+	│   │   ├── <a href="baseHREF/./shared/broker/README.md">README.md</a><br>
+	│   │   ├── <a href="baseHREF/./shared/broker/package.json">package.json</a><br>
+	│   │   └── <a href="baseHREF/./shared/broker/rabbitmq/">rabbitmq</a><br>
+	│   │   &nbsp;&nbsp;&nbsp; ├── <a href="baseHREF/./shared/broker/rabbitmq/exchange.js">exchange.js</a><br>
+	│   │   &nbsp;&nbsp;&nbsp; ├── <a href="baseHREF/./shared/broker/rabbitmq/index.js">index.js</a><br>
+	│   │   &nbsp;&nbsp;&nbsp; ├── <a href="baseHREF/./shared/broker/rabbitmq/publisher.js">publisher.js</a><br>
+	│   │   &nbsp;&nbsp;&nbsp; ├── <a href="baseHREF/./shared/broker/rabbitmq/subscriber.js">subscriber.js</a><br>
+	│   │   &nbsp;&nbsp;&nbsp; └── <a href="baseHREF/./shared/broker/rabbitmq/worker.queue.js">worker.queue.js</a><br>
+	│   ├── <a href="baseHREF/./shared/config/">config</a><br>
+	│   │   ├── <a href="baseHREF/./shared/config/README.md">README.md</a><br>
+	│   │   ├── <a href="baseHREF/./shared/config/config.js">config.js</a><br>
+	│   │   ├── <a href="baseHREF/./shared/config/index.js">index.js</a><br>
+	│   │   ├── <a href="baseHREF/./shared/config/logger.js">logger.js</a><br>
+	│   │   ├── <a href="baseHREF/./shared/config/morgan.js">morgan.js</a><br>
+	│   │   └── <a href="baseHREF/./shared/config/package.json">package.json</a><br>
+	│   ├── <a href="baseHREF/./shared/constants/">constants</a><br>
+	│   │   ├── <a href="baseHREF/./shared/constants/README.md">README.md</a><br>
+	│   │   └── <a href="baseHREF/./shared/constants/package.json">package.json</a><br>
+	│   ├── <a href="baseHREF/./shared/errors/">errors</a><br>
+	│   │   ├── <a href="baseHREF/./shared/errors/README.md">README.md</a><br>
+	│   │   ├── <a href="baseHREF/./shared/errors/errors.handler.js">errors.handler.js</a><br>
+	│   │   ├── <a href="baseHREF/./shared/errors/index.js">index.js</a><br>
+	│   │   └── <a href="baseHREF/./shared/errors/package.json">package.json</a><br>
+	│   ├── <a href="baseHREF/./shared/middlewares/">middlewares</a><br>
+	│   │   ├── <a href="baseHREF/./shared/middlewares/README.md">README.md</a><br>
+	│   │   └── <a href="baseHREF/./shared/middlewares/package.json">package.json</a><br>
+	│   └── <a href="baseHREF/./shared/utilities/">utilities</a><br>
+	│   &nbsp;&nbsp;&nbsp; ├── <a href="baseHREF/./shared/utilities/APIError.js">APIError.js</a><br>
+	│   &nbsp;&nbsp;&nbsp; ├── <a href="baseHREF/./shared/utilities/README.md">README.md</a><br>
+	│   &nbsp;&nbsp;&nbsp; ├── <a href="baseHREF/./shared/utilities/asyncErrorHandler.js">asyncErrorHandler.js</a><br>
+	│   &nbsp;&nbsp;&nbsp; ├── <a href="baseHREF/./shared/utilities/index.js">index.js</a><br>
+	│   &nbsp;&nbsp;&nbsp; ├── <a href="baseHREF/./shared/utilities/package.json">package.json</a><br>
+	│   &nbsp;&nbsp;&nbsp; ├── <a href="baseHREF/./shared/utilities/pick.js">pick.js</a><br>
+	│   &nbsp;&nbsp;&nbsp; └── <a href="baseHREF/./shared/utilities/validate.js">validate.js</a><br>
+	├── <a href="baseHREF/./suite.config">suite.config</a><br>
+	├── <a href="baseHREF/./suite.docker">suite.docker</a><br>
+	├── <a href="baseHREF/./suite.html">suite.html</a><br>
+	├── <a href="baseHREF/./suite.json">suite.json</a><br>
+	├── <a href="baseHREF/./suite.k8s">suite.k8s</a><br>
+	├── <a href="baseHREF/./suite.ms">suite.ms</a><br>
+	└── <a href="baseHREF/./tests/">tests</a><br>
+	&nbsp;&nbsp;&nbsp; ├── <a href="baseHREF/./tests/README.md">README.md</a><br>
+	&nbsp;&nbsp;&nbsp; └── <a href="baseHREF/./tests/cli/">cli</a><br>
+	&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; └── <a href="baseHREF/./tests/cli/scripts/">scripts</a><br>
+	&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; └── <a href="baseHREF/./tests/cli/scripts/retrieveWorkspaceName.test.js">retrieveWorkspaceName.test.js</a><br>
+<br><br><p>
+
+36 directories, 84 files
+
+</p>
+	<hr>
+	<p class="VERSION">
+		 tree v2.1.3 © 1996 - 2024 by Steve Baker and Thomas Moore <br>
+		 HTML output hacked and copyleft © 1998 by Francesc Rocher <br>
+		 JSON output hacked and copyleft © 2014 by Florian Sesser <br>
+		 Charsets / OS/2 support © 2001 by Kyosuke Tokoro
+	</p>
+</body>
+</html>

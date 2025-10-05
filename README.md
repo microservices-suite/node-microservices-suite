@@ -3,69 +3,132 @@
 ## Overview
 
 Welcome to the 📦 [Microservices](https://drive.google.com/file/d/1Noc_6WVe0CmzynnuURexm7MCv75OUAuQ/view?usp=drive_link) Suite project! This suite is a collection of Node.js microservices built using the 🦧 [mono-repo]() strategy and leveraging the [yarn workspaces](https://classic.yarnpkg.com/lang/en/docs/workspaces/) concept. Each microservice runs in its isolated Docker `container`, and `Kubernetes` orchestrates the deployment, providing scalability and efficiency.
+To easily work with a `@microservices-suite monorepo` you need to install [Suite CLI](https://www.npmjs.com/package/@microservices-suite/cli). With `Suite` you can easily scaffold,manage and automate your monorepo in development, CI as well as production. Check the installation guidelines in the `README.md` section of the `.suite-cli` root.
 
 ## Project file structure
 ```sequence
-├─ node-microservices-suite
-│  ├─ api-gateways/
-|  │  ├─ app-1/
-|  │  │  ├─ nginx
-|  │  │  ├─ apache
-|  │  │  ├─ README.md
-│  ├─ graphql/
-|  │  ├─ app-1/
-|  │  │  ├─ apollo-server # placeholder file atm
-|  │  │  ├─ README.md
-│  ├─ data-persistence/
-|  │  ├─ db-1/
-|  │  │  ├─ Dockerfile
-|  │  │  ├─ README.md
-|  │  ├─ sqlite/ #for in memory or disk db for miniature devices or prototyping
-|  │  ├─ ├─ db/
-|  │  │  ├─ README.md
-│  ├─ k8s/
-|  │  ├─ service-1/
-|  │  │  ├─ cluster-ip-service.yml
-|  │  │  ├─ cluster-deployment.yml
-|  │  │  ├─ ingress-service.yml
-|  │  │  ├─ README.md
-|  ├─ microservices/
-|  │  ├─ service-1/
-|  │  │  ├─ src
-|  │  │  ├─ .env
-|  │  │  ├─ .env.dev
-|  │  │  ├─ app.js
-|  │  │  ├─ Dockerfile
-├─ │  │  ├─ Dockerfile.dev
-|  │  │  ├─ ecosystem.config.js
-|  │  │  ├─ index.js
-|  │  │  ├─ package.json
-|  │  │  ├─ task.json
-|  ├─ shared/
-|  │  ├─ library-1/
-|  │  │  ├─ APIError.js
-|  │  │  ├─ catchAsync.js
-|  │  │  ├─ index.js
-|  │  │  ├─ package.json
-|  │  │  ├─ pick.js
-|  │  │  ├─ README.md
-|  │  │  ├─ validate
-│  ├─ tests/
-|  │  ├─ service-1/
-|  │  │  ├─ e2e/
-|  │  │  ├─ integration/
-|  │  │  ├─ snapshot/ #if it's a micro-frontend service
-|  │  │  ├─ unit/
-|  │  │  ├─ README.md
-|  ├─ .gitignore
-|  ├─ .npmrc
-|  ├─ .yarnrc.yml
-|  ├─ docker-compose.yml
-|  ├─ package.json
-|  ├─ production.yml
-|  ├─ README.md
-|  ├─ Taskfile.yml
-|  ├─ yarn.lock
+.
+├── CHANGELOG.md
+├── CODE_OF_CONDUCT.md
+├── CONTRIBUTING.md
+├── LICENSE
+├── README.md
+├── docker
+│   ├── README.md
+│   └── apps
+│       └── nyati
+│           ├── docker-compose.dev.yml
+│           ├── docker-compose.yml
+│           ├── krakend
+│           │   ├── README.md
+│           │   └── krakend.json
+│           └── nginx
+│               ├── Dockerfile
+│               ├── Dockerfile.dev
+│               └── default.conf
+├── graphql
+│   └── nyati-app
+│       └── appollo-server.yml
+├── k8s
+│   ├── README.md
+│   ├── broker
+│   │   ├── clusterIp.yaml
+│   │   ├── deployment.yaml
+│   │   ├── loadBalancer.yaml
+│   │   └── nodePort.yaml
+│   ├── ingress
+│   │   └── ingress.yaml
+│   └── ns
+│       └── default
+│           └── nyati
+│               ├── combo.yaml
+│               └── payment
+│                   ├── configMap.yaml
+│                   ├── db
+│                   │   ├── clusterIp.yaml
+│                   │   ├── deployment.yaml
+│                   │   ├── loadBalancer.yaml
+│                   │   └── nodePort.yaml
+│                   ├── secret.yaml
+│                   └── server
+│                       ├── clusterIp.yaml
+│                       ├── deployment.yaml
+│                       ├── loadBalancer.yaml
+│                       └── nodePort.yaml
+├── microservices
+│   └── payment
+│       ├── Dockerfile.dev
+│       ├── ecosystem.config.js
+│       ├── index.js
+│       ├── package.json
+│       └── src
+│           ├── controllers
+│           │   ├── controllers.js
+│           │   └── index.js
+│           ├── models
+│           │   ├── index.js
+│           │   └── models.js
+│           ├── routes
+│           │   ├── index.js
+│           │   └── routes.js
+│           ├── services
+│           │   ├── index.js
+│           │   └── services.js
+│           └── subscriber
+│               ├── index.js
+│               └── subscriber.js
+├── package.json
+├── production.yml
+├── shared
+│   ├── README.md
+│   ├── broker
+│   │   ├── README.md
+│   │   ├── package.json
+│   │   └── rabbitmq
+│   │       ├── exchange.js
+│   │       ├── index.js
+│   │       ├── publisher.js
+│   │       ├── subscriber.js
+│   │       └── worker.queue.js
+│   ├── config
+│   │   ├── README.md
+│   │   ├── config.js
+│   │   ├── index.js
+│   │   ├── logger.js
+│   │   ├── morgan.js
+│   │   └── package.json
+│   ├── constants
+│   │   ├── README.md
+│   │   └── package.json
+│   ├── errors
+│   │   ├── README.md
+│   │   ├── errors.handler.js
+│   │   ├── index.js
+│   │   └── package.json
+│   ├── middlewares
+│   │   ├── README.md
+│   │   └── package.json
+│   └── utilities
+│       ├── APIError.js
+│       ├── README.md
+│       ├── asyncErrorHandler.js
+│       ├── index.js
+│       ├── package.json
+│       ├── pick.js
+│       └── validate.js
+├── suite.config
+├── suite.docker
+├── suite.html
+├── suite.json
+├── suite.k8s
+├── suite.ms
+└── tests
+    ├── README.md
+    └── cli
+        └── scripts
+            └── retrieveWorkspaceName.test.js
+
+36 directories, 84 files
 ```
 ## Monorepo strategy benefits for microservices:
 
@@ -88,11 +151,17 @@ Welcome to the 📦 [Microservices](https://drive.google.com/file/d/1Noc_6WVe0Cm
   - simplify the automation of repetitive workflows.
 
 - **Code Sharing Anywhere:** 
-  - Publish and import organization-scoped libraries to the npm registry with 
+  - Publish and import organization-scoped libraries from the npm registry with 
 ```bash
-    yarn publish 
-    yarn add <@microservices-suite/foo> or
-    yarn @microservices-suite/<workspace-name> add <@microservices-suite/foo>
+    yarn release 
+    yarn add <@microservices-suite/foo>
+    yarn workspace @microservices-suite/<workspace-name> add  @microservices-suite/<library> 
+```
+  - Using `Suite CLI` you could achieve the results with the following commands
+```bash
+    suite release 
+    suite add <@microservices-suite/foo>
+    suite -W <workspace-name> add  @microservices-suite/<library> 
 ```
 
 - **Easily Containerize and Scale:** 
@@ -143,40 +212,46 @@ Welcome to our project! To ensure a smooth setup and development experience, ens
   - 👉 [Install docker here](https://docs.docker.com/engine/install/).
   - We love 💚 [alpine images](https://alpinelinux.org/) <small,simple,secure>. 
   - You can read about the specific flavor [here](https://github.com/nodejs/docker-node/blob/main/README.md#how-to-use-this-image)
-- **Task Runner Automation Tool:** 
-  - For task automation and workflow management.  
-  - 👉 [Install task runner here](https://taskfile.dev/installation/).
+- **Suite CLI:** 
+  - For easy project scaffolding task automation and workflow management.
+  - Install `suite`: check the installation guidelines below.
 - **Node.js:** 
   - As the runtime environment for executing the application code.  
   - 👉 [Download LTS version here](https://nodejs.org/en/download)
 - At the project <service_root> create `.env`, `.env.dev` and `.env.staging` files and copy `environment variables` from the `.env.example` file
 
-## Running Services
+## Running Components
 
-- This project uses [Task Runner](https://taskfile.dev/usage/) Automation Tool to streamline the process of starting services in both development and production. Follow these steps to get your environment up and running:
-- You can derive the `service_name` of a service from the workspace name found in the `package.json "name": ` property e.g 
+- A `component` in our `suite` jargon refers to a `service` or `application`. With `@microservices-suite` you can create 1 or more services as well as applications.
+- Suite is `component-scoped`, giour strategy that enhances modularity and at the same time makes using the monorepo intuitive. Its is inspired by `Single Responsibility` principle.
+- Apps are simply `cohessive` microservices `aggregated` under the `./gateway/apps/` directory to create decoupled services to serve your client. An example is an `Ecommerce app`. This app can have `customer, supplier,orders and products` microservices under the `./microservices/` directory. These microservices are then referenced in `docker-compose` file definitions placed under the `./gateway/apps/ecommerce-app/` directory. Other apps can be added to the `./gateway/apps` directory with their `docker-compose` definitions and `api-gateway configs(nginx/appache)`.
+- Suite scales applications with `kubernetes` and app-scoped `k8s` configs are located under the `./k8s/` directory. Therefore the kubernetes configurations for our Ecommerce app will be located at `./k8s/ecommerce-app`
+- [Suite CLI](https://github.com/microservices-suite/node-microservices-suite/tree/main/.suite-cli/cli) streamlines the process of starting a service(s) or app(s) in `development` & `production`. Follow these steps to get your environment up and running:
+- You can derive the `service_name` or `app-name` from the workspace name found in the `package.json "name": ` property e.g 
 ```json
-"name": "@microservices-suite/<service_name>"
+"name": "@microservices-suite/<component-name>"
 ```
-- To run a service in either modes [dev,staging,prod]:
-- Action is similar to [up,down] docker compose syntax where `up` & `down` `start` and `stop` the `service` respectively with `docker-compose <action>`
+- To run an app in either modes [dev,staging,prod]:
+- If -k or --kubectl flag is specified `suite` spins your app with `kubectl` . You need to have [minikube](https://minikube.sigs.k8s.io/docs/start/) installed and [kubectl](https://kubernetes.io/docs/tasks/tools/). Otherwise defaults to docker compose
+- If -m or --mode is specified you need to have a `docker-compose.<mode>` specified but this is not necessary with kubectl since we only run the development version of kubectl.
 ```bash
-task do:<service_name>:<mode>:<action>
+suite start [--kubectl,--mode]|[-km] <mode> <app-name...> 
 ```
-- This command uses docker-compose to start your service(s)
-- The task runner will handle the setup, ensuring your service is ready.
+- This command uses docker-compose to start your app(s)
+- Suite will handle the setup, ensuring your app is ready.
 
-### Running Services Without Docker
-- If you prefer not to use Docker, you can use the `vanilla` task command to start services using node `PM2` engine in production or `nodemon` in any other mode:
+### Running Services with -v --vanilla
+- If you prefer not to use Docker, you can use the `-v,--vanilla`  command to start service(s) using node `PM2` engine in production or `nodemon` in any other mode:
 ```bash
-task vanilla:<service_name>:<mode>
+suite start [--vanilla,--mode]|[-vm] <mode> <service_name...>
 ```
 
 ### Using Docker-Compose Directly
 - Should you need to use docker-compose directly for more control over the container orchestration, you can utilize the standard commands provided by Docker:
+- You can replace the yml files with your compose file path and production.yml has been used as an overide. There are many ways to kill the cat in dockers world 😎.
 ```bash
-docker-compose up
-docker-compose down
+ docker-compose  -f docker-compose.yml -f production.yml up --build -d
+ docker-compose down
 ```
 
 ## Contributing
@@ -192,18 +267,22 @@ git clone https://github.com/microservices-suite/node-microservices-suite.git
 git checkout -b feat/<my-feature>
 ```
 3. Make your changes and make sure that tests pass.
-4. Commit your changes using the Angular commit message convention:
-   - For more details, please refer to the [Angular commit message convention](https://github.com/angular/angular/blob/master/CONTRIBUTING.md#commit).
+
+4. Before committing your changes, make sure it follows the [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) specification:
+
+   - We recommend you use the [Better Commits CLI](https://github.com/Everduin94/better-commits) tool. It is a CLI for writing better commits, following the conventional commits specification.
+
 5. Push to the branch: 
 ```bash
 git push origin feat/<my-feature>
 ```
 6. Submit a pull request detailing your changes.
+
 7. Please ensure that your pull request adheres to the project's code style and conventions.
 
 ## License
 
-- This project is licensed under the [MIT License](LICENSE). Feel free to use, modify, and distribute this code for any purpose.
+- This project is licensed under the [MIT License](./LICENSE). Feel free to use, modify, and distribute this code for any purpose.
 
 ## Acknowledgements
 

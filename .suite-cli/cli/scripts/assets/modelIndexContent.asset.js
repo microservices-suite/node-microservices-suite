@@ -1,0 +1,1 @@
+module.exports = () => 'const models = require(\'./model\');\nmodule.exports = models;';

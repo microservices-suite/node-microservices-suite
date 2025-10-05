@@ -1,1 +1,0 @@
-module.exports.supllierController = require('./supplier.controller')

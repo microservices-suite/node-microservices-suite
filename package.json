@@ -1,6 +1,6 @@
 {
   "name": "@microservices-suite/microservices",
-  "version": "1.0.0",
+  "version": "1.9.0",
   "description": "This is the central orchestration point for our microservices-based platform, encompassing user management, email communications, file upload handling, and role-based access control services. It serves as the backbone of our application's backend, facilitating seamless interaction, development, and scaling of individual microservices. The workspace is designed to streamline the development process, ensuring dependency consistency, and simplifying the build and deployment workflows across all services.\nThis root workspace enables our development teams to:\n- Manage dependencies for all services in a unified manner, reducing conflicts and easing updates.\n- Utilize shared configurations, such as ESLint rules, TypeScript configurations, and shared utility libraries, to maintain coding standards and reduce redundancy across services.\n- Implement global scripts for tasks like testing, linting, and deployment that can run across all services, ensuring consistency and efficiency in our development pipeline.\n- Leverage the workspace's structure for local development, allowing for easy testing of interactions between services without the need for deploying or configuring external environments.",
   "keywords": [],
   "author": "Gilbert Andanje",
@@ -9,26 +9,20 @@
   "scripts": {
     "repo:reset": "find ../node-microservices-suite -type d -name 'node_modules' -exec rm -rf {} + && find ../node-microservices-suite -type f -name 'package-lock.json' -delete && find ../node-microservices-suite -type f -name 'yarn.lock' -delete && find ../node-microservices-suite -type d -name 'yarn-*' -exec rm -rf {} +",
     "repo:reset:1": "rm -rf node_modules",
+    "generate:release": "npx changelogen@latest --release",
+    "release:config": "yarn workspace @microservices-suite/config run release",
+    "release:constants": "yarn workspace @microservices-suite/constants run release",
+    "release:errors": "yarn workspace @microservices-suite/errors run release",
+    "release:middlewares": "yarn workspace @microservices-suite/middlewares run release",
+    "release:utilities": "yarn workspace @microservices-suite/utilities run release",
+    "release:validations": "yarn workspace @microservices-suite/validations run release",
     "test": "jest"
   },
   "workspaces": {
     "packages": [
-      "microservices/user-service",
-      "microservices/upload-service",
-      "microservices/email-service",
-      "microservices/rbac-service",
-      "microservices/notification-service",
-      "microservices/payment-service",
-      "microservices/product-service",
-      "microservices/cart-service",
-      "microservices/supplier-service",
-      "microservices/customer-service",
-      "shared/middlewares",
-      "shared/utilities",
-      "shared/constants",
-      "shared/errors",
-      "shared/config",
-      "shared/validations"
+      "microservices/*",
+      "shared/*",
+      ".suite-cli/cli"
     ],
     "nohoist": [
       "**/@microservices-suite/utilities",
@@ -38,5 +32,8 @@
       "**/@microservices-suite/constants",
       "**/@microservices-suite/middlewares"
     ]
+  },
+  "dependencies": {
+    "jsdoc": "^4.0.2"
   }
 }
