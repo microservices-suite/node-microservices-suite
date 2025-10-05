@@ -1,6 +1,27 @@
 # Changelog
 
 
+## v1.10.0
+
+[compare changes](https://github.com/microservices-suite/node-microservices-suite/compare/v4.0.1...v1.10.0)
+
+### 🚀 Enhancements
+
+- Add engine validation ([1e4334a](https://github.com/microservices-suite/node-microservices-suite/commit/1e4334a))
+
+### 🩹 Fixes
+
+- **middleware:** Closes issue #163 ([#163](https://github.com/microservices-suite/node-microservices-suite/issues/163))
+
+### 💅 Refactors
+
+- Move gitignore ([4ebcbad](https://github.com/microservices-suite/node-microservices-suite/commit/4ebcbad))
+- Remove console statement ([cdaeead](https://github.com/microservices-suite/node-microservices-suite/commit/cdaeead))
+
+### ❤️ Contributors
+
+- Gilbert Andanje ([@GAndanje](https://github.com/GAndanje))
+
 ## v1.9.0
 
 [compare changes](https://github.com/microservices-suite/node-microservices-suite/compare/v3.1.2...v1.9.0)
