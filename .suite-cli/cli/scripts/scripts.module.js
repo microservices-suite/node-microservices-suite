@@ -375,66 +375,8 @@ const startAll = async ({ options }) => {
  * @param {string} [options.mode='dev'] - The environment mode for running the services. Defaults to 'dev'.
  * @returns {void} Starts the services and logs their startup status.
  */
-//  const spinVanillaServices = async ({ serviceDirectories, microservicesDir, mode = 'dev' }) => {
-//      const spinner = ora('Starting all services in ' + mode + ' mode...').start();
 
-//      try {
-//          await Promise.all(serviceDirectories.map(async (dir) => {
-//              const servicePath = join(microservicesDir, dir);
-//              console.log(servicePath)
-//              // TODO: check if the yarn.cmd works in windows really
-//              const command = process.platform === 'win32' ? 'yarn.cmd' : 'yarn';
-//              const args = [mode];
-
-//              const child = spawn(command, args, { cwd: servicePath, shell: true });
-
-//              child.stdout.on('data', (data) => {
-//                  let output = data.toString();
-//                  // Check if the output contains the "yarn run" message
-//                  if (!output.includes('yarn run') && !output.includes('NODE_ENV')) {
-//                      // Stop the spinner before printing the output
-//                      if (output.includes('info')) {
-//                          const parts = output.trim().split(':');
-//                          const formattedOutput = formatLog(parts[0], dir, parts.slice(1).join(':').trim());
-//                          console.log(formattedOutput);
-//                      } else {
-//                          console.log(output.trim());
-//                      }
-//                      // Restart the spinner after printing the output
-//                  }
-//              });
-
-//              child.stderr.on('data', (data) => {
-//                  let output = data.toString();
-//                  const parts = output.trim().split(':');
-//                  const formattedOutput = formatLog(parts[0], dir, parts.slice(1).join(':').trim());
-//                  // Handle stderr output
-//                  console.log(formattedOutput);
-//              });
-
-//              child.on('close', (code) => {
-//                  console.log(code)
-//                  if (code !== 0) {
-//                      spinner.fail(`Service in directory ${dir} exited with code ${code}`);
-                    
-//                  } else {
-//                      spinner.succeed(`Service in directory ${dir} started successfully`);
-
-//                  }
-//              });
-//          }));
-
-//          spinner.succeed(`Service${serviceDirectories.length > 1 ? 's' : ''} started successfully: ${serviceDirectories.join(', ')}`);
-//          console.log('\n')
-//      } catch (error) {
-//          spinner.fail('An error occurred while starting services');
-//          console.error(error);
-//          process.exit(1);
-//      }
-//  };
-
-
-    const spinVanillaServices = async ({serviceDirectories,microservicesDir,mode = "dev"}) => {
+  const spinVanillaServices = async ({serviceDirectories,microservicesDir,mode = "dev"}) => {
         console.log(`\n🚀 Starting ${serviceDirectories.length} service(s) in ${mode} mode...\n`);
         for (const dir of serviceDirectories) {
             const servicePath = join(microservicesDir, dir);
@@ -686,7 +628,6 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
  */
 
 const startServices = async ({ services, mode, vanilla }) => {
-    console.log({services, mode, vanilla})
     const {
         component_root_dir: microservices_root_dir,
         components_directories: microservices_directories
