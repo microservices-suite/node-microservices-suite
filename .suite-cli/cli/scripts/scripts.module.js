@@ -375,60 +375,44 @@ const startAll = async ({ options }) => {
  * @param {string} [options.mode='dev'] - The environment mode for running the services. Defaults to 'dev'.
  * @returns {void} Starts the services and logs their startup status.
  */
-const spinVanillaServices = async ({ serviceDirectories, microservicesDir, mode = 'dev' }) => {
-    const spinner = ora('Starting all services in ' + mode + ' mode...').start();
 
-    try {
-        await Promise.all(serviceDirectories.map(async (dir) => {
+  const spinVanillaServices = async ({serviceDirectories,microservicesDir,mode = "dev"}) => {
+        console.log(`\n🚀 Starting ${serviceDirectories.length} service(s) in ${mode} mode...\n`);
+        for (const dir of serviceDirectories) {
             const servicePath = join(microservicesDir, dir);
-            // TODO: check if the yarn.cmd works in windows really
-            const command = process.platform === 'win32' ? 'yarn.cmd' : 'yarn';
+            const command = process.platform === "win32" ? "yarn.cmd" : "yarn";
             const args = [mode];
 
-            const child = spawn(command, args, { cwd: servicePath, shell: true });
+            const spinner = ora(`Launching ${dir}...`).start();
 
-            child.stdout.on('data', (data) => {
-                let output = data.toString();
-                // Check if the output contains the "yarn run" message
-                if (!output.includes('yarn run') && !output.includes('NODE_ENV')) {
-                    // Stop the spinner before printing the output
-                    if (output.includes('info')) {
-                        const parts = output.trim().split(':');
-                        const formattedOutput = formatLog(parts[0], dir, parts.slice(1).join(':').trim());
-                        console.log(formattedOutput);
-                    } else {
-                        console.log(output.trim());
-                    }
-                    // Restart the spinner after printing the output
-                }
+            const child = spawn(command, args, {
+            cwd: servicePath,
+            shell: true,
+            stdio: "inherit" 
             });
 
-            child.stderr.on('data', (data) => {
-                let output = data.toString();
-                const parts = output.trim().split(':');
-                const formattedOutput = formatLog(parts[0], dir, parts.slice(1).join(':').trim());
-                // Handle stderr output
-                console.log(formattedOutput);
+            child.on("spawn", () => {
+            spinner.succeed(`Service${serviceDirectories.length > 1 ? 's' : ''} started successfully: ${serviceDirectories.join(', ')}`);
             });
 
-            child.on('close', (code) => {
-                if (code !== 0) {
-                    spinner.fail(`Service in directory ${dir} exited with code ${code}`);
-                } else {
-                    spinner.succeed(`Service in directory ${dir} started successfully`);
-
-                }
+            // If child exits, just warn — do NOT exit the main CLI
+            child.on("close", (code) => {
+            if (code === 0) {
+                console.log(`${dir} stopped cleanly`);
+            } else {
+                console.warn(`${dir} exited with code ${code}`);
+            }
             });
-        }));
 
-        spinner.succeed(`Service${serviceDirectories.length > 1 ? 's' : ''} started successfully: ${serviceDirectories.join(', ')}`);
-        console.log('\n')
-    } catch (error) {
-        spinner.fail('An error occurred while starting services');
-        console.error(error);
-        process.exit(1);
-    }
-};
+            child.on("error", (err) => {
+            spinner.fail(`Failed to start ${dir}: ${err.message}`);
+            });
+        }
+
+       console.log(`\nAll ${serviceDirectories.length} service(s) launched (press Ctrl+C to stop them manually)...`);
+    };
+
+
 
 const padString = (str, length) => str.padEnd(length, ' ');
 
