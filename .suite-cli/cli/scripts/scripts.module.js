@@ -892,7 +892,7 @@ const addPackageJson = async ({ project_root, answers }) => {
     let warningMessage
     childProcess.stderr.on('data', data => {
         const output = data.toString();
-
+        logInfo({ message: output });
         if (output.toLowerCase().includes('warning')) {
             warningMessage = output.split('\n').find(line => line.toLowerCase().includes('warning'));
         } else {
