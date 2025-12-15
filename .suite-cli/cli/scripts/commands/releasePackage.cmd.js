@@ -1,6 +1,6 @@
 
 const { releasePackage } = require('../scripts.module')
 
-module.exports = async ({ package }) => {
-    releasePackage({ package });
+module.exports = async ({ pkg }) => {
+    releasePackage({ pkg });
 };

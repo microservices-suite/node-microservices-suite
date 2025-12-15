@@ -233,7 +233,7 @@ const installDepsAtWorkspace = ({ workspace_name, workspace_directory = 'microse
  * @param {string} packages Space-separated list of packages to add
  * @default options.workspace_directory='microservices' 
  * @returns {string}  Returns success message
- * @throws  Error if package not found in registry
+ * @throws  Error if pkg not found in registry
  */
 const addDepsAtWorkspace = ({ workspace_name, workspace_directory = 'microservices', packages }) => {
     return new Promise((resolve, reject) => {
@@ -486,31 +486,55 @@ const runDockerizedApps = async ({ apps_dir, apps_directories, mode = 'dev', bui
  * @returns {Promise<string>} A promise that resolves with a message indicating the success or failure of starting the service.
  */
 
+/**
+ * Spins Kubernetes pods for the specified apps.
+ * @param {Object} options - Environment settings for running the apps.
+ * @param {string} options.apps_dir - The root directory where the apps are located.
+ * @param {string[]} options.apps_directories - An array of directories containing the apps to run.
+ * @param {string} options.mode - The environment mode for running the apps.
+ * @returns {Promise<string>} A promise that resolves with a message indicating the success or failure of starting the service.
+ */
 const spinKubectlPods = ({ apps_dir, apps_directories, mode }) => {
-    exec(`yarn workspace @microservices-suite/${dir} ${mode}`, { cwd: join(microservicesDir, dir) }, async (error, stdout, stderr) => {
-        var error_message = ''
-        if (error) {
-            const _ = error.message.split('\n')
-            if (_[1] && _[1].startsWith('error Command') && _[1].endsWith('not found.')) {
-                error_message = `Missing script at ${dir}${sep}package.json: ${_[1].match(/"(.*?)"/)[1]}`
-            }
-            if (_[1] && _[1].includes('Unknown workspace')) {
-                if (existsSync(`${microservicesDir}/${dir}/package.json`)) {
-                    logWarning({ message: 'Wrong workspace naming' })
-                    logAdvise({ message: 'Run suite fix -n to auto-fix all workspace naming issues' })
-                    logAdvise({ message: 'suite fix only changes the package.json. If any service depends on it you will need to update it manually' })
-                } else {
-
-                    logError({ error: (`Missing package.json @microservices-suite${sep}${dir}`) })
-                }
-                exit(1)
-            }
-            logError({ error: error_message })
-        } else {
-            resolve(`Service in directory ${dir} started successfully`);
-        }
-    });
-}
+    return Promise.all(
+        apps_directories.map(app_dir => {
+            return new Promise((resolve, reject) => {
+                exec(
+                    `yarn workspace @microservices-suite/${app_dir} ${mode}`,
+                    { cwd: join(apps_dir, app_dir) },
+                    (error, stdout, stderr) => {
+                        let error_message = '';
+                        
+                        if (error) {
+                            const errorLines = error.message.split('\n');
+                            
+                            if (errorLines[1] && errorLines[1].startsWith('error Command') && errorLines[1].endsWith('not found.')) {
+                                error_message = `Missing script at ${app_dir}${sep}package.json: ${errorLines[1].match(/"(.*?)"/)[1]}`;
+                            }
+                            
+                            if (errorLines[1] && errorLines[1].includes('Unknown workspace')) {
+                                if (existsSync(`${apps_dir}/${app_dir}/package.json`)) {
+                                    logWarning({ message: 'Wrong workspace naming' });
+                                    logAdvise({ message: 'Run suite fix -n to auto-fix all workspace naming issues' });
+                                    logAdvise({ message: 'suite fix only changes the package.json. If any service depends on it you will need to update it manually' });
+                                } else {
+                                    logError({ error: `Missing package.json @microservices-suite${sep}${app_dir}` });
+                                }
+                                reject(new Error(`App ${app_dir} configuration error`));
+                                return;
+                            }
+                            
+                            logError({ error: error_message });
+                            reject(error);
+                        } else {
+                            logSuccess({ message: `App in directory ${app_dir} started successfully` });
+                            resolve(`App in directory ${app_dir} started successfully`);
+                        }
+                    }
+                );
+            });
+        })
+    );
+};
 
 /**
  * Starts all components in the existing workspaces.
@@ -1219,21 +1243,21 @@ const generateMCSHelper = ({ project_root, answers }) => {
 }
 
 /**
- * Releases a package or generates a release for the workspace.
+ * Releases a pkg or generates a release for the workspace.
  * @async
  * @param {Object} options - Options for releasing the package.
- * @param {string} options.package - The name of the package to release (optional).
+ * @param {string} options.pkg - The name of the pkg to release (optional).
  * @returns {Promise<void>} A Promise that resolves when the release process is completed.
  */
-const releasePackage = async ({ package }) => {
+const releasePackage = async ({ pkg }) => {
     try {
         const package_json_path = join(cwd(), 'package.json');
 
         // Read the package.json file
         const { workspace_name } = retrieveWorkSpaceName({ package_json_path });
-        if (package) {
-            logInfo({ message: `Looking for package: ${workspace_name}/${package}` });
-            await executeCommand('yarn', ['workspace', `${workspace_name}/${package}`, 'release'], { stdio: 'inherit', shell: true });
+        if (pkg) {
+            logInfo({ message: `Looking for pkg: ${workspace_name}/${pkg}` });
+            await executeCommand('yarn', ['workspace', `${workspace_name}/${pkg}`, 'release'], { stdio: 'inherit', shell: true });
         } else {
             await executeCommand('yarn', ['generate:release'], { cwd: cwd(), stdio: 'inherit', shell: true });
         }
@@ -1392,15 +1416,15 @@ const registerAppWithSuiteJson = ({ root_dir, name, services, port }) => {
     writeFile(configPath, JSON.stringify(config, null, 2), 'utf8');
 }
 /**
- * Releases a package or generates a release for the workspace.
+ * Releases a pkg or generates a release for the workspace.
  * @async
  * @param {Object} options - Options for releasing the package.
- * @param {string} options.package - The name of the package to release (optional).
+ * @param {string} options.pkg - The name of the pkg to release (optional).
  * @returns {Promise<void>} A Promise that resolves when the release process is completed.
  */
-const test = async ({ package }) => {
+const test = async ({ pkg }) => {
     let rootDir = cwd();
-    if (!package) {
+    if (!pkg) {
         rootDir = generateRootPath({ currentDir: cwd() });
     }
     try {
@@ -1408,9 +1432,9 @@ const test = async ({ package }) => {
 
         // Read the package.json file
         const { workspace_name } = retrieveWorkSpaceName({ package_json_path });
-        if (package) {
-            logInfo({ message: `Looking for package: ${workspace_name}/${package}` });
-            await executeCommand('yarn', ['workspace', `${workspace_name}/${package}`, 'test'], { stdio: 'inherit', shell: true });
+        if (pkg) {
+            logInfo({ message: `Looking for pkg: ${workspace_name}/${pkg}` });
+            await executeCommand('yarn', ['workspace', `${workspace_name}/${pkg}`, 'test'], { stdio: 'inherit', shell: true });
         } else {
             await executeCommand('yarn', ['test'], { cwd: rootDir, stdio: 'inherit', shell: true });
         }
@@ -2150,6 +2174,7 @@ module.exports = {
     generateDirectoryPath,
     changeDirectory,
     logTitle,
+    logAdvise,
     logInfo,
     logError,
     logSuccess,
@@ -2180,4 +2205,7 @@ module.exports = {
     getExistingApps,
     readFileContent,
     removeResource,
+    generateRootPath,
+    getComponentDirecotories,
+    spinVanillaServices,
 }

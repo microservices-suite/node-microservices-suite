@@ -1,0 +1,38 @@
+node-microservices-suite/
+├── __tests__/
+│   ├── .suite-cli/
+│   │   └── cli/
+│   │       └── scripts/
+│   │           ├── __mocks__/
+│   │           │   ├── child_process.js
+│   │           │   ├── fs.js
+│   │           │   └── chalk.js
+│   │           ├── commands/
+│   │           │   ├── installDepsAtWorkspace.test.js
+│   │           │   ├── addDepsAtWorkspace.test.js
+│   │           │   ├── changeDirectory.test.js
+│   │           │   ├── pathExists.test.js
+│   │           │   ├── getPlatform.test.js
+│   │           │   └── ... (other command tests)
+│   │           ├── logging.test.js
+│   │           ├── utilities.test.js
+│   │           └── scripts.module.test.js
+│   ├── shared/
+│   │   ├── broker/
+│   │   │   └── rabbitmq.test.js
+│   │   ├── config/
+│   │   │   └── config.test.js
+│   │   ├── errors/
+│   │   │   └── errors.handler.test.js
+│   │   ├── utilities/
+│   │   │   ├── APIError.test.js
+│   │   │   ├── pick.test.js
+│   │   │   ├── validate.test.js
+│   │   │   └── asyncErrorHandler.test.js
+│   │   └── middlewares/
+│   │       └── middlewares.test.js
+│   ├── integration/
+│   │   └── scaffoldNewRepo.integration.test.js
+│   └── jest.setup.js
+├── jest.config.js
+└── package.json

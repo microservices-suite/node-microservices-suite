@@ -1,0 +1,160 @@
+.suite-cli
+└── cli
+    ├── cli.js
+    ├── package.json
+    ├── README.md
+    └── scripts
+        ├── assets
+        │   ├── apiErrorContent.asset.js
+        │   ├── apolloServerContent.asset.js
+        │   ├── brokerExchangeContent.asset.js
+        │   ├── brokerIndexContent.asset.js
+        │   ├── brokerPublisherContent.asset.js
+        │   ├── brokerReadmeContent.asset.js
+        │   ├── brokerSubscriberContent.asset.js
+        │   ├── brokerWorkerQueueContent.asset.js
+        │   ├── configConfigContent.asset.js
+        │   ├── configIndexContent.asset.js
+        │   ├── configLoggerContent.asset.js
+        │   ├── configMorganContent.asset.js
+        │   ├── configReadmeContent.asset.js
+        │   ├── controllersContent.asset.js
+        │   ├── controllersIndexContent.asset.js
+        │   ├── debuggerConfigContent.asset.js
+        │   ├── defaultConfContent.asset.js
+        │   ├── dockerComposeContent.asset.js
+        │   ├── dockerComposeEnvContent.asset.js
+        │   ├── dockerfileContent.asset.js
+        │   ├── dockerIgnoreContent.asset.js
+        │   ├── e2eTestContent.asset.js
+        │   ├── ecosystemContent.asset.js
+        │   ├── envContent.asset.js
+        │   ├── errorHandlerContent.asset.js
+        │   ├── errorIndexContent.asset.js
+        │   ├── errorReadmeContent.asset.js
+        │   ├── fileStructureContent.asset.js
+        │   ├── genericPackageJsonContent.asset.js
+        │   ├── gitignoreContent.asset.js
+        │   ├── grafanaDashboardYamlContent.asset.js
+        │   ├── grafanaDatasourcesYamlContent.asset.js
+        │   ├── grafanaKrakendDashboardJsonContent.asset.js
+        │   ├── index.js
+        │   ├── integrationTestContent.asset.js
+        │   ├── k8sClusterDeploymentContent.asset.js
+        │   ├── k8sClusterIpContent.asset.js
+        │   ├── k8sComboContent.asset.js
+        │   ├── k8sConfigMapContent.asset.js
+        │   ├── k8sIngressContent.asset.js
+        │   ├── k8sLoadBalancerContent.asset.js
+        │   ├── k8sNodePortContent.asset.js
+        │   ├── k8sReadmeContent.asset.js
+        │   ├── k8sSecretContent.asset.js
+        │   ├── krakendConfigContent.asset.js
+        │   ├── krakendPartialsExtraConfContent.asset.js
+        │   ├── krakendPartialsInputHeadersContent.asset.js
+        │   ├── krakendPartialsRateLimitBackendContent.asset.js
+        │   ├── krakendSettingsDevEnvJsonContent.asset.js
+        │   ├── krakendSettingsDevLoopExampleJsonContent.asset.js
+        │   ├── krakendSettingsProdEnvJsonContent.asset.js
+        │   ├── krakendSettingsProdLoopExampleJsonContent.asset.js
+        │   ├── krakendTemplatesContent.asset.js
+        │   ├── krakenFlexibleConfigContent.asset.js
+        │   ├── krakenJsonContent.asset.js
+        │   ├── logstashConfContent.asset.js
+        │   ├── makeFileContent.asset.js
+        │   ├── middlewaresIndexContent.asset.js
+        │   ├── middlewaresReadmeContent.asset.js
+        │   ├── modelContent.asset.js
+        │   ├── modelIndexContent.asset.js
+        │   ├── nginxContent.asset.js
+        │   ├── nginxDockerfileContent.asset.js
+        │   ├── rootPackageJsonContent.asset.js
+        │   ├── routesContent.asset.js
+        │   ├── routesIndexContent.asset.js
+        │   ├── serverContent.asset.js
+        │   ├── servicesContent.asset.js
+        │   ├── servicesIndexContent.asset.js
+        │   ├── snapshotTestContent.asset.js
+        │   ├── sreTreeContent.asset.js
+        │   ├── subscriberContent.asset.js
+        │   ├── subscriberIndexContent.asset.js
+        │   ├── suiteConfig.asset.js
+        │   ├── suiteJSON.asset.js
+        │   ├── suiteRC.asset.js
+        │   ├── testContent.asset.js
+        │   ├── unitTestContent.asset.js
+        │   ├── utilitiesAsyncErrorHandlerContent.js
+        │   ├── utilitiesIndexContent.asset.js
+        │   ├── utilitiesPickContent.asset.js
+        │   ├── utilitiesReadmeContent.asset.js
+        │   └── utilitiesValidateContent.asset.js
+        ├── commands
+        │   ├── addDepsAtWorkspace.cmd.js
+        │   ├── changeDirectory.cmd.js
+        │   ├── checkDocker.cmd.js
+        │   ├── dockerPrune.js
+        │   ├── generateDirectoryPath.cmd.js
+        │   ├── getPlatform.cmd.js
+        │   ├── installDepsAtWorkspace.cmd.js
+        │   ├── isMatch.cmd.js
+        │   ├── logErrorMessage.cmd.js
+        │   ├── logInfoMessage.cmd.js
+        │   ├── logSuccessMessage.cmd.js
+        │   ├── logTitle.cmd.js
+        │   ├── nestedCommands.cmd.js
+        │   ├── pathExists.cmd.js
+        │   ├── releasePackage.cmd.js
+        │   ├── removeResource.cmd.js
+        │   ├── repoReset.cmd.js
+        │   ├── scaffoldNewLibrary.cmd.js
+        │   ├── scaffoldNewRepo.cmd.js
+        │   ├── scaffoldNewService.cmd.js
+        │   ├── start.cmd.js
+        │   ├── startAll.cmd.js
+        │   ├── startApps.cmd.js
+        │   ├── startDocker.cmd.js
+        │   ├── startServices.cmd.js
+        │   ├── stopApps.cmd.js
+        │   └── test.cmd.js
+        ├── index.js
+        ├── krakend.ndjson
+        └── scripts.module.js
+shared
+├── broker
+│   ├── package.json
+│   ├── rabbitmq
+│   │   ├── exchange.js
+│   │   ├── index.js
+│   │   ├── publisher.js
+│   │   ├── subscriber.js
+│   │   └── worker.queue.js
+│   └── README.md
+├── config
+│   ├── config.js
+│   ├── index.js
+│   ├── logger.js
+│   ├── morgan.js
+│   ├── package.json
+│   └── README.md
+├── constants
+│   ├── package.json
+│   └── README.md
+├── errors
+│   ├── errors.handler.js
+│   ├── index.js
+│   ├── package.json
+│   └── README.md
+├── middlewares
+│   ├── package.json
+│   └── README.md
+├── README.md
+└── utilities
+    ├── APIError.js
+    ├── asyncErrorHandler.js
+    ├── index.js
+    ├── package.json
+    ├── pick.js
+    ├── README.md
+    └── validate.js
+
+13 directories, 145 files
