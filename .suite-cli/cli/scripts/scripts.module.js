@@ -233,7 +233,7 @@ const installDepsAtWorkspace = ({ workspace_name, workspace_directory = 'microse
  * @param {string} packages Space-separated list of packages to add
  * @default options.workspace_directory='microservices' 
  * @returns {string}  Returns success message
- * @throws  Error if package not found in registry
+ * @throws  Error if pkg not found in registry
  */
 const addDepsAtWorkspace = ({ workspace_name, workspace_directory = 'microservices', packages }) => {
     return new Promise((resolve, reject) => {
@@ -1219,21 +1219,21 @@ const generateMCSHelper = ({ project_root, answers }) => {
 }
 
 /**
- * Releases a package or generates a release for the workspace.
+ * Releases a pkg or generates a release for the workspace.
  * @async
  * @param {Object} options - Options for releasing the package.
- * @param {string} options.package - The name of the package to release (optional).
+ * @param {string} options.pkg - The name of the pkg to release (optional).
  * @returns {Promise<void>} A Promise that resolves when the release process is completed.
  */
-const releasePackage = async ({ package }) => {
+const releasePackage = async ({ pkg }) => {
     try {
         const package_json_path = join(cwd(), 'package.json');
 
         // Read the package.json file
         const { workspace_name } = retrieveWorkSpaceName({ package_json_path });
-        if (package) {
-            logInfo({ message: `Looking for package: ${workspace_name}/${package}` });
-            await executeCommand('yarn', ['workspace', `${workspace_name}/${package}`, 'release'], { stdio: 'inherit', shell: true });
+        if (pkg) {
+            logInfo({ message: `Looking for pkg: ${workspace_name}/${pkg}` });
+            await executeCommand('yarn', ['workspace', `${workspace_name}/${pkg}`, 'release'], { stdio: 'inherit', shell: true });
         } else {
             await executeCommand('yarn', ['generate:release'], { cwd: cwd(), stdio: 'inherit', shell: true });
         }
@@ -1392,15 +1392,15 @@ const registerAppWithSuiteJson = ({ root_dir, name, services, port }) => {
     writeFile(configPath, JSON.stringify(config, null, 2), 'utf8');
 }
 /**
- * Releases a package or generates a release for the workspace.
+ * Releases a pkg or generates a release for the workspace.
  * @async
  * @param {Object} options - Options for releasing the package.
- * @param {string} options.package - The name of the package to release (optional).
+ * @param {string} options.pkg - The name of the pkg to release (optional).
  * @returns {Promise<void>} A Promise that resolves when the release process is completed.
  */
-const test = async ({ package }) => {
+const test = async ({ pkg }) => {
     let rootDir = cwd();
-    if (!package) {
+    if (!pkg) {
         rootDir = generateRootPath({ currentDir: cwd() });
     }
     try {
@@ -1408,9 +1408,9 @@ const test = async ({ package }) => {
 
         // Read the package.json file
         const { workspace_name } = retrieveWorkSpaceName({ package_json_path });
-        if (package) {
-            logInfo({ message: `Looking for package: ${workspace_name}/${package}` });
-            await executeCommand('yarn', ['workspace', `${workspace_name}/${package}`, 'test'], { stdio: 'inherit', shell: true });
+        if (pkg) {
+            logInfo({ message: `Looking for pkg: ${workspace_name}/${pkg}` });
+            await executeCommand('yarn', ['workspace', `${workspace_name}/${pkg}`, 'test'], { stdio: 'inherit', shell: true });
         } else {
             await executeCommand('yarn', ['test'], { cwd: rootDir, stdio: 'inherit', shell: true });
         }
@@ -2150,6 +2150,7 @@ module.exports = {
     generateDirectoryPath,
     changeDirectory,
     logTitle,
+    logAdvise,
     logInfo,
     logError,
     logSuccess,
@@ -2180,4 +2181,7 @@ module.exports = {
     getExistingApps,
     readFileContent,
     removeResource,
+    generateRootPath,
+    getComponentDirecotories,
+    spinVanillaServices,
 }

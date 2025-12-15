@@ -54,13 +54,13 @@ program
   .description('deep remove all node modules and artefacts generated during yarn install')
   .action(async (components, options) => await actionHandlers.repoReset({ options, components }));
 program
-  .command('release [package]')
-  .description('make a package release and publish simultaneously to npm.If no package is passed then generate:release for changelog is run')
-  .action(async (package) => await actionHandlers.releasePackage({ package }));
+  .command('release [pkg]')
+  .description('make a pkg release and publish simultaneously to npm.If no pkg is passed then generate:release for changelog is run')
+  .action(async (pkg) => await actionHandlers.releasePackage({ pkg }));
 program
-  .command('test [package]')
+  .command('test [pkg]')
   .description('run tests')
-  .action(async (package) => await actionHandlers.test({ package }));
+  .action(async (pkg) => await actionHandlers.test({ pkg }));
 program
   .command('start [components...]')
   .description('Starts specified components (services or apps), or all services in dev mode if -m is not specified')

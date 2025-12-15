@@ -16,7 +16,11 @@
     "release:middlewares": "yarn workspace @microservices-suite/middlewares run release",
     "release:utilities": "yarn workspace @microservices-suite/utilities run release",
     "release:validations": "yarn workspace @microservices-suite/validations run release",
-    "test": "jest"
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
+    "test:ci": "jest --coverage --ci"
   },
   "workspaces": {
     "packages": [
@@ -35,5 +39,8 @@
   },
   "dependencies": {
     "jsdoc": "^4.0.2"
+  },
+  "devDependencies": {
+    "jest": "^30.2.0"
   }
 }

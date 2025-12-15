@@ -23,7 +23,7 @@ The ${answers.project_base.charAt(0).toUpperCase() + answers.project_base.slice(
 
 ## Installation
 
-Install the package using npm:
+Install the pkg using npm:
 
 \`\`\`bash
 npm install ${answers.project_base}/broker
