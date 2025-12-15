@@ -486,31 +486,55 @@ const runDockerizedApps = async ({ apps_dir, apps_directories, mode = 'dev', bui
  * @returns {Promise<string>} A promise that resolves with a message indicating the success or failure of starting the service.
  */
 
+/**
+ * Spins Kubernetes pods for the specified apps.
+ * @param {Object} options - Environment settings for running the apps.
+ * @param {string} options.apps_dir - The root directory where the apps are located.
+ * @param {string[]} options.apps_directories - An array of directories containing the apps to run.
+ * @param {string} options.mode - The environment mode for running the apps.
+ * @returns {Promise<string>} A promise that resolves with a message indicating the success or failure of starting the service.
+ */
 const spinKubectlPods = ({ apps_dir, apps_directories, mode }) => {
-    exec(`yarn workspace @microservices-suite/${dir} ${mode}`, { cwd: join(microservicesDir, dir) }, async (error, stdout, stderr) => {
-        var error_message = ''
-        if (error) {
-            const _ = error.message.split('\n')
-            if (_[1] && _[1].startsWith('error Command') && _[1].endsWith('not found.')) {
-                error_message = `Missing script at ${dir}${sep}package.json: ${_[1].match(/"(.*?)"/)[1]}`
-            }
-            if (_[1] && _[1].includes('Unknown workspace')) {
-                if (existsSync(`${microservicesDir}/${dir}/package.json`)) {
-                    logWarning({ message: 'Wrong workspace naming' })
-                    logAdvise({ message: 'Run suite fix -n to auto-fix all workspace naming issues' })
-                    logAdvise({ message: 'suite fix only changes the package.json. If any service depends on it you will need to update it manually' })
-                } else {
-
-                    logError({ error: (`Missing package.json @microservices-suite${sep}${dir}`) })
-                }
-                exit(1)
-            }
-            logError({ error: error_message })
-        } else {
-            resolve(`Service in directory ${dir} started successfully`);
-        }
-    });
-}
+    return Promise.all(
+        apps_directories.map(app_dir => {
+            return new Promise((resolve, reject) => {
+                exec(
+                    `yarn workspace @microservices-suite/${app_dir} ${mode}`,
+                    { cwd: join(apps_dir, app_dir) },
+                    (error, stdout, stderr) => {
+                        let error_message = '';
+                        
+                        if (error) {
+                            const errorLines = error.message.split('\n');
+                            
+                            if (errorLines[1] && errorLines[1].startsWith('error Command') && errorLines[1].endsWith('not found.')) {
+                                error_message = `Missing script at ${app_dir}${sep}package.json: ${errorLines[1].match(/"(.*?)"/)[1]}`;
+                            }
+                            
+                            if (errorLines[1] && errorLines[1].includes('Unknown workspace')) {
+                                if (existsSync(`${apps_dir}/${app_dir}/package.json`)) {
+                                    logWarning({ message: 'Wrong workspace naming' });
+                                    logAdvise({ message: 'Run suite fix -n to auto-fix all workspace naming issues' });
+                                    logAdvise({ message: 'suite fix only changes the package.json. If any service depends on it you will need to update it manually' });
+                                } else {
+                                    logError({ error: `Missing package.json @microservices-suite${sep}${app_dir}` });
+                                }
+                                reject(new Error(`App ${app_dir} configuration error`));
+                                return;
+                            }
+                            
+                            logError({ error: error_message });
+                            reject(error);
+                        } else {
+                            logSuccess({ message: `App in directory ${app_dir} started successfully` });
+                            resolve(`App in directory ${app_dir} started successfully`);
+                        }
+                    }
+                );
+            });
+        })
+    );
+};
 
 /**
  * Starts all components in the existing workspaces.
